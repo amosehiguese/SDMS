@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ site_config.site_name|default:"SuccessDirectMarketStore" }} - Your Marketplace for Everything{% endblock %}
+
+{% block extra_head %}
+<style>
+.hero-image-banner {
+    background-image: url('{% static "img/hero.png" %}');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Categories carousel */
+.categories-scroll-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+.categories-track {
+    display: inline-flex;
+    gap: 1rem; /* 4 */
+    white-space: nowrap;
+}
+.category-card {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 9rem; /* fixed width per item to align single row */
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Banner -->
+{% if site_config.hero_banner_enabled %}
+<section class="relative py-16 overflow-hidden">
+    {% if site_config.hero_banner_image %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ site_config.hero_banner_image.url }}');"></div>
+    <div class="absolute inset-0 bg-black opacity-25"></div>
+    {% else %}
+    <div class="bg-gradient-to-r from-amber-800 to-amber-900"></div>
+    {% endif %}
+    <div class="relative container mx-auto px-4 text-center text-white">
+        <h1 class="text-4xl md:text-6xl font-bold mb-4">{{ site_config.hero_banner_title|default:"Flash Sale" }}</h1>
+        <p class="text-xl md:text-2xl mb-6">{{ site_config.hero_banner_subtitle|default:"Up to 70% off on selected items!" }}</p>
+        
+        {% if site_config.countdown_enabled %}
+        <div class="flex justify-center space-x-4 mb-6 text-black">
+            <!-- Only show days if duration is very long -->
+            {% if site_config.countdown_duration_hours >= 100 %}
+            <div class="bg-white bg-opacity-20 px-4 py-2 rounded-lg">
+                <span class="text-2xl font-bold" id="days">00</span>
+                <div class="text-sm">Days</div>
+            </div>
+            {% endif %}
+            <div class="bg-white bg-opacity-20 px-4 py-2 rounded-lg">
+                <span class="text-2xl font-bold" id="hours">00</span>
+                <div class="text-sm">Hours</div>
+            </div>
+            <div class="bg-white bg-opacity-20 px-4 py-2 rounded-lg">
+                <span class="text-2xl font-bold" id="minutes">00</span>
+                <div class="text-sm">Minutes</div>
+            </div>
+            <div class="bg-white bg-opacity-20 px-4 py-2 rounded-lg">
+                <span class="text-2xl font-bold" id="seconds">00</span>
+                <div class="text-sm">Seconds</div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <button onclick="searchProducts('{{ site_config.hero_banner_button_action|default:"flash sale" }}')" class="bg-black text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-800 transition">
+            {{ site_config.hero_banner_button_text|default:"Shop Now" }}
+        </button>
+    </div>
+</section>
+{% else %}
+<!-- Image Banner -->
+<section class="relative overflow-hidden">
+    <div class="relative w-full h-64 md:h-80 lg:h-96 hero-image-banner">
+        <!-- Overlay with reduced opacity -->
+        <div class="absolute inset-0 bg-white opacity-25"></div>
+        
+        <!-- Centered text content -->
+        <div class="relative z-10 h-full flex items-center justify-center text-center">
+            <div>
+                <h1 class="text-3xl md:text-5xl font-extrabold mb-4 text-black">{{ site_config.site_name|default:"Success Direct Market Store" }}</h1>
+                <p class="text-lg md:text-xl text-black font-extrabold" >Where Style Meets Substance.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Trust Indicators -->
+<section class="bg-gray-50 py-8">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+            <div class="flex items-center justify-center space-x-3">
+                <i class="fas fa-shipping-fast text-amber-700 text-2xl"></i>
+                <div>
+                    <h3 class="font-semibold">Free Shipping</h3>
+                    <p class="text-sm text-gray-600">On orders over ₦{{ site_config.free_shipping_threshold|floatformat:0|default:"50000" }}</p>
+                </div>
+            </div>
+            <div class="flex items-center justify-center space-x-3">
+                <i class="fas fa-shield-alt text-amber-700 text-2xl"></i>
+                <div>
+                    <h3 class="font-semibold">Secure Payment</h3>
+                    <p class="text-sm text-gray-600">100% secure transactions</p>
+                </div>
+            </div>
+            <div class="flex items-center justify-center space-x-3">
+                <i class="fas fa-undo text-amber-700 text-2xl"></i>
+                <div>
+                    <h3 class="font-semibold">Easy Returns</h3>
+                    <p class="text-sm text-gray-600">30-day return policy</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section (Carousel) -->
+<section class="py-12">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-8">Shop by Category</h2>
+        <div class="relative">
+            <button type="button" aria-label="Previous" class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow rounded-full p-2" onclick="scrollCategories(-1)"><i class="fas fa-chevron-left"></i></button>
+            <div id="categories-scroll" class="categories-scroll-container overflow-hidden px-10">
+                <div id="categories-track" class="categories-track">
+            {% for category in categories %}
+                    <div class="category-card bg-white rounded-lg shadow-md p-4 text-center hover:shadow-lg transition-shadow cursor-pointer" onclick="searchProducts('{{ category.name }}')">
+                <div class="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-{{ category.icon|default:'tag' }} text-amber-700 text-2xl"></i>
+                </div>
+                <h3 class="font-semibold text-sm">{{ category.name }}</h3>
+            </div>
+            {% endfor %}
+                </div>
+            </div>
+            <button type="button" aria-label="Next" class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow rounded-full p-2" onclick="scrollCategories(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+</section>
+
+<!-- Products Section -->
+<section class="py-12 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div id="products-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Products will be loaded here -->
+        </div>
+        
+        <!-- Loading indicator -->
+        <div id="loading-indicator" class="text-center py-8 hidden">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-amber-700"></div>
+            <p class="mt-2 text-gray-600">Loading more products...</p>
+        </div>
+        
+        <!-- Load more button -->
+        <div id="load-more-container" class="text-center py-8">
+            <button id="load-more-btn" onclick="loadMoreProducts()" class="bg-amber-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-amber-800 transition">
+                See More
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="bg-amber-800 text-white py-12">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-4">Stay Updated</h2>
+        <p class="text-xl mb-6">Get the latest deals and new arrivals delivered to your inbox</p>
+        <div class="max-w-md mx-auto flex">
+            <input type="email" id="newsletter-email" placeholder="Enter your email" class="bg-white flex-1 px-4 py-3 rounded-l-lg text-black focus:outline-none focus:ring-none focus:ring-amber-300">
+            <button onclick="subscribeNewsletter()" class="bg-black text-white px-6 py-3 rounded-r-lg hover:bg-gray-800 transition">
+                Subscribe
+            </button>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentPage = 1;
+let isLoading = false;
+let hasMoreProducts = true;
+
+$(document).ready(function() {
+    loadProducts();
+    initializeInfiniteScroll();
+    
+    // Countdown timer
+    {% if site_config.countdown_enabled %}
+    startCountdown();
+    {% endif %}
+});
+
+function loadProducts(page = 1, append = false) {
+    if (isLoading) return;
+    
+    isLoading = true;
+    showLoading();
+    
+    $.get('{% url "store:home_products" %}', {
+        page: page,
+        featured: true
+    })
+    .done(function(response) {
+        hideLoading();
+        if (append) {
+            $('#products-container').append(response.products_html);
+        } else {
+            $('#products-container').html(response.products_html);
+        }
+        
+        hasMoreProducts = response.has_next;
+        currentPage = page;
+        
+        if (!hasMoreProducts) {
+            $('#load-more-container').hide();
+        }
+    })
+    .fail(function() {
+        hideLoading();
+        showNotification('Error loading products', 'error');
+    })
+    .always(function() {
+        isLoading = false;
+        $('#loading-indicator').addClass('hidden');
+    });
+}
+
+function loadMoreProducts() {
+    if (hasMoreProducts && !isLoading) {
+        $('#loading-indicator').removeClass('hidden');
+        loadProducts(currentPage + 1, true);
+    }
+}
+
+function initializeInfiniteScroll() {
+    $(window).scroll(function() {
+        if ($(window).scrollTop() + $(window).height() >= $(document).height() - 1000) {
+            loadMoreProducts();
+        }
+    });
+}
+
+function scrollCategories(direction) {
+    const container = document.getElementById('categories-scroll');
+    const itemWidth = 180; // approximate width including gap
+    container.scrollBy({ left: direction * itemWidth * 3, behavior: 'smooth' });
+}
+
+function searchProducts(query) {
+    window.location.href = '{% url "store:product_list" %}?search=' + encodeURIComponent(query);
+}
+
+function addToCart(productId) {
+    showLoading();
+    
+    $.post('{% url "orders:add_to_cart" %}', {
+        product_id: productId,
+        quantity: 1,
+        csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
+    })
+    .done(function(response) {
+        hideLoading();
+        if (response.success) {
+            updateCartCount();
+            showNotification('Product added to cart!', 'success');
+        } else {
+            showNotification(response.error || 'Error adding to cart', 'error');
+        }
+    })
+    .fail(function() {
+        hideLoading();
+        showNotification('Error adding to cart', 'error');
+    });
+}
+
+function subscribeNewsletter() {
+    const email = $('#newsletter-email').val();
+    if (!email) {
+        showNotification('Please enter your email address', 'error');
+        return;
+    }
+    
+    showNotification('Newsletter subscription coming soon!', 'info');
+    $('#newsletter-email').val('');
+}
+
+function showNotification(message, type = 'info') {
+    const notification = $(`
+        <div class="fixed top-4 right-4 bg-${type === 'success' ? 'green' : type === 'error' ? 'red' : 'blue'}-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform">
+            ${message}
+        </div>
+    `);
+    
+    $('body').append(notification);
+    
+    setTimeout(() => {
+        notification.removeClass('translate-x-full');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.addClass('translate-x-full');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
+{% if site_config.countdown_enabled %}
+function startCountdown() {
+    // Get countdown duration from configuration (in hours)
+    const durationHours = {{ site_config.countdown_duration_hours|default:24 }};
+    const resetDaily = {{ site_config.countdown_reset_daily|yesno:"true,false" }};
+    
+    let countdownDate;
+    
+    if (resetDaily) {
+        // For daily reset, find the next midnight and add the duration
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0); // Next midnight
+        
+        // Check if we should use today's countdown or tomorrow's
+        const todayStart = new Date(now);
+        todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date(todayStart);
+        todayEnd.setTime(todayStart.getTime() + (durationHours * 60 * 60 * 1000));
+        
+        if (now < todayEnd) {
+            // Today's countdown is still active
+            countdownDate = todayEnd.getTime();
+        } else {
+            // Start tomorrow's countdown
+            const tomorrowEnd = new Date(tomorrow);
+            tomorrowEnd.setTime(tomorrow.getTime() + (durationHours * 60 * 60 * 1000));
+            countdownDate = tomorrowEnd.getTime();
+        }
+    } else {
+        // One-time countdown: duration from now
+        countdownDate = new Date().getTime() + (durationHours * 60 * 60 * 1000);
+    }
+    
+    function updateTimer() {
+        const now = new Date().getTime();
+        const distance = countdownDate - now;
+        
+        if (distance < 0) {
+            // Time's up
+            $('#hours, #minutes, #seconds').text('00');
+            
+            if (resetDaily) {
+                // Restart countdown for next day
+                startCountdown();
+                return;
+            } else {
+                // One-time countdown finished
+                clearInterval(timer);
+                return;
+            }
+        }
+        
+        // Calculate time components
+        const totalHours = Math.floor(distance / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        // For very large durations, show days + hours instead of just hours
+        if (totalHours >= 100) {
+            const days = Math.floor(totalHours / 24);
+            const hours = totalHours % 24;
+            
+            // Update the display to show days if container exists, otherwise show total hours
+            if ($('#days').length) {
+                $('#days').text(days.toString().padStart(2, '0'));
+                $('#hours').text(hours.toString().padStart(2, '0'));
+            } else {
+                $('#hours').text(totalHours.toString());
+            }
+        } else {
+            $('#hours').text(totalHours.toString().padStart(2, '0'));
+        }
+        
+        $('#minutes').text(minutes.toString().padStart(2, '0'));
+        $('#seconds').text(seconds.toString().padStart(2, '0'));
+    }
+    
+    // Update immediately
+    updateTimer();
+    
+    // Then update every second
+    const timer = setInterval(updateTimer, 1000);
+}
+{% endif %}
+
+</script>
+{% endblock %}

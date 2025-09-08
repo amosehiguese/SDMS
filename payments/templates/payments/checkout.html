@@ -1,0 +1,596 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout - {{ site_config.site_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checkout-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    
+    .checkout-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+    
+    .order-summary {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 2rem;
+    }
+    
+    .cart-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+    
+    .item-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-right: 1rem;
+    }
+    
+    .item-details {
+        flex: 1;
+    }
+    
+    .item-title {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+    
+    .item-price {
+        color: #059669;
+        font-weight: 600;
+    }
+    
+    .item-quantity {
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+    
+    .fulfillment-options {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .fulfillment-option {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .fulfillment-option:hover {
+        border-color: #d1d5db;
+    }
+    
+    .fulfillment-option.selected {
+        border-color: #059669;
+        background-color: #f0fdf4;
+    }
+    
+    .fulfillment-option input[type="radio"] {
+        margin-right: 1rem;
+    }
+    
+    .fulfillment-option-content {
+        flex: 1;
+    }
+    
+    .fulfillment-option-title {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+    
+    .fulfillment-option-description {
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+    
+    .shipping-address-section {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        display: none;
+    }
+    
+    .shipping-address-section.show {
+        display: block;
+    }
+    
+    .address-option {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .address-option:hover {
+        border-color: #d1d5db;
+    }
+    
+    .address-option.selected {
+        border-color: #059669;
+        background-color: #f0fdf4;
+    }
+    
+    .address-option input[type="radio"] {
+        margin-right: 1rem;
+    }
+    
+    .address-details {
+        flex: 1;
+    }
+    
+    .address-name {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+    
+    .address-text {
+        color: #6b7280;
+        font-size: 0.875rem;
+        line-height: 1.4;
+    }
+    
+    .notes-section {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .notes-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    .notes-textarea:focus {
+        outline: none;
+        border-color: #059669;
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+    
+    .checkout-button {
+        width: 100%;
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.125rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-top: 1rem;
+    }
+    
+    .checkout-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.4);
+    }
+    
+    .checkout-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .price-breakdown {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+    }
+    
+    .price-row.total {
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: #059669;
+        border-top: 2px solid #e5e7eb;
+        padding-top: 0.75rem;
+        margin-top: 0.75rem;
+    }
+    
+    .loading-spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #ffffff;
+        border-top: 2px solid transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 0.5rem;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .error-message {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        padding: 0.75rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        display: none;
+    }
+    
+    @media (max-width: 768px) {
+        .checkout-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .order-summary {
+            position: static;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-container">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+    
+    <div class="checkout-grid">
+        <!-- Left Column - Order Details -->
+        <div class="order-details">
+            <!-- Fulfillment Options -->
+            <div class="fulfillment-options">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">How would you like to receive your order?</h2>
+                
+                <div class="fulfillment-option" data-type="hold_asset">
+                    <input type="radio" name="fulfillment_type" value="hold_asset" id="hold_asset" checked>
+                    <div class="fulfillment-option-content">
+                        <div class="fulfillment-option-title">Hold as Asset</div>
+                        <div class="fulfillment-option-description">
+                            Your items will be stored digitally and can be liquidated later for delivery
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="fulfillment-option" data-type="deliver">
+                    <input type="radio" name="fulfillment_type" value="deliver" id="deliver">
+                    <div class="fulfillment-option-content">
+                        <div class="fulfillment-option-title">Deliver to Me</div>
+                        <div class="fulfillment-option-description">
+                            Standard shipping to your selected address
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Shipping Address Section (only for delivery) -->
+            <div class="shipping-address-section" id="shipping-address-section">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Shipping Address</h2>
+                
+                {% if shipping_addresses %}
+                    {% for address in shipping_addresses %}
+                    <div class="address-option" data-address-id="{{ address.id }}">
+                        <input type="radio" name="shipping_address" value="{{ address.id }}" id="address_{{ address.id }}">
+                        <div class="address-details">
+                            <div class="address-name">{{ address.first_name }} {{ address.last_name }}</div>
+                            <div class="address-text">
+                                {{ address.address_line_1 }}{% if address.address_line_2 %}, {{ address.address_line_2 }}{% endif %}<br>
+                                {{ address.city }}, {{ address.state }} {{ address.postal_code }}<br>
+                                {{ address.country }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-gray-600 mb-4">No shipping addresses found. Please add one in your profile.</p>
+                    <a href="{% url 'profile' %}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        Add Address
+                    </a>
+                {% endif %}
+            </div>
+            
+            <!-- Customer Notes -->
+            <div class="notes-section">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Additional Notes (Optional)</h2>
+                <textarea 
+                    class="notes-textarea" 
+                    id="customer_notes" 
+                    placeholder="Any special instructions or notes for your order..."
+                ></textarea>
+            </div>
+        </div>
+        
+        <!-- Right Column - Order Summary -->
+        <div class="order-summary">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
+            
+            <!-- Cart Items -->
+            <div class="cart-items mb-4">
+                {% for item in cart_items %}
+                <div class="cart-item">
+                    {% if item.product.images.first %}
+                    <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.title }}" class="item-image">
+                    {% else %}
+                    <div class="item-image bg-gray-200 flex items-center justify-center">
+                        <span class="text-gray-400 text-xs">No Image</span>
+                    </div>
+                    {% endif %}
+                    <div class="item-details">
+                        <div class="item-title">{{ item.product.title }}</div>
+                        <div class="item-price">₦{{ item.product.get_display_price }}</div>
+                        <div class="item-quantity">Qty: {{ item.quantity }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Price Breakdown -->
+            <div class="price-breakdown">
+                <div class="price-row">
+                    <span>Subtotal</span>
+                    <span>₦{{ subtotal }}</span>
+                </div>
+                <div class="price-row">
+                    <span>Shipping</span>
+                    <span>₦{{ shipping_cost }}</span>
+                </div>
+                <div class="price-row">
+                    <span>Tax</span>
+                    <span>₦{{ tax_amount }}</span>
+                </div>
+                <div class="price-row total">
+                    <span>Total</span>
+                    <span>₦{{ total }}</span>
+                </div>
+            </div>
+            
+            <!-- Error Message -->
+            <div class="error-message" id="error-message"></div>
+            
+            <!-- Checkout Button -->
+            <button class="checkout-button" id="checkout-button" onclick="initiatePayment()">
+                <span class="loading-spinner" id="loading-spinner"></span>
+                Proceed to Payment - ₦{{ total }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Paystack Modal -->
+<div id="paystack-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 class="text-lg font-semibold mb-4">Redirecting to Payment...</h3>
+            <p class="text-gray-600 mb-4">You will be redirected to Paystack to complete your payment securely.</p>
+            <div class="flex justify-end">
+                <button onclick="closePaystackModal()" class="text-gray-500 hover:text-gray-700 mr-4">Cancel</button>
+                <button onclick="proceedToPayment()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    Continue
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedFulfillmentType = 'hold_asset';
+let selectedShippingAddress = null;
+let paymentData = null;
+
+// Fulfillment type selection
+document.querySelectorAll('input[name="fulfillment_type"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        selectedFulfillmentType = this.value;
+        updateShippingAddressSection();
+    });
+});
+
+// Shipping address selection
+document.querySelectorAll('input[name="shipping_address"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        selectedShippingAddress = this.value;
+    });
+});
+
+// Update shipping address section visibility
+function updateShippingAddressSection() {
+    const shippingSection = document.getElementById('shipping-address-section');
+    if (selectedFulfillmentType === 'deliver') {
+        shippingSection.classList.add('show');
+    } else {
+        shippingSection.classList.remove('show');
+    }
+}
+
+// Fulfillment option styling
+document.querySelectorAll('.fulfillment-option').forEach(option => {
+    option.addEventListener('click', function() {
+        // Remove selected class from all options
+        document.querySelectorAll('.fulfillment-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        
+        // Add selected class to clicked option
+        this.classList.add('selected');
+        
+        // Check the radio button
+        const radio = this.querySelector('input[type="radio"]');
+        radio.checked = true;
+        selectedFulfillmentType = radio.value;
+        updateShippingAddressSection();
+    });
+});
+
+// Address option styling
+document.querySelectorAll('.address-option').forEach(option => {
+    option.addEventListener('click', function() {
+        // Remove selected class from all options
+        document.querySelectorAll('.address-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        
+        // Add selected class to clicked option
+        this.classList.add('selected');
+        
+        // Check the radio button
+        const radio = this.querySelector('input[type="radio"]');
+        radio.checked = true;
+        selectedShippingAddress = radio.value;
+    });
+});
+
+// Initialize payment
+async function initiatePayment() {
+    // Validate fulfillment type and shipping address
+    if (selectedFulfillmentType === 'deliver' && !selectedShippingAddress) {
+        showError('Please select a shipping address for delivery orders.');
+        return;
+    }
+    
+    // Get customer notes
+    const customerNotes = document.getElementById('customer_notes').value;
+    
+    // Show loading state
+    const button = document.getElementById('checkout-button');
+    const spinner = document.getElementById('loading-spinner');
+    button.disabled = true;
+    spinner.style.display = 'inline-block';
+    button.textContent = 'Processing...';
+    
+    // Hide any previous error messages
+    hideError();
+    
+    try {
+        const response = await fetch('{% url "payments:initiate_payment" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                fulfillment_type: selectedFulfillmentType,
+                shipping_address_id: selectedShippingAddress,
+                customer_notes: customerNotes
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            paymentData = data;
+            showPaystackModal();
+        } else {
+            showError(data.message || 'Failed to initiate payment. Please try again.');
+        }
+    } catch (error) {
+        showError('An error occurred. Please check your connection and try again.');
+        console.error('Payment initiation error:', error);
+    } finally {
+        // Reset button state
+        button.disabled = false;
+        spinner.style.display = 'none';
+        button.innerHTML = `<span class="loading-spinner" id="loading-spinner"></span>Proceed to Payment - ₦{{ total }}`;
+    }
+}
+
+// Show Paystack modal
+function showPaystackModal() {
+    document.getElementById('paystack-modal').classList.remove('hidden');
+}
+
+// Close Paystack modal
+function closePaystackModal() {
+    document.getElementById('paystack-modal').classList.add('hidden');
+}
+
+// Proceed to Paystack payment
+function proceedToPayment() {
+    if (paymentData && paymentData.authorization_url) {
+        window.location.href = paymentData.authorization_url;
+    }
+}
+
+// Show error message
+function showError(message) {
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    
+    // Scroll to error message
+    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// Hide error message
+function hideError() {
+    document.getElementById('error-message').style.display = 'none';
+}
+
+// Get CSRF token from cookies
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    updateShippingAddressSection();
+    
+    // Set initial selected state
+    document.querySelector('.fulfillment-option[data-type="hold_asset"]').classList.add('selected');
+});
+</script>
+{% endblock %} 

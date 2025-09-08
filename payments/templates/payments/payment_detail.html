@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment Details - {{ payment.payment_reference }} - {{ site_config.site_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Payment Details</h1>
+                <p class="mt-2 text-gray-600">Reference: {{ payment.payment_reference }}</p>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <a href="{% url 'payments:payment_history' %}" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Back to History
+                </a>
+                
+                {% if payment.status == 'success' %}
+                    <a href="{% url 'orders:order_detail' payment.order.id %}" 
+                       class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        View Order
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Payment Information -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Payment Status Card -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-gray-900">Payment Status</h2>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        {% if payment.status == 'success' %}bg-green-100 text-green-800
+                        {% elif payment.status == 'pending' %}bg-yellow-100 text-yellow-800
+                        {% elif payment.status == 'failed' %}bg-red-100 text-red-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ payment.get_status_display }}
+                    </span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Amount</dt>
+                        <dd class="mt-1 text-lg font-semibold text-gray-900">{{ payment.amount }} {{ payment.currency }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Payment Method</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ payment.get_payment_method_display }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Initiated</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ payment.initiated_at|date:"M d, Y H:i" }}</dd>
+                    </div>
+                    {% if payment.completed_at %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Completed</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ payment.completed_at|date:"M d, Y H:i" }}</dd>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Order Information -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Order Information</h2>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Order Number</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ payment.order.order_number }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Order Status</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ payment.order.get_status_display }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Fulfillment Type</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ payment.order.get_fulfillment_type_display }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Order Date</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ payment.order.created_at|date:"M d, Y" }}</dd>
+                    </div>
+                </div>
+                
+                {% if payment.order.fulfillment_type == 'deliver' and payment.order.shipping_address %}
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <dt class="text-sm font-medium text-gray-500 mb-2">Shipping Address</dt>
+                    <dd class="text-sm text-gray-900">
+                        {{ payment.order.shipping_address.full_name }}<br>
+                        {{ payment.order.shipping_address.full_address }}
+                    </dd>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Paystack Details -->
+            {% if payment.paystack_access_code or payment.paystack_authorization_url %}
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Paystack Details</h2>
+                
+                <div class="space-y-3">
+                    {% if payment.paystack_access_code %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Access Code</dt>
+                        <dd class="mt-1 text-sm text-gray-900 font-mono">{{ payment.paystack_access_code }}</dd>
+                    </div>
+                    {% endif %}
+                    
+                    {% if payment.transaction_id %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Transaction ID</dt>
+                        <dd class="mt-1 text-sm text-gray-900 font-mono">{{ payment.transaction_id }}</dd>
+                    </div>
+                    {% endif %}
+                    
+                    {% if payment.paystack_authorization_url %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Authorization URL</dt>
+                        <dd class="mt-1 text-sm text-gray-900 break-all">{{ payment.paystack_authorization_url }}</dd>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Error Information (if failed) -->
+            {% if payment.status == 'failed' and payment.error_message %}
+            <div class="bg-white shadow rounded-lg p-6 border-l-4 border-red-400">
+                <h2 class="text-xl font-semibold text-red-900 mb-4">Error Information</h2>
+                
+                <div class="space-y-3">
+                    {% if payment.error_code %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Error Code</dt>
+                        <dd class="mt-1 text-sm text-gray-900 font-mono">{{ payment.error_code }}</dd>
+                    </div>
+                    {% endif %}
+                    
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Error Message</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ payment.error_message }}</dd>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Customer Information -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Customer Information</h2>
+                
+                <div class="space-y-3">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Name</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ payment.customer_name|default:"Not provided" }}</dd>
+                    </div>
+                    
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Email</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ payment.customer_email }}</dd>
+                    </div>
+                    
+                    {% if payment.customer_phone %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Phone</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ payment.customer_phone }}</dd>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Payment Timeline -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Payment Timeline</h2>
+                
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-3 h-3 rounded-full bg-green-400 mt-2"></div>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">Payment Initiated</p>
+                            <p class="text-xs text-gray-500">{{ payment.initiated_at|date:"M d, Y H:i" }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if payment.completed_at %}
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-3 h-3 rounded-full bg-green-400 mt-2"></div>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">Payment Completed</p>
+                            <p class="text-xs text-gray-500">{{ payment.completed_at|date:"M d, Y H:i" }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if payment.status == 'failed' %}
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-3 h-3 rounded-full bg-red-400 mt-2"></div>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">Payment Failed</p>
+                            <p class="text-xs text-gray-500">{{ payment.updated_at|date:"M d, Y H:i" }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Actions</h2>
+                
+                <div class="space-y-3">
+                    {% if payment.status == 'pending' %}
+                        <a href="{% url 'payments:payment_verification' payment.payment_reference %}" 
+                           class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            Verify Payment
+                        </a>
+                    {% endif %}
+                    
+                    {% if payment.status == 'success' %}
+                        <a href="{% url 'orders:order_detail' payment.order.id %}" 
+                           class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            View Order Details
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'payments:payment_history' %}" 
+                       class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        View All Payments
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

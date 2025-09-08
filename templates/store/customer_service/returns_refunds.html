@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block title %}Returns & Refunds - {{ site_config.site_name|default:'Store' }}{% endblock %}
+{% block content %}
+<section class="py-12"><div class="container mx-auto px-4"><h1 class="text-3xl md:text-4xl font-bold mb-6">Returns & Refunds</h1><div class="prose max-w-none"><h2>Return Policy</h2><p>You can return most items within 30 days of delivery in their original condition for a full refund or exchange.</p><h2>How to Start a Return</h2><ol><li>Contact support at {{ site_config.contact_email|default:'support@example.com' }} with your order number.</li><li>We’ll provide return instructions and a return authorization.</li><li>Pack the item securely and ship it back.</li></ol><h2>Refunds</h2><p>Refunds are processed within 5-7 business days after we receive your return.</p></div></div></section>
+{% endblock %} 

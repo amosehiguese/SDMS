@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment Failed - {{ site_config.site_name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+            <!-- Error Icon -->
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
+                <svg class="h-10 w-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </div>
+            
+            <h2 class="text-3xl font-extrabold text-gray-900 mb-4">
+                Payment Failed
+            </h2>
+            
+            <p class="text-lg text-gray-600 mb-8">
+                We're sorry, but your payment could not be processed. This could be due to several reasons.
+            </p>
+            
+            <!-- Common Issues -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-8 text-left">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Common reasons for payment failure:</h3>
+                
+                <div class="space-y-3">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-2 h-2 rounded-full bg-red-400 mt-2"></div>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-gray-700">
+                                Insufficient funds in your account
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-2 h-2 rounded-full bg-red-400 mt-2"></div>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-gray-700">
+                                Card expired or invalid card details
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-2 h-2 rounded-full bg-red-400 mt-2"></div>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-gray-700">
+                                Transaction declined by your bank
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-2 h-2 rounded-full bg-red-400 mt-2"></div>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-gray-700">
+                                Network or technical issues
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="space-y-4">
+                <a href="{% url 'payments:checkout' %}" 
+                   class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                    Try Again
+                </a>
+                
+                <a href="{% url 'store:cart' %}" 
+                   class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                    Return to Cart
+                </a>
+            </div>
+            
+            <!-- Support Information -->
+            <div class="mt-8 text-center">
+                <p class="text-sm text-gray-500 mb-2">
+                    Still having issues? Our support team is here to help.
+                </p>
+                <p class="text-sm text-gray-500">
+                    Contact us at 
+                    <a href="mailto:{{ site_config.contact_email }}" class="text-green-600 hover:text-green-500">
+                        {{ site_config.contact_email }}
+                    </a>
+                    or call {{ site_config.phone_number }}
+                </p>
+            </div>
+            
+            <!-- Tips -->
+            <div class="mt-6 bg-blue-50 rounded-lg p-4">
+                <h4 class="text-sm font-semibold text-blue-800 mb-2">💡 Payment Tips:</h4>
+                <ul class="text-xs text-blue-700 space-y-1 text-left">
+                    <li>• Ensure your card has sufficient funds</li>
+                    <li>• Check that your card details are correct</li>
+                    <li>• Try using a different payment method</li>
+                    <li>• Contact your bank if the issue persists</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

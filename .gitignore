@@ -1,0 +1,45 @@
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media
+staticfiles
+
+# If using virtualenv
+venv/
+ENV/
+.env
+.env.*
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Pytest
+.pytest_cache/
+
+# Migrations
+**/migrations/*.pyc
+**/migrations/__pycache__/
+
+# Coverage reports
+htmlcov/
+.coverage
+.tox/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+
+# pip-tools
+*.txt~
+
+# Sentry
+.sentryclirc

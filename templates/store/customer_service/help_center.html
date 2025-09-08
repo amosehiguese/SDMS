@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block title %}Help Center - {{ site_config.site_name|default:'Store' }}{% endblock %}
+{% block content %}
+<section class="py-12"><div class="container mx-auto px-4"><h1 class="text-3xl md:text-4xl font-bold mb-6">Help Center</h1><div class="prose max-w-none"><p>Welcome to our Help Center. Find answers to common questions and guidance on using our store.</p><h2>Popular Topics</h2><ul><li>Ordering and payments</li><li>Shipping and delivery</li><li>Returns and refunds</li><li>Account and security</li></ul><p>If you need further assistance, contact us at {{ site_config.contact_email|default:'support@example.com' }}.</p></div></div></section>
+{% endblock %} 

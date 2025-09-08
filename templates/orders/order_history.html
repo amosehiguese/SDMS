@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+
+{% block title %}Order History - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="bg-gray-100 py-4">
+    <div class="container mx-auto px-4">
+        <nav class="text-sm">
+            <a href="{% url 'store:home' %}" class="text-amber-700 hover:text-yellow-700">Home</a>
+            <span class="mx-2">/</span>
+            <span class="text-gray-600">Order History</span>
+        </nav>
+    </div>
+</div>
+
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold mb-2">Order History</h1>
+            <p class="text-gray-600">Track and manage your orders</p>
+        </div>
+        
+        <!-- Filters -->
+        <div class="mt-4 md:mt-0 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+            <select id="status-filter" class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
+                <option value="">All Orders</option>
+                <option value="pending">Pending</option>
+                <option value="paid">Paid</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+            
+            <select id="date-filter" class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
+                <option value="">All Time</option>
+                <option value="last_week">Last Week</option>
+                <option value="last_month">Last Month</option>
+                <option value="last_3_months">Last 3 Months</option>
+                <option value="last_year">Last Year</option>
+            </select>
+        </div>
+    </div>
+    
+    <!-- Orders List -->
+    <div id="orders-container">
+        {% if orders %}
+            <div class="space-y-6">
+                {% for order in orders %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <!-- Order Header -->
+                    <div class="bg-gray-50 px-6 py-4 border-b">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                            <div class="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-6">
+                                <div>
+                                    <p class="text-sm text-gray-600">Order Number</p>
+                                    <p class="font-semibold">#{{ order.order_number }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Date Placed</p>
+                                    <p class="font-semibold">{{ order.created_at|date:"M d, Y" }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Total</p>
+                                    <p class="font-semibold text-amber-700">₦{{ order.total_amount|floatformat:0 }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 md:mt-0 flex items-center space-x-4">
+                                <!-- Order Status -->
+                                <div class="px-3 py-1 rounded-full text-sm font-semibold
+                                    {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% elif order.status == 'paid' %}bg-blue-100 text-blue-800
+                                    {% elif order.status == 'shipped' %}bg-purple-100 text-purple-800
+                                    {% elif order.status == 'delivered' %}bg-green-100 text-green-800
+                                    {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                    {% endif %}">
+                                    {{ order.get_status_display }}
+                                </div>
+                                
+                                <!-- View Order Button -->
+                                <a href="{% url 'orders:order_detail' order.id %}" class="bg-amber-700 text-white px-4 py-2 rounded hover:bg-amber-800 transition text-sm">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Items Preview -->
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            {% for item in order.items.all|slice:":3" %}
+                            <div class="flex items-center space-x-4">
+                                <!-- Product Image -->
+                                <div class="w-16 h-16 flex-shrink-0">
+                                    {% if item.product.images.exists %}
+                                        <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.title }}" class="w-full h-full object-cover rounded">
+                                    {% else %}
+                                        <div class="w-full h-full bg-gray-200 flex items-center justify-center rounded">
+                                            <i class="fas fa-image text-gray-400"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Product Info -->
+                                <div class="flex-1">
+                                    <h4 class="font-semibold mb-1">{{ item.product.title|truncatewords:8 }}</h4>
+                                    <div class="flex items-center space-x-4 text-sm text-gray-600">
+                                        <span>Qty: {{ item.quantity }}</span>
+                                        <span>₦{{ item.unit_price|floatformat:0 }} each</span>
+                                        <span class="{% if item.purchase_option == 'hold' %}text-blue-600{% else %}text-green-600{% endif %}">
+                                            {% if item.purchase_option == 'hold' %}
+                                                Hold as Asset
+                                            {% else %}
+                                                Deliver to Me
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Item Total -->
+                                <div class="text-right">
+                                    <p class="font-semibold">₦{{ item.total_price|floatformat:0 }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            
+                            {% if order.items.count > 3 %}
+                            <div class="text-center pt-2">
+                                <p class="text-sm text-gray-500">+ {{ order.items.count|add:"-3" }} more item{{ order.items.count|add:"-3"|pluralize }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Order Actions -->
+                        <div class="mt-6 pt-4 border-t flex flex-wrap gap-3">
+                            {% if order.status == 'pending' %}
+                                <button onclick="cancelOrder('{{ order.id }}')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition text-sm">
+                                    <i class="fas fa-times mr-2"></i>Cancel Order
+                                </button>
+                            {% endif %}
+                            
+                            {% if order.is_paid %}
+                                <a href="#" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm">
+                                    <i class="fas fa-download mr-2"></i>Download Receipt
+                                </a>
+                            {% endif %}
+                            
+                            {% if order.status == 'delivered' %}
+                                {% for item in order.items.all %}
+                                    {% if item.purchase_option == 'hold' %}
+                                        <button onclick="liquidateAsset('{{ order.id }}')" class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 transition text-sm">
+                                            <i class="fas fa-exchange-alt mr-2"></i>Liquidate Assets
+                                        </button>
+                                        {% break %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                            
+                            <button onclick="reorderItems('{{ order.id }}')" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition text-sm">
+                                <i class="fas fa-redo mr-2"></i>Reorder
+                            </button>
+                            
+                            {% if order.tracking_number %}
+                                <a href="#" onclick="trackOrder('{{ order.tracking_number }}')" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition text-sm">
+                                    <i class="fas fa-truck mr-2"></i>Track Package
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="mt-8 flex justify-center">
+                <nav class="flex items-center space-x-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="px-3 py-2 bg-amber-700 text-white rounded">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}" class="px-3 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+            {% endif %}
+            
+        {% else %}
+            <!-- Empty State -->
+            <div class="bg-white rounded-lg shadow-md p-12 text-center">
+                <i class="fas fa-clipboard-list text-6xl text-gray-300 mb-6"></i>
+                <h3 class="text-xl font-semibold text-gray-600 mb-4">No Orders Yet</h3>
+                <p class="text-gray-500 mb-8">You haven't placed any orders yet. Start shopping to see your order history here.</p>
+                <a href="{% url 'store:product_list' %}" class="bg-amber-700 text-white px-8 py-3 rounded-lg hover:bg-amber-800 transition inline-block">
+                    Start Shopping
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Initialize filters
+    initializeFilters();
+});
+
+function initializeFilters() {
+    $('#status-filter, #date-filter').change(function() {
+        applyFilters();
+    });
+}
+
+function applyFilters() {
+    const status = $('#status-filter').val();
+    const dateRange = $('#date-filter').val();
+    
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    if (dateRange) params.append('date_range', dateRange);
+    
+    // Reload page with filters
+    window.location.href = '?' + params.toString();
+}
+
+// Cancel Order
+function cancelOrder(orderId) {
+    if (!confirm('Are you sure you want to cancel this order?')) {
+        return;
+    }
+    
+    showLoading();
+    
+    // This would call a cancel order endpoint
+    showNotification('Order cancellation feature coming soon!', 'info');
+    hideLoading();
+}
+
+// Liquidate Asset
+function liquidateAsset(orderId) {
+    if (!confirm('Are you sure you want to liquidate the assets in this order? This will convert them to be shipped to you.')) {
+        return;
+    }
+    
+    showLoading();
+    
+    $.post(`/orders/ajax/liquidate/${orderId}/`, {
+        csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
+    })
+    .done(function(response) {
+        hideLoading();
+        if (response.success) {
+            showNotification('Asset liquidation initiated. You will be contacted for shipping details.', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            showNotification(response.error || 'Error processing liquidation', 'error');
+        }
+    })
+    .fail(function() {
+        hideLoading();
+        showNotification('Error processing liquidation', 'error');
+    });
+}
+
+// Reorder Items
+function reorderItems(orderId) {
+    showLoading();
+    
+    // This would add all items from the order back to cart
+    showNotification('Reorder feature coming soon!', 'info');
+    hideLoading();
+}
+
+// Track Order
+function trackOrder(trackingNumber) {
+    // Open tracking page or modal
+    showNotification(`Tracking number: ${trackingNumber}`, 'info');
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500',
+        warning: 'bg-amber-700'
+    };
+    
+    const notification = $(`
+        <div class="fixed top-20 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform">
+            ${message}
+        </div>
+    `);
+    
+    $('body').append(notification);
+    
+    setTimeout(() => {
+        notification.removeClass('translate-x-full');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.addClass('translate-x-full');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+</script>
+{% endblock %} 

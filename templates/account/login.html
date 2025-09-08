@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Sign In" %} - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                {% trans "Sign in to your account" %}
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                {% trans "Welcome back! Please sign in to continue shopping." %}
+            </p>
+        </div>
+        
+        <form class="mt-8 space-y-6" method="post" action="{% url 'account_login' %}">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="{{ form.login.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        {% trans "Email address" %}
+                    </label>
+                    <input id="{{ form.login.id_for_label }}" 
+                           name="{{ form.login.name }}" 
+                           type="email" 
+                           autocomplete="email" 
+                           required 
+                           class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500 focus:z-10 sm:text-sm"
+                           placeholder="{% trans 'Enter your email' %}"
+                           value="{{ form.login.value|default:'' }}">
+                    {% if form.login.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.login.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        {% trans "Password" %}
+                    </label>
+                    <div class="mt-1 relative">
+                        <input id="{{ form.password.id_for_label }}" 
+                               name="{{ form.password.name }}" 
+                               type="password" 
+                               autocomplete="current-password" 
+                               required 
+                               class="appearance-none relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500 focus:z-10 sm:text-sm"
+                               placeholder="{% trans 'Enter your password' %}">
+                        <button type="button" 
+                                onclick="togglePassword('{{ form.password.id_for_label }}')"
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i id="password-toggle-icon" class="fas fa-eye text-gray-400 hover:text-gray-600"></i>
+                        </button>
+                    </div>
+                    {% if form.password.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.password.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                {% if form.remember %}
+                <div class="flex items-center">
+                    <input id="{{ form.remember.id_for_label }}" 
+                           name="{{ form.remember.name }}" 
+                           type="checkbox" 
+                           class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded">
+                    <label for="{{ form.remember.id_for_label }}" class="ml-2 block text-sm text-gray-900">
+                        {% trans "Remember me" %}
+                    </label>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div>
+                <button type="submit" 
+                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                        <i class="fas fa-sign-in-alt text-amber-500 group-hover:text-amber-400"></i>
+                    </span>
+                    {% trans "Sign in" %}
+                </button>
+            </div>
+            
+            <div class="flex items-center justify-between">
+                <div class="text-sm">
+                    <a href="{% url 'account_reset_password' %}" class="font-medium text-amber-600 hover:text-amber-500">
+                        {% trans "Forgot your password?" %}
+                    </a>
+                </div>
+                <div class="text-sm">
+                    <span class="text-gray-600">{% trans "Don't have an account?" %}</span>
+                    <a href="{% url 'account_signup' %}" class="font-medium text-amber-600 hover:text-amber-500">
+                        {% trans "Sign up" %}
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById('password-toggle-icon');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+</script>
+{% endblock %}

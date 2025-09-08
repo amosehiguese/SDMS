@@ -1,0 +1,370 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if search_query %}
+    Search Results for "{{ search_query }}" - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}
+{% else %}
+    All Products - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<!-- Search Results Header -->
+<div class="bg-gray-50 py-6">
+    <div class="container mx-auto px-4">
+        {% if search_query %}
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">Search Results for "{{ search_query }}"</h1>
+                <p class="text-gray-600 mt-1">{{ total_products }} products found</p>
+            </div>
+            <button onclick="window.history.back()" class="text-amber-700 hover:text-amber-800 flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Home
+            </button>
+        </div>
+        {% else %}
+        <div class="text-center">
+            <h1 class="text-2xl font-bold text-gray-800">All Products</h1>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Filter Carousel -->
+<div class="bg-white border-b border-gray-200 py-4">
+    <div class="container mx-auto px-4">
+        <div class="relative">
+            <!-- Left Arrow -->
+            <button id="filter-left-arrow" class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white border border-gray-300 rounded-full p-2 shadow-md hover:shadow-lg transition z-10 hidden">
+                <i class="fas fa-chevron-left text-gray-600"></i>
+            </button>
+            
+            <!-- Right Arrow -->
+            <button id="filter-right-arrow" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white border border-gray-300 rounded-full p-2 shadow-md hover:shadow-lg transition z-10 hidden">
+                <i class="fas fa-chevron-right text-gray-600"></i>
+            </button>
+            
+            <!-- Filter Container -->
+            <div class="overflow-hidden mx-12">
+                <div id="filter-container" class="flex space-x-4 transition-transform duration-300">
+                    <!-- Category Filter -->
+                    <div class="filter-dropdown relative">
+                        <button id="category-filter-btn" class="filter-btn flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 hover:border-amber-700 hover:text-amber-700 transition whitespace-nowrap">
+                            <i class="fas fa-tags"></i>
+                            <span>Category</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div id="category-dropdown" class="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-20 hidden">
+                            <div class="p-4">
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="radio" name="category" value="" class="mr-2" checked>
+                                        <span>All Categories</span>
+                                    </label>
+                                    {% for category in categories %}
+                                    <label class="flex items-center">
+                                        <input type="radio" name="category" value="{{ category.id }}" class="mr-2">
+                                        <span>{{ category.name }}</span>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                                <div class="mt-4 pt-4 border-t border-gray-200">
+                                    <button onclick="applyCategoryFilter()" class="w-full bg-amber-700 text-white py-2 rounded hover:bg-amber-800 transition">
+                                        Apply Filter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Price Filter -->
+                    <div class="filter-dropdown relative">
+                        <button id="price-filter-btn" class="filter-btn flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 hover:border-amber-700 hover:text-amber-700 transition whitespace-nowrap">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>Price</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div id="price-dropdown" class="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-20 hidden">
+                            <div class="p-4">
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="radio" name="price" value="" class="mr-2" checked>
+                                        <span>All Prices</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="price" value="0-10000" class="mr-2">
+                                        <span>Under ₦10,000</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="price" value="10000-50000" class="mr-2">
+                                        <span>₦10,000 - ₦50,000</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="price" value="50000-100000" class="mr-2">
+                                        <span>₦50,000 - ₦100,000</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="price" value="100000-" class="mr-2">
+                                        <span>Over ₦100,000</span>
+                                    </label>
+                                </div>
+                                <div class="mt-4 pt-4 border-t border-gray-200">
+                                    <button onclick="applyPriceFilter()" class="w-full bg-amber-700 text-white py-2 rounded hover:bg-amber-800 transition">
+                                        Apply Filter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sort Filter -->
+                    <div class="filter-dropdown relative">
+                        <button id="sort-filter-btn" class="filter-btn flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 hover:border-amber-700 hover:text-amber-700 transition whitespace-nowrap">
+                            <i class="fas fa-sort"></i>
+                            <span>Sort By</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div id="sort-dropdown" class="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-20 hidden">
+                            <div class="p-4">
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="radio" name="sort" value="name" class="mr-2" checked>
+                                        <span>Name A-Z</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="sort" value="-name" class="mr-2">
+                                        <span>Name Z-A</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="sort" value="price" class="mr-2">
+                                        <span>Price Low to High</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="sort" value="-price" class="mr-2">
+                                        <span>Price High to Low</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="sort" value="-created_at" class="mr-2">
+                                        <span>Newest First</span>
+                                    </label>
+                                </div>
+                                <div class="mt-4 pt-4 border-t border-gray-200">
+                                    <button onclick="applySortFilter()" class="w-full bg-amber-700 text-white py-2 rounded hover:bg-amber-800 transition">
+                                        Apply Filter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Clear Filters -->
+                    <button onclick="clearAllFilters()" class="filter-btn flex items-center space-x-2 bg-gray-100 border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-200 hover:text-gray-700 transition whitespace-nowrap">
+                        <i class="fas fa-times"></i>
+                        <span>Clear All</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Products Grid -->
+<div class="py-8">
+    <div class="container mx-auto px-4">
+        <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Products will be loaded here -->
+        </div>
+        
+        <!-- Loading indicator -->
+        <div id="loading-indicator" class="text-center py-8 hidden">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-amber-700"></div>
+            <p class="mt-2 text-gray-600">Loading products...</p>
+        </div>
+        
+        <!-- Load more button -->
+        <div id="load-more-container" class="text-center py-8">
+            <button id="load-more-btn" onclick="loadMoreProducts()" class="bg-amber-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-amber-800 transition">
+                Load More Products
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentPage = 1;
+let isLoading = false;
+let hasMoreProducts = true;
+let currentFilters = {};
+
+$(document).ready(function() {
+    loadProducts();
+    initializeFilterCarousel();
+    initializeDropdowns();
+});
+
+function loadProducts(page = 1, append = false) {
+    if (isLoading) return;
+    
+    isLoading = true;
+    showLoading();
+    
+    const params = {
+        page: page,
+        ...currentFilters
+    };
+    
+    $.get('{% url "store:product_list" %}', params)
+    .done(function(response) {
+        hideLoading();
+        if (append) {
+            $('#products-grid').append(response.products_html);
+        } else {
+            $('#products-grid').html(response.products_html);
+        }
+        
+        hasMoreProducts = response.has_next;
+        currentPage = page;
+        
+        if (!hasMoreProducts) {
+            $('#load-more-container').hide();
+        } else {
+            $('#load-more-container').show();
+        }
+    })
+    .fail(function() {
+        hideLoading();
+        showNotification('Error loading products', 'error');
+    })
+    .always(function() {
+        isLoading = false;
+        $('#loading-indicator').addClass('hidden');
+    });
+}
+
+function loadMoreProducts() {
+    if (hasMoreProducts && !isLoading) {
+        $('#loading-indicator').removeClass('hidden');
+        loadProducts(currentPage + 1, true);
+    }
+}
+
+function initializeFilterCarousel() {
+    const container = $('#filter-container');
+    const leftArrow = $('#filter-left-arrow');
+    const rightArrow = $('#filter-right-arrow');
+    
+    function updateArrows() {
+        const containerWidth = container.parent().width();
+        const contentWidth = container[0].scrollWidth;
+        const scrollLeft = container.scrollLeft();
+        
+        leftArrow.toggle(scrollLeft > 0);
+        rightArrow.toggle(scrollLeft < contentWidth - containerWidth);
+    }
+    
+    leftArrow.click(function() {
+        container.animate({scrollLeft: container.scrollLeft() - 200}, 300);
+    });
+    
+    rightArrow.click(function() {
+        container.animate({scrollLeft: container.scrollLeft() + 200}, 300);
+    });
+    
+    container.on('scroll', updateArrows);
+    $(window).on('resize', updateArrows);
+    updateArrows();
+}
+
+function initializeDropdowns() {
+    // Close dropdowns when clicking outside
+    $(document).click(function(e) {
+        if (!$(e.target).closest('.filter-dropdown').length) {
+            $('.filter-dropdown .absolute').addClass('hidden');
+        }
+    });
+    
+    // Toggle dropdowns
+    $('.filter-btn').click(function(e) {
+        e.stopPropagation();
+        const dropdown = $(this).siblings('.absolute');
+        $('.filter-dropdown .absolute').not(dropdown).addClass('hidden');
+        dropdown.toggleClass('hidden');
+    });
+}
+
+function applyCategoryFilter() {
+    const categoryId = $('input[name="category"]:checked').val();
+    currentFilters.category = categoryId || '';
+    $('#category-dropdown').addClass('hidden');
+    loadProducts(1, false);
+}
+
+function applyPriceFilter() {
+    const priceRange = $('input[name="price"]:checked').val();
+    currentFilters.price = priceRange || '';
+    $('#price-dropdown').addClass('hidden');
+    loadProducts(1, false);
+}
+
+function applySortFilter() {
+    const sortBy = $('input[name="sort"]:checked').val();
+    currentFilters.sort = sortBy || '';
+    $('#sort-dropdown').addClass('hidden');
+    loadProducts(1, false);
+}
+
+function clearAllFilters() {
+    currentFilters = {};
+    $('input[type="radio"]').prop('checked', false);
+    $('input[type="radio"][value=""]').prop('checked', true);
+    loadProducts(1, false);
+}
+
+function addToCart(productId) {
+    showLoading();
+    
+    $.post('{% url "orders:add_to_cart" %}', {
+        product_id: productId,
+        quantity: 1,
+        csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
+    })
+    .done(function(response) {
+        hideLoading();
+        if (response.success) {
+            updateCartCount();
+            showNotification('Product added to cart!', 'success');
+        } else {
+            showNotification(response.error || 'Error adding to cart', 'error');
+        }
+    })
+    .fail(function() {
+        hideLoading();
+        showNotification('Error adding to cart', 'error');
+    });
+}
+
+function showNotification(message, type = 'info') {
+    const notification = $(`
+        <div class="fixed top-4 right-4 bg-${type === 'success' ? 'green' : type === 'error' ? 'red' : 'blue'}-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform">
+            ${message}
+        </div>
+    `);
+    
+    $('body').append(notification);
+    
+    setTimeout(() => {
+        notification.removeClass('translate-x-full');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.addClass('translate-x-full');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+</script>
+{% endblock %}

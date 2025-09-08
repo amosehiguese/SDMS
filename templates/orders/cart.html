@@ -1,0 +1,408 @@
+{% extends 'base.html' %}
+{% load math_filters %}
+
+{% block title %}Shopping Cart - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="bg-gray-100 py-4">
+    <div class="container mx-auto px-4">
+        <nav class="text-sm">
+            <a href="{% url 'store:home' %}" class="text-amber-700 hover:text-yellow-700">Home</a>
+            <span class="mx-2">/</span>
+            <span class="text-gray-600">Shopping Cart</span>
+        </nav>
+    </div>
+</div>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Cart Items -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow-md">
+                <div class="p-6 border-b">
+                    <h1 class="text-2xl font-bold flex items-center">
+                        <i class="fas fa-shopping-cart mr-3 text-yellow-500"></i>
+                        Shopping Cart
+                        <span class="ml-2 text-sm font-normal text-gray-500" id="cart-count">({{ cart.get_total_items }} items)</span>
+                    </h1>
+                </div>
+                
+                <div id="cart-items-container">
+                    {% if cart.get_items %}
+                        {% for item in cart.get_items %}
+                        <div class="cart-item border-b p-6" data-item-id="{{ item.id }}">
+                            <div class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+                                <!-- Product Image -->
+                                <div class="w-20 h-20 flex-shrink-0">
+                                    {% if item.product.images.exists %}
+                                        <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.title }}" class="w-full h-full object-cover rounded">
+                                    {% else %}
+                                        <div class="w-full h-full bg-gray-200 flex items-center justify-center rounded">
+                                            <i class="fas fa-image text-gray-400"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Product Details -->
+                                <div class="flex-1">
+                                    <h3 class="font-semibold mb-1">
+                                        <a href="{% url 'store:product_detail' item.product.slug %}" class="hover:text-amber-700">
+                                            {{ item.product.title }}
+                                        </a>
+                                    </h3>
+                                    <p class="text-sm text-gray-600 mb-2">
+                                        <span class="font-medium">Option:</span> 
+                                        {% if item.purchase_option == 'hold' %}
+                                            Hold as Asset
+                                        {% else %}
+                                            Deliver to Me
+                                        {% endif %}
+                                    </p>
+                                    {% if item.product.category %}
+                                        <p class="text-xs text-gray-500">{{ item.product.category.name }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Price -->
+                                <div class="text-center">
+                                    <p class="font-bold text-amber-700">₦{{ item.product.get_display_price|floatformat:0 }}</p>
+                                    {% if item.product.sale_price %}
+                                        <p class="text-sm text-gray-500 line-through">₦{{ item.product.price|floatformat:0 }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Quantity Controls -->
+                                <div class="flex items-center space-x-3">
+                                    <button onclick="updateQuantity('{{ item.id }}', {{ item.quantity|add:'-1' }})" class="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100">
+                                        <i class="fas fa-minus text-xs"></i>
+                                    </button>
+                                    <span class="w-12 text-center font-semibold">{{ item.quantity }}</span>
+                                    <button onclick="updateQuantity('{{ item.id }}', {{ item.quantity|add:'1' }})" class="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100">
+                                        <i class="fas fa-plus text-xs"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Subtotal -->
+                                <div class="text-center">
+                                    <p class="font-bold">₦{{ item.get_total_price|floatformat:0 }}</p>
+                                </div>
+                                
+                                <!-- Remove Button -->
+                                <div>
+                                    <button onclick="removeFromCart('{{ item.id }}')" class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Empty Cart -->
+                        <div id="empty-cart" class="text-center py-12">
+                            <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
+                            <h3 class="text-xl font-semibold text-gray-600 mb-2">Your cart is empty</h3>
+                            <p class="text-gray-500 mb-6">Looks like you haven't added anything to your cart yet.</p>
+                            <a href="{% url 'store:product_list' %}" class="bg-amber-700 text-white px-6 py-3 rounded-lg hover:bg-amber-800 transition inline-block">
+                                Continue Shopping
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                {% if cart.get_items %}
+                <!-- Cart Actions -->
+                <div class="p-6 border-t bg-gray-50">
+                    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                        <a href="{% url 'store:product_list' %}" class="text-amber-700 hover:text-yellow-700 flex items-center">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Continue Shopping
+                        </a>
+                        <button onclick="clearCart()" class="text-red-600 hover:text-red-700 flex items-center">
+                            <i class="fas fa-trash mr-2"></i>
+                            Clear Cart
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if cart.get_items %}
+        <!-- Order Summary -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-md p-6 sticky top-24">
+                <h2 class="text-xl font-bold mb-6">Order Summary</h2>
+                
+                <div class="space-y-3 mb-6">
+                    <div class="flex justify-between">
+                        <span>Subtotal ({{ cart.get_total_items }} items)</span>
+                        <span>₦{{ cart.get_subtotal|floatformat:0 }}</span>
+                    </div>
+                    
+                    <div class="flex justify-between">
+                        <span>Shipping</span>
+                        <span id="shipping-cost">
+                            {% if cart.get_subtotal >= site_config.free_shipping_threshold %}
+                                <span class="text-green-600">Free</span>
+                            {% else %}
+                                ₦{{ site_config.default_shipping_cost|floatformat:0 }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    {% if site_config.tax_rate > 0 %}
+                    <div class="flex justify-between">
+                        <span>Tax ({{ site_config.tax_rate|floatformat:1 }}%)</span>
+                        <span>₦{{ cart.get_tax_amount|floatformat:0 }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <hr class="my-4">
+                    
+                    <div class="flex justify-between text-lg font-bold">
+                        <span>Total</span>
+                        <span class="text-amber-700">₦{{ cart.get_total|floatformat:0 }}</span>
+                    </div>
+                </div>
+                
+                <!-- Free Shipping Progress -->
+                {% if cart.get_subtotal < site_config.free_shipping_threshold %}
+                <div class="mb-6 p-4 bg-yellow-50 rounded-lg">
+                    <p class="text-sm text-yellow-800 mb-2">
+                        <i class="fas fa-shipping-fast mr-1"></i>
+                        Add ₦<span id="free-shipping-remaining">{{ site_config.free_shipping_threshold|sub:cart.get_subtotal|floatformat:0 }}</span> more for free shipping!
+                    </p>
+                    <div class="w-full bg-yellow-200 rounded-full h-2">
+                        <div class="bg-amber-700 h-2 rounded-full" style="width: {{ cart.get_subtotal|div:site_config.free_shipping_threshold|mul:100 }}%"></div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Checkout Button -->
+                <button onclick="proceedToCheckout()" class="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition mb-4">
+                    Proceed to Checkout
+                </button>
+                
+                <!-- Security Info -->
+                <div class="text-center text-sm text-gray-500">
+                    <i class="fas fa-lock mr-1"></i>
+                    Secure checkout with SSL encryption
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Update cart count in header
+    updateHeaderCartCount();
+    updateFreeShippingRemaining();
+});
+
+// Update free shipping remaining amount
+function updateFreeShippingRemaining() {
+    const subtotal = {{ cart.get_subtotal|default:0 }};
+    const threshold = {{ site_config.free_shipping_threshold|default:50000 }};
+    const remaining = Math.max(0, threshold - subtotal);
+    $('#free-shipping-remaining').text(remaining.toLocaleString());
+}
+
+// Update cart item quantity
+function updateQuantity(itemId, newQuantity) {
+    if (newQuantity < 1) {
+        removeFromCart(itemId);
+        return;
+    }
+    
+    showLoading();
+    
+    $.post('{% url "orders:update_cart_item" %}', {
+        item_id: itemId,
+        quantity: newQuantity,
+        csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
+    })
+    .done(function(response) {
+        hideLoading();
+        if (response.success) {
+            updateCartDisplay(response.cart);
+            showNotification('Cart updated!', 'success');
+        } else {
+            showNotification(response.error || 'Error updating cart', 'error');
+        }
+    })
+    .fail(function() {
+        hideLoading();
+        showNotification('Error updating cart', 'error');
+    });
+}
+
+// Remove item from cart
+function removeFromCart(itemId) {
+    if (!confirm('Are you sure you want to remove this item from your cart?')) {
+        return;
+    }
+    
+    showLoading();
+    
+    $.post('{% url "orders:remove_from_cart" %}', {
+        item_id: itemId,
+        csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
+    })
+    .done(function(response) {
+        hideLoading();
+        if (response.success) {
+            $(`.cart-item[data-item-id="${itemId}"]`).fadeOut(300, function() {
+                $(this).remove();
+                if (response.cart.total_items === 0) {
+                    showEmptyCart();
+                } else {
+                    updateCartDisplay(response.cart);
+                }
+            });
+            showNotification('Item removed from cart', 'info');
+        } else {
+            showNotification(response.error || 'Error removing item', 'error');
+        }
+    })
+    .fail(function() {
+        hideLoading();
+        showNotification('Error removing item', 'error');
+    });
+}
+
+// Clear entire cart
+function clearCart() {
+    if (!confirm('Are you sure you want to clear your entire cart?')) {
+        return;
+    }
+    
+    showLoading();
+    
+    $.post('{% url "orders:remove_from_cart" %}', {
+        clear_all: true,
+        csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
+    })
+    .done(function(response) {
+        hideLoading();
+        if (response.success) {
+            showEmptyCart();
+            showNotification('Cart cleared', 'info');
+        } else {
+            showNotification(response.error || 'Error clearing cart', 'error');
+        }
+    })
+    .fail(function() {
+        hideLoading();
+        showNotification('Error clearing cart', 'error');
+    });
+}
+
+// Show empty cart state
+function showEmptyCart() {
+    $('#cart-items-container').html(`
+        <div id="empty-cart" class="text-center py-12">
+            <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">Your cart is empty</h3>
+            <p class="text-gray-500 mb-6">Looks like you haven't added anything to your cart yet.</p>
+            <a href="{% url 'store:product_list' %}" class="bg-amber-700 text-white px-6 py-3 rounded-lg hover:bg-amber-800 transition inline-block">
+                Continue Shopping
+            </a>
+        </div>
+    `);
+    
+    // Hide order summary
+    $('.lg\\:col-span-1').hide();
+    $('.lg\\:col-span-2').removeClass('lg:col-span-2').addClass('lg:col-span-3');
+    
+    updateHeaderCartCount(0);
+}
+
+// Update cart display
+function updateCartDisplay(cart) {
+    // Update cart count
+    $('#cart-count').text(`(${cart.total_items} items)`);
+    
+    // Update totals in order summary
+    updateOrderSummary(cart);
+    
+    updateHeaderCartCount(cart.total_items);
+}
+
+// Update order summary
+function updateOrderSummary(cart) {
+    // Update subtotal
+    $('.order-summary .subtotal').text(`₦${cart.subtotal.toLocaleString()}`);
+    
+    // Update shipping
+    const threshold = {{ site_config.free_shipping_threshold|default:50000 }};
+    if (cart.subtotal >= threshold) {
+        $('#shipping-cost').html('<span class="text-green-600">Free</span>');
+    } else {
+        $('#shipping-cost').text(`₦${cart.shipping_cost.toLocaleString()}`);
+    }
+    
+    // Update tax
+    if (cart.tax_amount > 0) {
+        $('.order-summary .tax').text(`₦${cart.tax_amount.toLocaleString()}`);
+    }
+    
+    // Update total
+    $('.order-summary .total').text(`₦${cart.total.toLocaleString()}`);
+    
+    // Update free shipping progress
+    updateFreeShippingRemaining();
+}
+
+// Update header cart count
+function updateHeaderCartCount(count = null) {
+    if (count === null) {
+        // Get current count from page
+        count = {{ cart.get_total_items|default:0 }};
+    }
+    $('#cart-count').text(count);
+}
+
+// Proceed to checkout
+function proceedToCheckout() {
+    {% if user.is_authenticated %}
+        window.location.href = '{% url "orders:checkout" %}';
+    {% else %}
+        showLoginModal();
+    {% endif %}
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500',
+        warning: 'bg-amber-700'
+    };
+    
+    const notification = $(`
+        <div class="fixed top-20 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform">
+            ${message}
+        </div>
+    `);
+    
+    $('body').append(notification);
+    
+    setTimeout(() => {
+        notification.removeClass('translate-x-full');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.addClass('translate-x-full');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+</script>
+{% endblock %}

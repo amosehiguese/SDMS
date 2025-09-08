@@ -1,0 +1,442 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block title %}{{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock title %}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {% if site_config.meta_title %}
+        <meta name="title" content="{{ site_config.meta_title }}">
+    {% endif %}
+    {% if site_config.meta_description %}
+        <meta name="description" content="{{ site_config.meta_description }}">
+    {% endif %}
+    {% if site_config.meta_keywords %}
+        <meta name="keywords" content="{{ site_config.meta_keywords }}">
+    {% endif %}
+    {% if site_config.site_favicon %}
+        <link rel="icon" type="image/x-icon" href="{{ site_config.site_favicon.url }}">
+    {% endif %}
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    {% tailwind_css %}
+    
+    <!-- AJAX Setup -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    
+    {% block extra_head %}{% endblock extra_head %}
+</head>
+
+<body class="bg-white text-black min-h-screen flex flex-col">
+    <!-- Top Header Bar -->
+    <div class="bg-amber-800 text-black text-sm py-2 px-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex space-x-6">
+                <span><i class="fas fa-shipping-fast"></i> Free shipping on orders over ₦{{ site_config.free_shipping_threshold|floatformat:0|default:"50000" }}</span>
+                <span><i class="fas fa-phone"></i> {{ site_config.phone_number|default:"+234 XXX XXX XXXX" }}</span>
+            </div>
+            <div class="flex space-x-4">
+                {% if user.is_authenticated %}
+                    <a href="#" class="hover:text-gray-700">Welcome, {{ user.get_full_name|default:user.email }}!</a>
+                    <a href="#" onclick="logout()" class="hover:text-gray-700">Logout</a>
+                {% else %}
+                    <a href="#" onclick="showLoginModal()" class="hover:text-gray-700">Sign In</a>
+                    <a href="#" onclick="showRegisterModal()" class="hover:text-gray-700">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="bg-white border-b shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <a href="{% url 'store:home' %}" class="flex items-center space-x-2">
+                    {% if site_config.site_logo %}
+                        <img src="{{ site_config.site_logo.url }}" alt="{{ site_config.site_name }}" class="h-10 w-auto">
+                    {% else %}
+                        <span class="text-2xl font-bold text-yellow-500">{{ site_config.site_name|default:"SDMS" }}</span>
+                    {% endif %}
+                </a>
+
+                <!-- Search Bar -->
+                <div class="hidden md:flex flex-1 max-w-2xl mx-8">
+                    <div class="w-full relative">
+                        <input type="text" id="search-input" placeholder="Search for products..." 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-amber-700"
+                               autocomplete="off">
+                        <button type="button" onclick="performSearch()" class="absolute right-0 top-0 h-full px-4 bg-amber-700 text-white rounded-r-lg hover:bg-amber-800">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <!-- Search Results Dropdown -->
+                        <div id="search-results" class="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-50 hidden max-h-96 overflow-y-auto">
+                            <!-- Results will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Icons -->
+                <div class="flex items-center space-x-6">
+                    
+                    <!-- Cart -->
+                    <a href="#" onclick="showCart()" class="relative hover:text-yellow-500">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center" id="cart-count">0</span>
+                    </a>
+                    
+                    <!-- User Account -->
+                    {% if user.is_authenticated %}
+                        <div class="relative group">
+                            <a href="#" class="hover:text-yellow-500">
+                                <i class="fas fa-user text-xl"></i>
+                            </a>
+                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Orders</a>
+                                <hr class="my-1">
+                                <a href="#" onclick="logout()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Mobile Menu Toggle -->
+                    <button class="md:hidden" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Search -->
+        <div class="md:hidden px-4 pb-3">
+            <div class="w-full relative">
+                <input type="text" id="mobile-search-input" placeholder="Search for products..." 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-amber-700"
+                       autocomplete="off">
+                <button type="button" onclick="performMobileSearch()" class="absolute right-0 top-0 h-full px-4 bg-amber-700 text-white rounded-r-lg hover:bg-amber-800">
+                    <i class="fas fa-search"></i>
+                </button>
+                <!-- Mobile Search Results -->
+                <div id="mobile-search-results" class="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-50 hidden max-h-96 overflow-y-auto">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1">
+    {% block content %}
+    {% endblock content %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-auto">
+        <div class="container mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Company Info -->
+                <div>
+                    <h3 class="font-bold text-lg mb-4">Company Info</h3>
+                    <div class="space-y-2 text-gray-300">
+                        <p>{{ site_config.footer_about_text|default:"Your trusted marketplace for quality products at great prices." }}</p>
+                        <p><i class="fas fa-map-marker-alt"></i> {{ site_config.address|default:"Lagos, Nigeria" }}</p>
+                        <p><i class="fas fa-phone"></i> {{ site_config.phone_number|default:"+234 XXX XXX XXXX" }}</p>
+                        <p><i class="fas fa-envelope"></i> {{ site_config.contact_email|default:"info@store.com" }}</p>
+                        {% if site_config.business_hours %}
+                            <p><i class="fas fa-clock"></i> {{ site_config.business_hours }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Customer Service -->
+                <div>
+                    <h3 class="font-bold text-lg mb-4">Customer Service</h3>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="#" class="hover:text-yellow-400">Help Center</a></li>
+                        <li><a href="#" class="hover:text-yellow-400">Shipping Info</a></li>
+                        <li><a href="#" class="hover:text-yellow-400">Returns & Refunds</a></li>
+                        <li><a href="#" class="hover:text-yellow-400">Size Guide</a></li>
+                        <li><a href="#" class="hover:text-yellow-400">Track Your Order</a></li>
+                    </ul>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="font-bold text-lg mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="{% url 'store:home' %}" class="hover:text-yellow-400">Home</a></li>
+                        <li><a href="{% url 'store:product_list' %}" class="hover:text-yellow-400">All Products</a></li>
+                        {% if site_config.blog_enabled %}
+                            <li><a href="#" class="hover:text-yellow-400">Blog</a></li>
+                        {% endif %}
+                        <li><a href="#" class="hover:text-yellow-400">About Us</a></li>
+                        <li><a href="#" class="hover:text-yellow-400">Contact</a></li>
+                    </ul>
+                </div>
+
+                <!-- Connect -->
+                <div>
+                    <h3 class="font-bold text-lg mb-4">Connect With Us</h3>
+                    <div class="flex space-x-4 mb-4">
+                        {% if site_config.facebook_url %}
+                            <a href="{{ site_config.facebook_url }}" class="text-2xl hover:text-yellow-400" target="_blank"><i class="fab fa-facebook"></i></a>
+                        {% endif %}
+                        {% if site_config.twitter_url %}
+                            <a href="{{ site_config.twitter_url }}" class="text-2xl hover:text-yellow-400" target="_blank"><i class="fab fa-twitter"></i></a>
+                        {% endif %}
+                        {% if site_config.instagram_url %}
+                            <a href="{{ site_config.instagram_url }}" class="text-2xl hover:text-yellow-400" target="_blank"><i class="fab fa-instagram"></i></a>
+                        {% endif %}
+                        {% if site_config.linkedin_url %}
+                            <a href="{{ site_config.linkedin_url }}" class="text-2xl hover:text-yellow-400" target="_blank"><i class="fab fa-linkedin"></i></a>
+                        {% endif %}
+                        {% if site_config.youtube_url %}
+                            <a href="{{ site_config.youtube_url }}" class="text-2xl hover:text-yellow-400" target="_blank"><i class="fab fa-youtube"></i></a>
+                        {% endif %}
+                        {% if site_config.whatsapp_number %}
+                            <a href="https://wa.me/{{ site_config.whatsapp_number }}" class="text-2xl hover:text-yellow-400" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Payment Methods -->
+                    <div>
+                        <h4 class="font-semibold mb-2">Secure Payments</h4>
+                        <div class="flex space-x-2">
+                            <span class="text-yellow-400"><i class="fab fa-cc-visa text-2xl"></i></span>
+                            <span class="text-yellow-400"><i class="fab fa-cc-mastercard text-2xl"></i></span>
+                            <span class="text-yellow-400"><i class="fas fa-credit-card text-2xl"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <hr class="my-8 border-gray-700">
+            <div class="text-center text-gray-400">
+                <p>{{ site_config.copyright_text|default:"© 2024 SuccessDirectMarketStore. All rights reserved." }}</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-700"></div>
+                <span>Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global JavaScript -->
+    <script>
+        // CSRF Token setup for AJAX
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    xhr.setRequestHeader("X-CSRFToken", $('meta[name=csrf-token]').attr('content'));
+                }
+            }
+        });
+
+        // Show/Hide loading overlay
+        function showLoading() {
+            $('#loading-overlay').removeClass('hidden');
+        }
+
+        function hideLoading() {
+            $('#loading-overlay').addClass('hidden');
+        }
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            // Implementation for mobile menu
+            console.log('Mobile menu toggled');
+        }
+
+        // Authentication modals
+        function showLoginModal() {
+            // Implementation for login modal
+            console.log('Show login modal');
+        }
+
+        function showRegisterModal() {
+            // Implementation for register modal
+            console.log('Show register modal');
+        }
+
+        // Cart functions
+        function showCart() {
+            // Implementation for cart sidebar
+            console.log('Show cart');
+        }
+
+                        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                showLoading();
+                $.post('/accounts/logout/', {
+                    csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
+                }).done(function() {
+                    window.location.reload();
+                }).fail(function() {
+                    hideLoading();
+                    alert('Error logging out. Please try again.');
+                });
+            }
+        }
+
+        // Load cart count on page load
+        $(document).ready(function() {
+            loadCartCount();
+            initializeSearch();
+        });
+
+        function loadCartCount() {
+            // Implementation to load cart count
+            // This will be implemented with the cart functionality
+        }
+
+        // Initialize Search Functionality
+        function initializeSearch() {
+            let searchTimeout;
+            
+            // Desktop search
+            $('#search-input').on('input', function() {
+                clearTimeout(searchTimeout);
+                const query = $(this).val().trim();
+                
+                if (query.length >= 2) {
+                    searchTimeout = setTimeout(() => {
+                        performLiveSearch(query, '#search-results');
+                    }, 300);
+                } else {
+                    $('#search-results').addClass('hidden');
+                }
+            });
+            
+            // Mobile search
+            $('#mobile-search-input').on('input', function() {
+                clearTimeout(searchTimeout);
+                const query = $(this).val().trim();
+                
+                if (query.length >= 2) {
+                    searchTimeout = setTimeout(() => {
+                        performLiveSearch(query, '#mobile-search-results');
+                    }, 300);
+                } else {
+                    $('#mobile-search-results').addClass('hidden');
+                }
+            });
+            
+            // Close search results when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#search-input, #search-results, #mobile-search-input, #mobile-search-results').length) {
+                    $('#search-results, #mobile-search-results').addClass('hidden');
+                }
+            });
+            
+            // Handle Enter key
+            $('#search-input, #mobile-search-input').on('keypress', function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    const query = $(this).val().trim();
+                    if (query) {
+                        window.location.href = `{% url 'store:product_list' %}?q=${encodeURIComponent(query)}`;
+                    }
+                }
+            });
+        }
+
+        // Perform Live Search
+        function performLiveSearch(query, resultsContainer) {
+            $.get('{% url "core:search" %}', { q: query })
+                .done(function(response) {
+                    displaySearchResults(response.products, resultsContainer);
+                })
+                .fail(function() {
+                    $(resultsContainer).addClass('hidden');
+                });
+        }
+
+        // Display Search Results
+        function displaySearchResults(products, resultsContainer) {
+            const container = $(resultsContainer);
+            
+            if (products.length === 0) {
+                container.html(`
+                    <div class="p-4 text-center text-gray-500">
+                        <i class="fas fa-search mb-2"></i>
+                        <p>No products found</p>
+                    </div>
+                `).removeClass('hidden');
+                return;
+            }
+            
+            let html = '';
+            products.forEach(function(product) {
+                const imageHtml = product.image_url 
+                    ? `<img src="${product.image_url}" alt="${product.title}" class="w-12 h-12 object-cover rounded">`
+                    : `<div class="w-12 h-12 bg-gray-200 flex items-center justify-center rounded">
+                         <i class="fas fa-image text-gray-400"></i>
+                       </div>`;
+                
+                const flashSaleBadge = product.has_flash_sale 
+                    ? `<span class="bg-red-100 text-red-600 text-xs px-2 py-1 rounded ml-2">Flash Sale</span>`
+                    : '';
+                
+                html += `
+                    <a href="/product/${product.slug}/" class="flex items-center p-3 hover:bg-gray-50 transition">
+                        ${imageHtml}
+                        <div class="ml-3 flex-1">
+                            <h4 class="font-medium text-sm">${product.title}</h4>
+                            <div class="flex items-center">
+                                <span class="text-amber-700 font-bold">₦${product.price}</span>
+                                ${flashSaleBadge}
+                            </div>
+                            ${product.category ? `<p class="text-xs text-gray-500">${product.category}</p>` : ''}
+                        </div>
+                    </a>
+                `;
+            });
+            
+            if (products.length >= 20) {
+                html += `
+                    <div class="p-3 border-t bg-gray-50 text-center">
+                        <a href="{% url 'store:product_list' %}?q=${encodeURIComponent($('#search-input, #mobile-search-input').val())}" 
+                           class="text-amber-700 hover:text-yellow-700 text-sm font-medium">
+                            View all results
+                        </a>
+                    </div>
+                `;
+            }
+            
+            container.html(html).removeClass('hidden');
+        }
+
+        // Perform Search (button click)
+        function performSearch() {
+            const query = $('#search-input').val().trim();
+            if (query) {
+                window.location.href = `{% url 'store:product_list' %}?q=${encodeURIComponent(query)}`;
+            }
+        }
+
+        // Perform Mobile Search (button click)
+        function performMobileSearch() {
+            const query = $('#mobile-search-input').val().trim();
+            if (query) {
+                window.location.href = `{% url 'store:product_list' %}?q=${encodeURIComponent(query)}`;
+            }
+        }
+    </script>
+
+    {% block extra_js %}
+    {% endblock extra_js %}
+</body>
+</html>
