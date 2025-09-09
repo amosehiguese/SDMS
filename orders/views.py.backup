@@ -36,7 +36,6 @@ def add_to_cart(request):
     try:
         product_id = request.POST.get('product_id')
         quantity = int(request.POST.get('quantity', 1))
-        buy_now = request.POST.get('buy_now', 'false').lower() == 'true'
         
         product = get_object_or_404(Product, id=product_id, is_active=True)
         
@@ -63,18 +62,12 @@ def add_to_cart(request):
             cart_item.quantity = new_quantity
             cart_item.save()
         
-        response_data = {
+        return JsonResponse({
             'success': True,
             'cart_total_items': cart.get_total_items(),
             'cart_subtotal': str(cart.get_subtotal()),
             'message': f'{product.title} added to cart'
-        }
-        
-        # If buy_now is True, redirect to checkout
-        if buy_now:
-            response_data['redirect_url'] = reverse('orders:checkout')
-        
-        return JsonResponse(response_data)
+        })
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': 'An error occurred'})
@@ -165,7 +158,7 @@ def checkout(request):
         messages.info(request, 'Please log in to proceed to checkout.')
         return redirect('account_login')
     
-    cart = get_or_create_cart(request)
+    cart = get_object_or_404(Cart, user=request.user)
     
     if not cart.items.exists():
         messages.warning(request, 'Your cart is empty.')
@@ -193,7 +186,7 @@ def checkout(request):
 def create_order(request):
     """AJAX endpoint to create order"""
     try:
-        cart = get_or_create_cart(request)
+        cart = get_object_or_404(Cart, user=request.user)
         
         if not cart.items.exists():
             return JsonResponse({'success': False, 'error': 'Cart is empty'})

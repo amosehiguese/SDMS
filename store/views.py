@@ -359,3 +359,11 @@ def size_guide(request):
 
 def track_order(request):
     return render(request, 'store/customer_service/track_order.html')
+
+
+def contact(request):
+    return render(request, 'store/contact.html')
+
+
+def about(request):
+    return render(request, 'store/about.html')

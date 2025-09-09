@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}Blog - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="bg-gradient-to-br from-amber-50 to-yellow-100 py-16">
+    <div class="container mx-auto px-4">
+        <div class="text-center max-w-4xl mx-auto">
+            <h1 class="text-5xl font-bold text-gray-900 mb-6">
+                Our <span class="text-amber-700">Blog</span>
+            </h1>
+            <p class="text-xl text-gray-600 mb-8">
+                Discover insights, tips, and stories from our community. Stay updated with the latest trends and expert advice.
+            </p>
+            
+            <!-- Search Bar -->
+            <div class="max-w-2xl mx-auto">
+                <form method="get" action="{% url 'blog:search' %}" class="relative">
+                    <input type="text" 
+                           name="q" 
+                           placeholder="Search articles..." 
+                           class="w-full px-6 py-4 pr-16 text-lg border-2 border-gray-300 rounded-full focus:outline-none focus:border-amber-500 transition-colors shadow-lg">
+                    <button type="submit" 
+                            class="absolute right-2 top-2 bg-amber-600 text-white p-2 rounded-full hover:bg-amber-700 transition-colors">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mx-auto px-4 py-12">
+    <!-- Featured Posts Section -->
+    {% if featured_posts %}
+    <section class="mb-16">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-3xl font-bold text-gray-900">Featured Articles</h2>
+            <a href="{% url 'blog:post_list' %}" class="text-amber-700 hover:text-yellow-700 font-medium flex items-center">
+                View All <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for post in featured_posts %}
+            <article class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
+                <!-- Post Image Placeholder -->
+                <div class="h-48 bg-gradient-to-br from-amber-100 to-yellow-200 flex items-center justify-center">
+                    <i class="fas fa-newspaper text-4xl text-amber-600"></i>
+                </div>
+                
+                <div class="p-6">
+                    <!-- Category -->
+                    {% if post.category %}
+                    <span class="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                        {{ post.category.name }}
+                    </span>
+                    {% endif %}
+                    
+                    <!-- Title -->
+                    <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-amber-700 transition-colors">
+                        <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+                    </h3>
+                    
+                    <!-- Excerpt -->
+                    <p class="text-gray-600 mb-4 line-clamp-3">{{ post.excerpt|default:post.content|truncatewords:20 }}</p>
+                    
+                    <!-- Meta Info -->
+                    <div class="flex items-center justify-between text-sm text-gray-500">
+                        <div class="flex items-center space-x-4">
+                            <span class="flex items-center">
+                                <i class="fas fa-user mr-1"></i>
+                                {{ post.author.get_full_name|default:post.author.username }}
+                            </span>
+                            <span class="flex items-center">
+                                <i class="fas fa-clock mr-1"></i>
+                                {{ post.reading_time }} min read
+                            </span>
+                        </div>
+                        <span>{{ post.published_at|date:"M d" }}</span>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    
+    <!-- Recent Posts Section -->
+    {% if recent_posts %}
+    <section class="mb-16">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-3xl font-bold text-gray-900">Latest Articles</h2>
+            <a href="{% url 'blog:post_list' %}" class="text-amber-700 hover:text-yellow-700 font-medium flex items-center">
+                View All <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for post in recent_posts %}
+            <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
+                <!-- Post Image Placeholder -->
+                <div class="h-32 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                    <i class="fas fa-file-alt text-2xl text-gray-500"></i>
+                </div>
+                
+                <div class="p-4">
+                    <!-- Category -->
+                    {% if post.category %}
+                    <span class="inline-block bg-gray-100 text-gray-700 text-xs font-semibold px-2 py-1 rounded-full mb-2">
+                        {{ post.category.name }}
+                    </span>
+                    {% endif %}
+                    
+                    <!-- Title -->
+                    <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-amber-700 transition-colors line-clamp-2">
+                        <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+                    </h3>
+                    
+                    <!-- Meta Info -->
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <span>{{ post.author.get_full_name|default:post.author.username }}</span>
+                        <span>{{ post.published_at|date:"M d" }}</span>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    
+    <!-- Categories and Tags Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- Categories -->
+        {% if categories %}
+        <section>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Browse by Category</h2>
+            <div class="grid grid-cols-2 gap-4">
+                {% for category in categories %}
+                <a href="{{ category.get_absolute_url }}" 
+                   class="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-300 group">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-semibold text-gray-900 group-hover:text-amber-700 transition-colors">
+                                {{ category.name }}
+                            </h3>
+                            <p class="text-sm text-gray-500">{{ category.post_count }} article{{ category.post_count|pluralize }}</p>
+                        </div>
+                        <i class="fas fa-arrow-right text-gray-400 group-hover:text-amber-600 transition-colors"></i>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+        
+        <!-- Popular Tags -->
+        {% if popular_tags %}
+        <section>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Popular Tags</h2>
+            <div class="flex flex-wrap gap-2">
+                {% for tag in popular_tags %}
+                <a href="{{ tag.get_absolute_url }}" 
+                   class="bg-amber-100 text-amber-800 px-3 py-2 rounded-full text-sm font-medium hover:bg-amber-200 transition-colors">
+                    #{{ tag.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Add any blog-specific JavaScript here
+    console.log('Blog homepage loaded');
+});
+</script>
+{% endblock %}

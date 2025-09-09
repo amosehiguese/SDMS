@@ -1,0 +1,156 @@
+{% load math_filters %}
+
+<div id="cart-sidebar-content">
+    {% if cart.items.exists %}
+        <div class="space-y-4 p-4">
+            {% for item in cart.items.all %}
+            <div class="cart-item border border-gray-200 rounded-lg p-4" data-item-id="{{ item.id }}">
+                <div class="flex space-x-3">
+                    <!-- Product Image -->
+                    <div class="w-16 h-16 flex-shrink-0">
+                        {% if item.product.images.exists %}
+                            <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.title }}" class="w-full h-full object-cover rounded">
+                        {% else %}
+                            <div class="w-full h-full bg-gray-200 flex items-center justify-center rounded">
+                                <i class="fas fa-image text-gray-400"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Product Details -->
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-semibold text-sm text-gray-800 truncate">
+                            <a href="{% url 'store:product_detail' item.product.slug %}" class="hover:text-amber-700">
+                                {{ item.product.title }}
+                            </a>
+                        </h3>
+                        <p class="text-xs text-gray-500 mt-1">{{ item.product.category.name }}</p>
+                        
+                        <!-- Price and Quantity -->
+                        <div class="flex items-center justify-between mt-2">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm font-semibold text-amber-700">₦{{ item.product.get_display_price|floatformat:2 }}</span>
+                                <span class="text-xs text-gray-500">x{{ item.quantity }}</span>
+                            </div>
+                            <span class="text-sm font-bold text-gray-800">₦{{ item.get_total_price|floatformat:2 }}</span>
+                        </div>
+                        
+                        <!-- Quantity Controls -->
+                        <div class="flex items-center space-x-2 mt-2">
+                            <button onclick="updateCartItemQuantity({{ item.id }}, {{ item.quantity|add:'-1' }})" 
+                                    class="w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-xs transition-colors">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="text-sm font-medium w-8 text-center">{{ item.quantity }}</span>
+                            <button onclick="updateCartItemQuantity({{ item.id }}, {{ item.quantity|add:'1' }})" 
+                                    class="w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-xs transition-colors">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button onclick="removeCartItem({{ item.id }})" 
+                                    class="ml-2 text-red-500 hover:text-red-700 text-xs transition-colors">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Empty Cart -->
+        <div class="flex flex-col items-center justify-center h-64 text-gray-500">
+            <div class="text-6xl mb-4">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">Your cart is empty</h3>
+            <p class="text-sm text-center mb-4">Add some items to get started</p>
+            <button onclick="closeCartSidebar()" class="bg-amber-700 text-white px-6 py-2 rounded-lg hover:bg-amber-800 transition-colors">
+                Continue Shopping
+            </button>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Cart Summary (only shown when cart has items) -->
+{% if cart.items.exists %}
+<script>
+// Update cart subtotal
+$('#cart-subtotal').text('₦{{ cart.get_subtotal|floatformat:2 }}');
+
+// Cart item functions - Make sure these are globally accessible
+window.updateCartItemQuantity = function(itemId, newQuantity) {
+    if (newQuantity <= 0) {
+        window.removeCartItem(itemId);
+        return;
+    }
+    
+    $.post('{% url "orders:update_cart_item" %}', {
+        item_id: itemId,
+        quantity: newQuantity,
+        csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
+    })
+    .done(function(response) {
+        if (response.success) {
+            loadCartSidebar(); // Reload the entire sidebar
+            updateCartCount();
+        } else {
+            showNotification(response.error || 'Error updating quantity', 'error');
+        }
+    })
+    .fail(function() {
+        showNotification('Error updating quantity', 'error');
+    });
+};
+
+window.removeCartItem = function(itemId) {
+    if (!confirm('Are you sure you want to remove this item from your cart?')) {
+        return;
+    }
+    
+    $.post('{% url "orders:remove_from_cart" %}', {
+        item_id: itemId,
+        csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
+    })
+    .done(function(response) {
+        if (response.success) {
+            loadCartSidebar(); // Reload the entire sidebar
+            updateCartCount();
+        } else {
+            showNotification(response.error || 'Error removing item', 'error');
+        }
+    })
+    .fail(function() {
+        showNotification('Error removing item', 'error');
+    });
+};
+
+// Show notification function
+function showNotification(message, type = 'info') {
+    const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500',
+        warning: 'bg-amber-700'
+    };
+    
+    const notification = $(`
+        <div class="fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform">
+            ${message}
+        </div>
+    `);
+    
+    $('body').append(notification);
+    
+    setTimeout(() => {
+        notification.removeClass('translate-x-full');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.addClass('translate-x-full');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+</script>
+{% endif %}

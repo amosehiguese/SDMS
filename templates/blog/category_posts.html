@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ category.name }} - Blog - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="bg-gray-50 py-4">
+    <div class="container mx-auto px-4">
+        <nav class="text-sm">
+            <a href="{% url 'store:home' %}" class="text-amber-700 hover:text-yellow-700">Home</a>
+            <span class="mx-2">/</span>
+            <a href="{% url 'blog:home' %}" class="text-amber-700 hover:text-yellow-700">Blog</a>
+            <span class="mx-2">/</span>
+            <span class="text-gray-600">{{ category.name }}</span>
+        </nav>
+    </div>
+</div>
+
+<div class="container mx-auto px-4 py-8">
+    <!-- Category Header -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ category.name }}</h1>
+        {% if category.description %}
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">{{ category.description }}</p>
+        {% endif %}
+    </div>
+    
+    <!-- Posts Grid -->
+    {% if page_obj %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for post in page_obj %}
+            <article class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
+                <!-- Post Image Placeholder -->
+                <div class="h-48 bg-gradient-to-br from-amber-100 to-yellow-200 flex items-center justify-center">
+                    <i class="fas fa-newspaper text-4xl text-amber-600"></i>
+                </div>
+                
+                <div class="p-6">
+                    <!-- Tags -->
+                    <div class="flex items-center space-x-2 mb-3">
+                        {% for tag in post.tags.all|slice:":2" %}
+                        <span class="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
+                            #{{ tag.name }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Title -->
+                    <h2 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-amber-700 transition-colors">
+                        <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+                    </h2>
+                    
+                    <!-- Excerpt -->
+                    <p class="text-gray-600 mb-4 line-clamp-3">{{ post.excerpt|default:post.content|truncatewords:20 }}</p>
+                    
+                    <!-- Meta Info -->
+                    <div class="flex items-center justify-between text-sm text-gray-500">
+                        <div class="flex items-center space-x-4">
+                            <span class="flex items-center">
+                                <i class="fas fa-user mr-1"></i>
+                                {{ post.author.get_full_name|default:post.author.username }}
+                            </span>
+                            <span class="flex items-center">
+                                <i class="fas fa-clock mr-1"></i>
+                                {{ post.reading_time }} min read
+                            </span>
+                        </div>
+                        <span>{{ post.published_at|date:"M d" }}</span>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="mt-12 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" 
+                       class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <span class="px-3 py-2 text-sm font-medium text-white bg-amber-600 border border-amber-600 rounded-md">
+                            {{ num }}
+                        </span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?page={{ num }}" 
+                           class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                            {{ num }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" 
+                       class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    {% else %}
+        <!-- No Posts -->
+        <div class="text-center py-16">
+            <div class="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
+                <i class="fas fa-newspaper text-4xl text-gray-400"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">No posts found</h2>
+            <p class="text-gray-600 mb-8">No posts found in the {{ category.name }} category.</p>
+            <a href="{% url 'blog:home' %}" 
+               class="inline-flex items-center bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Blog
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

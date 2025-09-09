@@ -17,4 +17,6 @@ urlpatterns = [
     path('help/returns/', views.returns_refunds, name='returns_refunds'),
     path('help/size-guide/', views.size_guide, name='size_guide'),
     path('help/track-order/', views.track_order, name='track_order'),
+    path('contact/', views.contact, name='contact'),
+    path('about/', views.about, name='about'),
 ]

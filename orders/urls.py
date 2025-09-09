@@ -6,9 +6,11 @@ app_name = 'orders'
 urlpatterns = [
     # Cart URLs
     path('cart/', views.cart_view, name='cart'),
+    path('ajax/cart/', views.cart_sidebar, name='cart_sidebar'),
     path('ajax/cart/add/', views.add_to_cart, name='add_to_cart'),
     path('ajax/cart/update/', views.update_cart_item, name='update_cart_item'),
     path('ajax/cart/remove/', views.remove_from_cart, name='remove_from_cart'),
+    path('ajax/cart/count/', views.get_cart_count, name='get_cart_count'),
     
     # Checkout URLs
     path('checkout/', views.checkout, name='checkout'),

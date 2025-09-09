@@ -1,0 +1,134 @@
+/* Blog-specific styles */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Prose styles for blog content */
+.prose {
+    color: #374151;
+    max-width: none;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    color: #111827;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.prose h1 {
+    font-size: 2.25rem;
+}
+
+.prose h2 {
+    font-size: 1.875rem;
+}
+
+.prose h3 {
+    font-size: 1.5rem;
+}
+
+.prose p {
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.prose a {
+    color: #d97706;
+    text-decoration: underline;
+}
+
+.prose a:hover {
+    color: #b45309;
+}
+
+.prose ul, .prose ol {
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    padding-left: 1.5rem;
+}
+
+.prose li {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.prose blockquote {
+    border-left: 4px solid #d97706;
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+    color: #6b7280;
+}
+
+.prose code {
+    background-color: #f3f4f6;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.prose pre {
+    background-color: #1f2937;
+    color: #f9fafb;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+}
+
+.prose pre code {
+    background-color: transparent;
+    padding: 0;
+    color: inherit;
+}
+
+.prose img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1.5rem 0;
+}
+
+.prose table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+}
+
+.prose th, .prose td {
+    border: 1px solid #d1d5db;
+    padding: 0.75rem;
+    text-align: left;
+}
+
+.prose th {
+    background-color: #f9fafb;
+    font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .prose h1 {
+        font-size: 1.875rem;
+    }
+    
+    .prose h2 {
+        font-size: 1.5rem;
+    }
+    
+    .prose h3 {
+        font-size: 1.25rem;
+    }
+}

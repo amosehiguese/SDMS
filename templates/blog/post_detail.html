@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - Blog - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
+
+{% block meta_description %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="bg-gray-50 py-4">
+    <div class="container mx-auto px-4">
+        <nav class="text-sm">
+            <a href="{% url 'store:home' %}" class="text-amber-700 hover:text-yellow-700">Home</a>
+            <span class="mx-2">/</span>
+            <a href="{% url 'blog:home' %}" class="text-amber-700 hover:text-yellow-700">Blog</a>
+            {% if post.category %}
+                <span class="mx-2">/</span>
+                <a href="{{ post.category.get_absolute_url }}" class="text-amber-700 hover:text-yellow-700">{{ post.category.name }}</a>
+            {% endif %}
+            <span class="mx-2">/</span>
+            <span class="text-gray-600">{{ post.title|truncatechars:30 }}</span>
+        </nav>
+    </div>
+</div>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-3">
+            <article class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <!-- Post Header -->
+                <div class="p-8 border-b border-gray-200">
+                    <!-- Category and Tags -->
+                    <div class="flex items-center space-x-2 mb-4">
+                        {% if post.category %}
+                        <a href="{{ post.category.get_absolute_url }}" 
+                           class="inline-block bg-amber-100 text-amber-800 text-sm font-semibold px-4 py-2 rounded-full hover:bg-amber-200 transition-colors">
+                            {{ post.category.name }}
+                        </a>
+                        {% endif %}
+                        {% for tag in post.tags.all %}
+                        <a href="{{ tag.get_absolute_url }}" 
+                           class="inline-block bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full hover:bg-gray-200 transition-colors">
+                            #{{ tag.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Title -->
+                    <h1 class="text-4xl font-bold text-gray-900 mb-4 leading-tight">{{ post.title }}</h1>
+                    
+                    <!-- Excerpt -->
+                    {% if post.excerpt %}
+                    <p class="text-xl text-gray-600 mb-6">{{ post.excerpt }}</p>
+                    {% endif %}
+                    
+                    <!-- Meta Info -->
+                    <div class="flex items-center justify-between text-sm text-gray-500">
+                        <div class="flex items-center space-x-6">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">{{ post.author.get_full_name|default:post.author.username }}</div>
+                                    <div class="text-xs text-gray-500">Author</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-4">
+                                <span class="flex items-center">
+                                    <i class="fas fa-calendar mr-2"></i>
+                                    {{ post.published_at|date:"F d, Y" }}
+                                </span>
+                                <span class="flex items-center">
+                                    <i class="fas fa-clock mr-2"></i>
+                                    {{ post.reading_time }} min read
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Social Share -->
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-500">Share:</span>
+                            <a href="#" class="text-gray-400 hover:text-blue-600 transition-colors">
+                                <i class="fab fa-facebook"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-blue-800 transition-colors">
+                                <i class="fab fa-linkedin"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Post Image Placeholder -->
+                <div class="h-64 bg-gradient-to-br from-amber-100 to-yellow-200 flex items-center justify-center">
+                    <i class="fas fa-newspaper text-6xl text-amber-600"></i>
+                </div>
+                
+                <!-- Post Content -->
+                <div class="p-8">
+                    <div class="prose prose-lg max-w-none">
+                        {{ post.content_html|safe }}
+                    </div>
+                </div>
+                
+                <!-- Post Footer -->
+                <div class="px-8 py-6 bg-gray-50 border-t border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-6">
+                            <button onclick="likePost('{{ post.slug }}')" 
+                                    class="flex items-center space-x-2 text-gray-600 hover:text-red-500 transition-colors">
+                                <i class="fas fa-heart"></i>
+                                <span id="like-count">{{ post.like_count }}</span>
+                            </button>
+                            
+                            <span class="flex items-center space-x-2 text-gray-600">
+                                <i class="fas fa-eye"></i>
+                                <span>{{ post.view_count }} views</span>
+                            </span>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-500">Share this article:</span>
+                            <a href="#" class="text-gray-400 hover:text-blue-600 transition-colors">
+                                <i class="fab fa-facebook"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-blue-800 transition-colors">
+                                <i class="fab fa-linkedin"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            
+            <!-- Comments Section -->
+            <div class="mt-8 bg-white rounded-xl shadow-lg p-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">Comments ({{ comments.count }})</h3>
+                
+                {% if user.is_authenticated %}
+                <!-- Add Comment Form -->
+                <form method="post" action="{% url 'blog:add_comment' post.slug %}" class="mb-8">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <textarea name="content" 
+                                  rows="4" 
+                                  placeholder="Share your thoughts..." 
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                  required></textarea>
+                    </div>
+                    <button type="submit" 
+                            class="bg-amber-600 text-white px-6 py-2 rounded-lg hover:bg-amber-700 transition-colors">
+                        Post Comment
+                    </button>
+                </form>
+                {% else %}
+                <div class="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p class="text-amber-800">
+                        <a href="{% url 'account_login' %}" class="font-medium hover:underline">Sign in</a> 
+                        to leave a comment.
+                    </p>
+                </div>
+                {% endif %}
+                
+                <!-- Comments List -->
+                <div class="space-y-6">
+                    {% for comment in comments %}
+                    <div class="border-l-4 border-amber-200 pl-4">
+                        <div class="flex items-center space-x-3 mb-2">
+                            <div class="w-8 h-8 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">{{ comment.author.get_full_name|default:comment.author.username }}</div>
+                                <div class="text-sm text-gray-500">{{ comment.created_at|date:"M d, Y g:i A" }}</div>
+                            </div>
+                        </div>
+                        <p class="text-gray-700">{{ comment.content }}</p>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-comments text-4xl mb-4"></i>
+                        <p>No comments yet. Be the first to share your thoughts!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+            <div class="space-y-8">
+                <!-- Author Info -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">About the Author</h3>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">{{ post.author.get_full_name|default:post.author.username }}</div>
+                            <div class="text-sm text-gray-500">Author</div>
+                        </div>
+                    </div>
+                    <a href="{% url 'blog:author_posts' post.author.username %}" 
+                       class="text-amber-600 hover:text-amber-700 text-sm font-medium">
+                        View all posts by {{ post.author.get_full_name|default:post.author.username }}
+                    </a>
+                </div>
+                
+                <!-- Related Posts -->
+                {% if related_posts %}
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Related Articles</h3>
+                    <div class="space-y-4">
+                        {% for related_post in related_posts %}
+                        <div class="flex space-x-3">
+                            <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-file-alt text-gray-500"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-medium text-gray-900 mb-1 line-clamp-2">
+                                    <a href="{{ related_post.get_absolute_url }}" class="hover:text-amber-700 transition-colors">
+                                        {{ related_post.title }}
+                                    </a>
+                                </h4>
+                                <p class="text-sm text-gray-500">{{ related_post.published_at|date:"M d, Y" }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Newsletter Signup -->
+                <div class="bg-gradient-to-br from-amber-50 to-yellow-100 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Stay Updated</h3>
+                    <p class="text-sm text-gray-600 mb-4">Get the latest articles delivered to your inbox.</p>
+                    <form class="space-y-3">
+                        <input type="email" 
+                               placeholder="Your email address" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm">
+                        <button type="submit" 
+                                class="w-full bg-amber-600 text-white py-2 rounded font-medium hover:bg-amber-700 transition-colors text-sm">
+                            Subscribe
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function likePost(slug) {
+    $.post('{% url "blog:like_post" "PLACEHOLDER" %}'.replace('PLACEHOLDER', slug), {
+        csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
+    })
+    .done(function(response) {
+        if (response.success) {
+            $('#like-count').text(response.like_count);
+            showNotification('Thanks for liking this post!', 'success');
+        }
+    })
+    .fail(function() {
+        showNotification('Error liking post', 'error');
+    });
+}
+
+function showNotification(message, type = 'info') {
+    const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500',
+        warning: 'bg-amber-700'
+    };
+    
+    const notification = $(`
+        <div class="fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform">
+            ${message}
+        </div>
+    `);
+    
+    $('body').append(notification);
+    
+    setTimeout(() => {
+        notification.removeClass('translate-x-full');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.addClass('translate-x-full');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+</script>
+{% endblock %}

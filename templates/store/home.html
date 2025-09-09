@@ -168,19 +168,6 @@
     </div>
 </section>
 
-<!-- Newsletter Section -->
-<section class="bg-amber-800 text-white py-12">
-    <div class="container mx-auto px-4 text-center">
-        <h2 class="text-3xl font-bold mb-4">Stay Updated</h2>
-        <p class="text-xl mb-6">Get the latest deals and new arrivals delivered to your inbox</p>
-        <div class="max-w-md mx-auto flex">
-            <input type="email" id="newsletter-email" placeholder="Enter your email" class="bg-white flex-1 px-4 py-3 rounded-l-lg text-black focus:outline-none focus:ring-none focus:ring-amber-300">
-            <button onclick="subscribeNewsletter()" class="bg-black text-white px-6 py-3 rounded-r-lg hover:bg-gray-800 transition">
-                Subscribe
-            </button>
-        </div>
-    </div>
-</section>
 {% endblock %}
 
 {% block extra_js %}
@@ -282,16 +269,6 @@ function addToCart(productId) {
     });
 }
 
-function subscribeNewsletter() {
-    const email = $('#newsletter-email').val();
-    if (!email) {
-        showNotification('Please enter your email address', 'error');
-        return;
-    }
-    
-    showNotification('Newsletter subscription coming soon!', 'info');
-    $('#newsletter-email').val('');
-}
 
 function showNotification(message, type = 'info') {
     const notification = $(`

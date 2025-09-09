@@ -17,7 +17,6 @@ class Payment(BaseModel):
     
     PAYMENT_METHOD_CHOICES = [
         ('paystack', 'Paystack'),
-        # Future payment methods can be added here
     ]
     
     # Payment identification

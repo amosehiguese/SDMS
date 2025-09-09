@@ -1,5 +1,283 @@
 {% extends 'base.html' %}
 {% block title %}Size Guide - {{ site_config.site_name|default:'Store' }}{% endblock %}
 {% block content %}
-<section class="py-12"><div class="container mx-auto px-4"><h1 class="text-3xl md:text-4xl font-bold mb-6">Size Guide</h1><div class="prose max-w-none"><p>Use this guide to find your perfect size. Measurements are in centimeters.</p><table><thead><tr><th>Size</th><th>Bust</th><th>Waist</th><th>Hips</th></tr></thead><tbody><tr><td>S</td><td>84-88</td><td>64-68</td><td>88-92</td></tr><tr><td>M</td><td>88-92</td><td>68-72</td><td>92-96</td></tr><tr><td>L</td><td>92-96</td><td>72-76</td><td>96-100</td></tr></tbody></table><p>Tip: If you’re between sizes, we recommend sizing up for comfort.</p></div></div></section>
+<!-- Hero Section -->
+<div class="bg-gradient-to-br from-purple-50 to-pink-50 py-16">
+    <div class="container mx-auto px-4">
+        <div class="text-center max-w-3xl mx-auto">
+            <div class="mb-6">
+                <i class="fas fa-ruler text-6xl text-purple-700"></i>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Size Guide</h1>
+            <p class="text-xl text-gray-600">Find your perfect fit with our comprehensive sizing information</p>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+            <!-- Introduction -->
+            <div class="text-center mb-12">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">How to Measure Yourself</h2>
+                <p class="text-gray-600 text-lg mb-8">
+                    Use our size guide to find your perfect fit. All measurements are in centimeters and should be taken while wearing well-fitted undergarments.
+                </p>
+                
+                <!-- Measurement Instructions -->
+                <div class="grid md:grid-cols-3 gap-6 mb-12">
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                        <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-arrows-alt-h text-2xl text-purple-700"></i>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 mb-2">Bust/Chest</h3>
+                        <p class="text-sm text-gray-600">Measure around the fullest part of your bust/chest, keeping the tape level</p>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                        <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-arrows-alt-h text-2xl text-blue-700"></i>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 mb-2">Waist</h3>
+                        <p class="text-sm text-gray-600">Measure around your natural waistline, at the narrowest part of your torso</p>
+                    </div>
+                    <div class="bg-pink-50 border border-pink-200 rounded-lg p-6">
+                        <div class="bg-pink-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-arrows-alt-h text-2xl text-pink-700"></i>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 mb-2">Hips</h3>
+                        <p class="text-sm text-gray-600">Measure around the fullest part of your hips, keeping the tape level</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Size Charts -->
+            <div class="space-y-12">
+                <!-- Women's Clothing -->
+                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="bg-purple-700 text-white p-6">
+                        <h3 class="text-2xl font-bold text-center">
+                            <i class="fas fa-female mr-2"></i>
+                            Women's Clothing Size Chart
+                        </h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left font-semibold text-gray-800">Size</th>
+                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">Bust (cm)</th>
+                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">Waist (cm)</th>
+                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">Hips (cm)</th>
+                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">UK Size</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-semibold text-purple-700">XS</td>
+                                    <td class="px-6 py-4 text-center">80-84</td>
+                                    <td class="px-6 py-4 text-center">60-64</td>
+                                    <td class="px-6 py-4 text-center">84-88</td>
+                                    <td class="px-6 py-4 text-center">6-8</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-semibold text-purple-700">S</td>
+                                    <td class="px-6 py-4 text-center">84-88</td>
+                                    <td class="px-6 py-4 text-center">64-68</td>
+                                    <td class="px-6 py-4 text-center">88-92</td>
+                                    <td class="px-6 py-4 text-center">8-10</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-semibold text-purple-700">M</td>
+                                    <td class="px-6 py-4 text-center">88-92</td>
+                                    <td class="px-6 py-4 text-center">68-72</td>
+                                    <td class="px-6 py-4 text-center">92-96</td>
+                                    <td class="px-6 py-4 text-center">10-12</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-semibold text-purple-700">L</td>
+                                    <td class="px-6 py-4 text-center">92-96</td>
+                                    <td class="px-6 py-4 text-center">72-76</td>
+                                    <td class="px-6 py-4 text-center">96-100</td>
+                                    <td class="px-6 py-4 text-center">12-14</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-semibold text-purple-700">XL</td>
+                                    <td class="px-6 py-4 text-center">96-100</td>
+                                    <td class="px-6 py-4 text-center">76-80</td>
+                                    <td class="px-6 py-4 text-center">100-104</td>
+                                    <td class="px-6 py-4 text-center">14-16</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-semibold text-purple-700">XXL</td>
+                                    <td class="px-6 py-4 text-center">100-104</td>
+                                    <td class="px-6 py-4 text-center">80-84</td>
+                                    <td class="px-6 py-4 text-center">104-108</td>
+                                    <td class="px-6 py-4 text-center">16-18</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Men's Clothing -->
+                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="bg-blue-700 text-white p-6">
+                        <h3 class="text-2xl font-bold text-center">
+                            <i class="fas fa-male mr-2"></i>
+                            Men's Clothing Size Chart
+                        </h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left font-semibold text-gray-800">Size</th>
+                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">Chest (cm)</th>
+                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">Waist (cm)</th>
+                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">Neck (cm)</th>
+                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">UK Size</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-semibold text-blue-700">S</td>
+                                    <td class="px-6 py-4 text-center">88-92</td>
+                                    <td class="px-6 py-4 text-center">76-80</td>
+                                    <td class="px-6 py-4 text-center">36-37</td>
+                                    <td class="px-6 py-4 text-center">34-36</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-semibold text-blue-700">M</td>
+                                    <td class="px-6 py-4 text-center">92-96</td>
+                                    <td class="px-6 py-4 text-center">80-84</td>
+                                    <td class="px-6 py-4 text-center">37-38</td>
+                                    <td class="px-6 py-4 text-center">36-38</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-semibold text-blue-700">L</td>
+                                    <td class="px-6 py-4 text-center">96-100</td>
+                                    <td class="px-6 py-4 text-center">84-88</td>
+                                    <td class="px-6 py-4 text-center">38-39</td>
+                                    <td class="px-6 py-4 text-center">38-40</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-semibold text-blue-700">XL</td>
+                                    <td class="px-6 py-4 text-center">100-104</td>
+                                    <td class="px-6 py-4 text-center">88-92</td>
+                                    <td class="px-6 py-4 text-center">39-40</td>
+                                    <td class="px-6 py-4 text-center">40-42</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-semibold text-blue-700">XXL</td>
+                                    <td class="px-6 py-4 text-center">104-108</td>
+                                    <td class="px-6 py-4 text-center">92-96</td>
+                                    <td class="px-6 py-4 text-center">40-41</td>
+                                    <td class="px-6 py-4 text-center">42-44</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Shoe Sizes -->
+                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="bg-green-700 text-white p-6">
+                        <h3 class="text-2xl font-bold text-center">
+                            <i class="fas fa-shoe-prints mr-2"></i>
+                            Shoe Size Chart
+                        </h3>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-0">
+                        <!-- Women's Shoes -->
+                        <div class="overflow-x-auto border-r border-gray-200">
+                            <h4 class="bg-pink-100 text-pink-800 font-semibold p-4 text-center">Women's Shoes</h4>
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-center font-semibold text-gray-800">UK</th>
+                                        <th class="px-4 py-3 text-center font-semibold text-gray-800">US</th>
+                                        <th class="px-4 py-3 text-center font-semibold text-gray-800">EU</th>
+                                        <th class="px-4 py-3 text-center font-semibold text-gray-800">CM</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">3</td><td class="px-4 py-2 text-center">5</td><td class="px-4 py-2 text-center">36</td><td class="px-4 py-2 text-center">22.5</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">4</td><td class="px-4 py-2 text-center">6</td><td class="px-4 py-2 text-center">37</td><td class="px-4 py-2 text-center">23</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">5</td><td class="px-4 py-2 text-center">7</td><td class="px-4 py-2 text-center">38</td><td class="px-4 py-2 text-center">24</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">6</td><td class="px-4 py-2 text-center">8</td><td class="px-4 py-2 text-center">39</td><td class="px-4 py-2 text-center">25</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">7</td><td class="px-4 py-2 text-center">9</td><td class="px-4 py-2 text-center">40</td><td class="px-4 py-2 text-center">25.5</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Men's Shoes -->
+                        <div class="overflow-x-auto">
+                            <h4 class="bg-blue-100 text-blue-800 font-semibold p-4 text-center">Men's Shoes</h4>
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-center font-semibold text-gray-800">UK</th>
+                                        <th class="px-4 py-3 text-center font-semibold text-gray-800">US</th>
+                                        <th class="px-4 py-3 text-center font-semibold text-gray-800">EU</th>
+                                        <th class="px-4 py-3 text-center font-semibold text-gray-800">CM</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">6</td><td class="px-4 py-2 text-center">7</td><td class="px-4 py-2 text-center">40</td><td class="px-4 py-2 text-center">25</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">7</td><td class="px-4 py-2 text-center">8</td><td class="px-4 py-2 text-center">41</td><td class="px-4 py-2 text-center">26</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">8</td><td class="px-4 py-2 text-center">9</td><td class="px-4 py-2 text-center">42</td><td class="px-4 py-2 text-center">27</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">9</td><td class="px-4 py-2 text-center">10</td><td class="px-4 py-2 text-center">43</td><td class="px-4 py-2 text-center">28</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">10</td><td class="px-4 py-2 text-center">11</td><td class="px-4 py-2 text-center">44</td><td class="px-4 py-2 text-center">28.5</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sizing Tips -->
+            <div class="mt-16 space-y-8">
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-8">
+                    <h3 class="text-xl font-bold text-amber-800 mb-4">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        Sizing Tips & Recommendations
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-6 text-amber-700">
+                        <ul class="space-y-2">
+                            <li class="flex items-start"><i class="fas fa-arrow-right mr-2 mt-1"></i>If you're between sizes, we recommend sizing up for comfort</li>
+                            <li class="flex items-start"><i class="fas fa-arrow-right mr-2 mt-1"></i>Check individual product descriptions for specific fit notes</li>
+                            <li class="flex items-start"><i class="fas fa-arrow-right mr-2 mt-1"></i>Measure yourself without heavy clothing</li>
+                        </ul>
+                        <ul class="space-y-2">
+                            <li class="flex items-start"><i class="fas fa-arrow-right mr-2 mt-1"></i>For shoes, measure feet in the evening when they're slightly swollen</li>
+                            <li class="flex items-start"><i class="fas fa-arrow-right mr-2 mt-1"></i>Consider your preferred fit - loose or fitted</li>
+                            <li class="flex items-start"><i class="fas fa-arrow-right mr-2 mt-1"></i>When in doubt, contact our customer service for help</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Still Need Help -->
+                <div class="bg-gray-50 rounded-lg p-8 text-center">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Still Unsure About Sizing?</h3>
+                    <p class="text-gray-600 mb-6">
+                        Our customer service team is here to help you find the perfect fit. 
+                        Don't hesitate to reach out with any sizing questions.
+                    </p>
+                    <div class="flex flex-col md:flex-row gap-4 justify-center">
+                        <a href="mailto:{{ site_config.contact_email|default:'support@example.com' }}" 
+                           class="bg-purple-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-800 transition-colors inline-flex items-center justify-center">
+                            <i class="fas fa-envelope mr-2"></i>
+                            Ask for Help
+                        </a>
+                        <a href="{% url 'store:returns_refunds' %}" 
+                           class="bg-white border border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors inline-flex items-center justify-center">
+                            <i class="fas fa-undo mr-2"></i>
+                            Return Policy
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %} 

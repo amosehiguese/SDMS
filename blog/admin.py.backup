@@ -25,6 +25,12 @@ class BlogTagAdmin(ModelAdmin):
         return obj.posts.filter(status='published').count()
     post_count.short_description = 'Posts'
 
+class BlogCommentInline(admin.TabularInline):
+    model = BlogComment
+    extra = 0
+    readonly_fields = ['author', 'content', 'created_at']
+    fields = ['author', 'content', 'is_approved', 'is_featured', 'created_at']
+
 @admin.register(BlogPost)
 class BlogPostAdmin(ModelAdmin):
     list_display = [
@@ -38,6 +44,7 @@ class BlogPostAdmin(ModelAdmin):
     search_fields = ['title', 'excerpt', 'content', 'author__username']
     prepopulated_fields = {'slug': ('title',)}
     filter_horizontal = ['tags']
+    inlines = [BlogCommentInline]
     
     fieldsets = (
         ('Basic Information', {

@@ -50,11 +50,11 @@
                 </h2>
                 
                 <!-- Existing Addresses -->
-                {% if shipping_addresses.exists %}
+                {% if user.shipping_addresses.exists %}
                 <div class="mb-6">
                     <h3 class="font-semibold mb-4">Select Shipping Address</h3>
                     <div class="space-y-3">
-                        {% for address in shipping_addresses %}
+                        {% for address in user.shipping_addresses.all %}
                         <label class="flex items-start p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition">
                             <input type="radio" name="shipping_address" value="{{ address.id }}" class="mt-1 mr-3" {% if forloop.first %}checked{% endif %}>
                             <div class="flex-1">
@@ -83,8 +83,8 @@
                 {% endif %}
                 
                 <!-- New Address Form -->
-                <div id="new-address-form" class="{% if shipping_addresses.exists %}hidden{% endif %}">
-                    <h3 class="font-semibold mb-4">{% if not shipping_addresses.exists %}Shipping Address{% else %}New Address{% endif %}</h3>
+                <div id="new-address-form" class="{% if user.shipping_addresses.exists %}hidden{% endif %}">
+                    <h3 class="font-semibold mb-4">{% if not user.shipping_addresses.exists %}Shipping Address{% else %}New Address{% endif %}</h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -97,11 +97,7 @@
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium mb-2">Street Address *</label>
-                            <input type="text" name="address_line_1" required class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium mb-2">Address Line 2</label>
-                            <input type="text" name="address_line_2" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
+                            <input type="text" name="street_address" required class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-2">City *</label>
@@ -126,11 +122,7 @@
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium mb-2">Phone Number</label>
-                            <input type="tel" name="phone" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium mb-2">Email</label>
-                            <input type="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
+                            <input type="tel" name="phone_number" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
                         </div>
                         <div class="md:col-span-2">
                             <label class="flex items-center">
@@ -165,7 +157,7 @@
                         </div>
                     </label>
                     
-                    <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 opacity-50 cursor-not-allowed">
+                    <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition opacity-50 cursor-not-allowed">
                         <input type="radio" name="payment_method" value="bank_transfer" class="mr-3" disabled>
                         <div class="flex items-center">
                             <i class="fas fa-university text-2xl text-gray-400 mr-4"></i>
@@ -185,7 +177,7 @@
                     Order Notes (Optional)
                 </h2>
                 
-                <textarea name="notes" rows="4" placeholder="Any special instructions for your order..." 
+                <textarea name="order_notes" rows="4" placeholder="Any special instructions for your order..." 
                           class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700"></textarea>
             </div>
         </div>
@@ -197,7 +189,7 @@
                 
                 <!-- Cart Items -->
                 <div class="space-y-4 mb-6 max-h-64 overflow-y-auto">
-                    {% for item in cart.items.all %}
+                    {% for item in cart.get_items %}
                     <div class="flex items-center space-x-3">
                         <div class="w-12 h-12 flex-shrink-0">
                             {% if item.product.images.exists %}
@@ -212,6 +204,13 @@
                             <p class="text-sm font-medium truncate">{{ item.product.title }}</p>
                             <p class="text-xs text-gray-500">
                                 Qty: {{ item.quantity }} × ₦{{ item.product.get_display_price|floatformat:0 }}
+                            </p>
+                            <p class="text-xs text-gray-500">
+                                {% if item.purchase_option == 'hold' %}
+                                    Hold as Asset
+                                {% else %}
+                                    Deliver to Me
+                                {% endif %}
                             </p>
                         </div>
                         <div class="text-sm font-semibold">
@@ -252,7 +251,7 @@
                     
                     <div class="flex justify-between text-lg font-bold">
                         <span>Total</span>
-                        <span class="text-amber-700">₦{{ cart.get_subtotal|floatformat:0 }}</span>
+                        <span class="text-amber-700">₦{{ cart.get_total|floatformat:0 }}</span>
                     </div>
                 </div>
                 
@@ -321,11 +320,12 @@ function processCheckout() {
     .done(function(response) {
         hideLoading();
         if (response.success) {
-            if (response.redirect_url) {
+            if (response.payment_url) {
                 // Redirect to payment gateway
-                window.location.href = response.redirect_url;
+                window.location.href = response.payment_url;
             } else {
-                showNotification('Order created successfully', 'success');
+                // Order created successfully
+                window.location.href = response.redirect_url;
             }
         } else {
             showNotification(response.error || 'Error processing order', 'error');
@@ -346,7 +346,7 @@ function validateCheckoutForm() {
     
     if (!hasSelectedAddress && isNewAddressFormVisible) {
         // Validate new address form
-        const requiredFields = ['first_name', 'last_name', 'address_line_1', 'city', 'state', 'country'];
+        const requiredFields = ['first_name', 'last_name', 'street_address', 'city', 'state', 'country'];
         
         requiredFields.forEach(function(fieldName) {
             const field = $(`input[name="${fieldName}"], select[name="${fieldName}"]`);
@@ -387,16 +387,6 @@ function updatePaymentMethod() {
     }
 }
 
-function showLoading() {
-    // Show loading state
-    $('button[type="submit"]').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Processing...');
-}
-
-function hideLoading() {
-    // Hide loading state
-    $('button[type="submit"]').prop('disabled', false).html('<i class="fas fa-lock mr-2"></i>Place Order');
-}
-
 // Show notification
 function showNotification(message, type = 'info') {
     const colors = {
@@ -426,4 +416,4 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 </script>
-{% endblock %}
+{% endblock %} 

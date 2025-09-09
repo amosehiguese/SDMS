@@ -1,3 +1,4 @@
+import uuid
 from decimal import Decimal
 from django.db import models
 from django.contrib.auth.models import User
@@ -32,27 +33,11 @@ class ShippingAddress(BaseModel):
         # Ensure only one default address per user
         if self.is_default:
             ShippingAddress.objects.filter(user=self.user, is_default=True).update(is_default=False)
+    def save(self, *args, **kwargs):
+        # Set price from product if not set
+        if not self.price:
+            self.price = self.product.get_display_price()
         super().save(*args, **kwargs)
-    
-    @property
-    def full_name(self):
-        return f"{self.first_name} {self.last_name}"
-    
-    @property
-    def full_address(self):
-        address = f"{self.address_line_1}"
-        if self.address_line_2:
-            address += f", {self.address_line_2}"
-        address += f", {self.city}, {self.state} {self.postal_code}, {self.country}"
-        return address
-    
-    @property
-    def street_address(self):
-        return f"{self.address_line_1}" + (f", {self.address_line_2}" if self.address_line_2 else "")
-    
-    @property
-    def phone_number(self):
-        return self.phone
 
 class Cart(BaseModel):
     """Shopping cart for both logged-in users and anonymous users"""
@@ -79,10 +64,6 @@ class Cart(BaseModel):
     def get_subtotal(self):
         """Get cart subtotal"""
         return sum(item.get_total_price() for item in self.items.all())
-    
-    def get_items(self):
-        """Get all cart items"""
-        return self.items.all()
     
     def clear(self):
         """Clear all items from cart"""
@@ -143,6 +124,18 @@ class OrderStatusLog(BaseModel):
     
     def __str__(self):
         return f"Order {self.order.order_number}: {self.previous_status} → {self.new_status}"
+    
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+    
+    @property
+    def full_address(self):
+        address = f"{self.address_line_1}"
+        if self.address_line_2:
+            address += f", {self.address_line_2}"
+        address += f", {self.city}, {self.state} {self.postal_code}, {self.country}"
+        return address
 
 class Order(BaseModel):
     STATUS_CHOICES = [

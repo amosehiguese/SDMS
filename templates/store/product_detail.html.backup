@@ -66,6 +66,8 @@
                     {% endif %}
                 </div>
                 {% endif %}
+                
+                </button>
             </div>
             
             <!-- Thumbnail Images -->
@@ -143,14 +145,14 @@
             <div class="space-y-4">
                 <h3 class="text-lg font-semibold">Choose Purchase Option:</h3>
                 <div class="space-y-3">
-                    <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition purchase-option">
+                    <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition">
                         <input type="radio" name="purchase_option" value="deliver" class="mr-3" checked>
                         <div>
                             <h4 class="font-semibold">Deliver to Me</h4>
                             <p class="text-sm text-gray-600">Standard shipping to your address</p>
                         </div>
                     </label>
-                    <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition purchase-option">
+                    <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition">
                         <input type="radio" name="purchase_option" value="hold" class="mr-3">
                         <div>
                             <h4 class="font-semibold">Hold as Asset</h4>
@@ -371,6 +373,7 @@
                             <i class="fas fa-image text-gray-400 text-3xl"></i>
                         </div>
                     {% endif %}
+                    
                 </div>
                 
                 <div class="p-4">
@@ -412,8 +415,6 @@ $(document).ready(function() {
     // Initialize countdown timer
     initializeCountdownTimer();
     
-    // Initialize purchase option selection
-    initializePurchaseOptions();
 });
 
 // Initialize Tabs
@@ -429,18 +430,6 @@ function initializeTabs() {
         $('.tab-content').addClass('hidden');
         $(`#${tabName}-tab`).removeClass('hidden');
     });
-}
-
-// Initialize Purchase Options
-function initializePurchaseOptions() {
-    $('.purchase-option').click(function() {
-        $('.purchase-option').removeClass('border-amber-700 bg-amber-50');
-        $(this).addClass('border-amber-700 bg-amber-50');
-        $(this).find('input[type="radio"]').prop('checked', true);
-    });
-    
-    // Set initial state
-    $('.purchase-option:first').addClass('border-amber-700 bg-amber-50');
 }
 
 // Initialize Rating Stars
@@ -691,35 +680,10 @@ function loadMoreReviews() {
     });
 }
 
-// Update Cart Count - Use global function from base.html
+// Update Cart Count
 function updateCartCount() {
-    if (typeof window.updateCartCount === 'function') {
-        window.updateCartCount();
-    } else {
-        // Fallback if global function is not available
-        $.get('{% url "orders:get_cart_count" %}')
-        .done(function(response) {
-            if (response.success) {
-                $('#cart-count').text(response.cart_count);
-                $('#sidebar-cart-count').text(`(${response.cart_count} items)`);
-            }
-        })
-        .fail(function() {
-            console.log('Failed to update cart count');
-        });
-    }
-}
-
-// Show Loading
-function showLoading() {
-    $('button').prop('disabled', true);
-    $('button').addClass('opacity-50 cursor-not-allowed');
-}
-
-// Hide Loading
-function hideLoading() {
-    $('button').prop('disabled', false);
-    $('button').removeClass('opacity-50 cursor-not-allowed');
+    // Use the global function from base.html
+    window.updateCartCount();
 }
 
 // Show Notification
@@ -752,4 +716,4 @@ function showNotification(message, type = 'info') {
 }
 </script>
 
-{% endblock %}
+{% endblock %} 
