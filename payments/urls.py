@@ -5,7 +5,6 @@ app_name = 'payments'
 
 urlpatterns = [
     # Checkout and payment flow
-    path('checkout/', views.checkout, name='checkout'),
     path('initiate/', views.initiate_payment, name='initiate_payment'),
     path('verify/<str:reference>/', views.payment_verification, name='payment_verification'),
     path('status/<str:reference>/', views.payment_status, name='payment_status'),

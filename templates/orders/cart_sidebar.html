@@ -4,7 +4,7 @@
     {% if cart.items.exists %}
         <div class="space-y-4 p-4">
             {% for item in cart.items.all %}
-            <div class="cart-item border border-gray-200 rounded-lg p-4" data-item-id="{{ item.id }}">
+            <div class="cart-item border border-gray-200 rounded-lg p-4" data-item-id="{{ item.id }}" id="sidebar-cart-item-{{ item.id }}">
                 <div class="flex space-x-3">
                     <!-- Product Image -->
                     <div class="w-16 h-16 flex-shrink-0">
@@ -30,24 +30,31 @@
                         <div class="flex items-center justify-between mt-2">
                             <div class="flex items-center space-x-2">
                                 <span class="text-sm font-semibold text-amber-700">₦{{ item.product.get_display_price|floatformat:2 }}</span>
-                                <span class="text-xs text-gray-500">x{{ item.quantity }}</span>
+                                <span class="text-xs text-gray-500">x<span id="sidebar-quantity-display-{{ item.id }}">{{ item.quantity }}</span></span>
                             </div>
-                            <span class="text-sm font-bold text-gray-800">₦{{ item.get_total_price|floatformat:2 }}</span>
+                            <span class="text-sm font-bold text-gray-800" id="sidebar-item-total-{{ item.id }}">₦{{ item.get_total_price|floatformat:2 }}</span>
                         </div>
                         
                         <!-- Quantity Controls -->
                         <div class="flex items-center space-x-2 mt-2">
-                            <button onclick="updateCartItemQuantity({{ item.id }}, {{ item.quantity|add:'-1' }})" 
-                                    class="w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-xs transition-colors">
+                            <button type="button" 
+                                    class="sidebar-quantity-btn w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-xs transition-colors"
+                                    data-action="decrease"
+                                    data-item-id="{{ item.id }}"
+                                    data-current-quantity="{{ item.quantity }}">
                                 <i class="fas fa-minus"></i>
                             </button>
-                            <span class="text-sm font-medium w-8 text-center">{{ item.quantity }}</span>
-                            <button onclick="updateCartItemQuantity({{ item.id }}, {{ item.quantity|add:'1' }})" 
-                                    class="w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-xs transition-colors">
+                            <span class="text-sm font-medium w-8 text-center" id="sidebar-quantity-{{ item.id }}">{{ item.quantity }}</span>
+                            <button type="button" 
+                                    class="sidebar-quantity-btn w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-xs transition-colors"
+                                    data-action="increase"
+                                    data-item-id="{{ item.id }}"
+                                    data-current-quantity="{{ item.quantity }}">
                                 <i class="fas fa-plus"></i>
                             </button>
-                            <button onclick="removeCartItem({{ item.id }})" 
-                                    class="ml-2 text-red-500 hover:text-red-700 text-xs transition-colors">
+                            <button type="button" 
+                                    class="sidebar-remove-btn ml-2 text-red-500 hover:text-red-700 text-xs transition-colors"
+                                    data-item-id="{{ item.id }}">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -71,71 +78,285 @@
     {% endif %}
 </div>
 
-<!-- Cart Summary (only shown when cart has items) -->
+<!-- JavaScript for Sidebar Functionality -->
 {% if cart.items.exists %}
 <script>
-// Update cart subtotal
-$('#cart-subtotal').text('₦{{ cart.get_subtotal|floatformat:2 }}');
-
-// Cart item functions - Make sure these are globally accessible
-window.updateCartItemQuantity = function(itemId, newQuantity) {
-    if (newQuantity <= 0) {
-        window.removeCartItem(itemId);
-        return;
-    }
+$(document).ready(function() {
+    // Update cart subtotal in the sidebar footer
+    $('#cart-subtotal').text('₦{{ cart.get_subtotal|floatformat:2 }}');
     
-    $.post('{% url "orders:update_cart_item" %}', {
-        item_id: itemId,
-        quantity: newQuantity,
-        csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
-    })
-    .done(function(response) {
-        if (response.success) {
-            loadCartSidebar(); // Reload the entire sidebar
-            updateCartCount();
-        } else {
-            showNotification(response.error || 'Error updating quantity', 'error');
-        }
-    })
-    .fail(function() {
-        showNotification('Error updating quantity', 'error');
-    });
-};
+    // Initialize sidebar cart functionality
+    initializeSidebarCartFunctions();
+});
 
-window.removeCartItem = function(itemId) {
-    if (!confirm('Are you sure you want to remove this item from your cart?')) {
-        return;
-    }
+let sidebarCurrentItemToRemove = null;
+
+function initializeSidebarCartFunctions() {
+    console.log('Initializing sidebar cart functions...');
     
-    $.post('{% url "orders:remove_from_cart" %}', {
-        item_id: itemId,
-        csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
-    })
-    .done(function(response) {
-        if (response.success) {
-            loadCartSidebar(); // Reload the entire sidebar
-            updateCartCount();
-        } else {
-            showNotification(response.error || 'Error removing item', 'error');
+    // Handle quantity button clicks in sidebar
+    $(document).off('click', '.sidebar-quantity-btn').on('click', '.sidebar-quantity-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const $btn = $(this);
+        const action = $btn.data('action');
+        const itemId = $btn.data('item-id');
+        const currentQuantity = parseInt($btn.data('current-quantity'));
+        
+        console.log('Sidebar quantity button clicked:', action, itemId, currentQuantity);
+        
+        let newQuantity;
+        if (action === 'increase') {
+            newQuantity = currentQuantity + 1;
+        } else if (action === 'decrease') {
+            newQuantity = currentQuantity - 1;
         }
-    })
-    .fail(function() {
-        showNotification('Error removing item', 'error');
+        
+        if (newQuantity <= 0) {
+            showSidebarConfirmModal(itemId);
+        } else {
+            sidebarUpdateCartItemQuantity(itemId, newQuantity);
+        }
     });
-};
+    
+    // Handle remove button clicks in sidebar
+    $(document).off('click', '.sidebar-remove-btn').on('click', '.sidebar-remove-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const itemId = $(this).data('item-id');
+        console.log('Sidebar remove button clicked:', itemId);
+        showSidebarConfirmModal(itemId);
+    });
+}
 
-// Show notification function
-function showNotification(message, type = 'info') {
+function showSidebarConfirmModal(itemId) {
+    console.log('Showing sidebar confirm modal for item:', itemId);
+    sidebarCurrentItemToRemove = itemId;
+    
+    // Remove any existing modal
+    $('#sidebar-confirm-modal').remove();
+    
+    const modal = $(`
+        <div id="sidebar-confirm-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="z-index: 9999;">
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-black opacity-50"></div>
+            
+            <!-- Modal -->
+            <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 z-10">
+                <div class="p-6">
+                    <!-- Header -->
+                    <div class="flex items-center mb-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900">Remove Item</h3>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="mb-6">
+                        <p class="text-sm text-gray-600">Remove this item from your cart?</p>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="flex space-x-3 justify-end">
+                        <button type="button" id="sidebar-modal-cancel" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300">
+                            Cancel
+                        </button>
+                        <button type="button" id="sidebar-modal-confirm" class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500">
+                            Remove Item
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    $('body').append(modal);
+    $('body').addClass('overflow-hidden');
+    
+    // Handle confirm
+    modal.find('#sidebar-modal-confirm').on('click', function() {
+        console.log('Confirmed removal of item:', sidebarCurrentItemToRemove);
+        modal.remove();
+        $('body').removeClass('overflow-hidden');
+        if (sidebarCurrentItemToRemove) {
+            sidebarRemoveCartItem(sidebarCurrentItemToRemove);
+            sidebarCurrentItemToRemove = null;
+        }
+    });
+    
+    // Handle cancel
+    modal.find('#sidebar-modal-cancel').on('click', function() {
+        console.log('Cancelled removal');
+        modal.remove();
+        $('body').removeClass('overflow-hidden');
+        sidebarCurrentItemToRemove = null;
+    });
+    
+    // Handle backdrop click
+    modal.on('click', function(e) {
+        if ($(e.target).hasClass('bg-black') || e.target === this) {
+            console.log('Modal cancelled via backdrop');
+            modal.remove();
+            $('body').removeClass('overflow-hidden');
+            sidebarCurrentItemToRemove = null;
+        }
+    });
+    
+    // Handle ESC key
+    $(document).on('keydown.sidebarModal', function(e) {
+        if (e.keyCode === 27) { // ESC key
+            console.log('Modal cancelled via ESC');
+            modal.remove();
+            $('body').removeClass('overflow-hidden');
+            $(document).off('keydown.sidebarModal');
+            sidebarCurrentItemToRemove = null;
+        }
+    });
+}
+
+function sidebarUpdateCartItemQuantity(itemId, newQuantity) {
+    console.log('Updating sidebar cart item quantity:', itemId, newQuantity);
+    
+    const $itemContainer = $(`#sidebar-cart-item-${itemId}`);
+    $itemContainer.find('.sidebar-quantity-btn, .sidebar-remove-btn').prop('disabled', true).addClass('opacity-50');
+    
+    $.ajax({
+        url: '{% url "orders:update_cart_item" %}',
+        type: 'POST',
+        data: {
+            item_id: itemId,
+            quantity: newQuantity,
+            csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
+        },
+        success: function(response) {
+            console.log('Update cart response:', response);
+            if (response.success) {
+                if (response.action === 'removed') {
+                    $itemContainer.fadeOut(300, function() {
+                        $(this).remove();
+                        checkSidebarCartEmpty();
+                    });
+                } else {
+                    // Update the quantity displays and item total
+                    $(`#sidebar-quantity-${itemId}`).text(newQuantity);
+                    $(`#sidebar-quantity-display-${itemId}`).text(newQuantity);
+                    $(`#sidebar-item-total-${itemId}`).text('₦' + parseFloat(response.item_total).toFixed(2));
+                    
+                    // Update button data attributes
+                    $itemContainer.find('.sidebar-quantity-btn').data('current-quantity', newQuantity);
+                }
+                
+                // Update global cart elements
+                updateGlobalCartElements(response.cart_total_items, response.cart_subtotal);
+                showSidebarNotification('Cart updated', 'success');
+            } else {
+                showSidebarNotification(response.error || 'Error updating quantity', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error updating cart:', status, error);
+            showSidebarNotification('Error updating quantity', 'error');
+        },
+        complete: function() {
+            // Re-enable buttons
+            $itemContainer.find('.sidebar-quantity-btn, .sidebar-remove-btn').prop('disabled', false).removeClass('opacity-50');
+        }
+    });
+}
+
+function sidebarRemoveCartItem(itemId) {
+    console.log('Removing sidebar cart item:', itemId);
+    
+    const $itemContainer = $(`#sidebar-cart-item-${itemId}`);
+    $itemContainer.find('.sidebar-quantity-btn, .sidebar-remove-btn').prop('disabled', true).addClass('opacity-50');
+    
+    $.ajax({
+        url: '{% url "orders:remove_from_cart" %}',
+        type: 'POST',
+        data: {
+            item_id: itemId,
+            csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
+        },
+        success: function(response) {
+            console.log('Remove cart response:', response);
+            if (response.success) {
+                $itemContainer.fadeOut(300, function() {
+                    $(this).remove();
+                    checkSidebarCartEmpty();
+                });
+                
+                // Update global cart elements
+                updateGlobalCartElements(response.cart_total_items, response.cart_subtotal);
+                showSidebarNotification('Item removed', 'success');
+            } else {
+                showSidebarNotification(response.error || 'Error removing item', 'error');
+                // Re-enable buttons on error
+                $itemContainer.find('.sidebar-quantity-btn, .sidebar-remove-btn').prop('disabled', false).removeClass('opacity-50');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error removing cart item:', status, error);
+            showSidebarNotification('Error removing item', 'error');
+            // Re-enable buttons on error
+            $itemContainer.find('.sidebar-quantity-btn, .sidebar-remove-btn').prop('disabled', false).removeClass('opacity-50');
+        }
+    });
+}
+
+function updateGlobalCartElements(totalItems, subtotal) {
+    const formattedSubtotal = '₦' + parseFloat(subtotal).toFixed(2);
+    const itemText = totalItems + ' item' + (totalItems != 1 ? 's' : '');
+    
+    console.log('Updating global cart elements:', totalItems, formattedSubtotal);
+    
+    // Update cart count in navigation
+    $('#cart-count').text(totalItems);
+    $('#sidebar-cart-count').text(`(${itemText})`);
+    
+    // Update cart subtotal in sidebar footer
+    $('#cart-subtotal').text(formattedSubtotal);
+    
+    // If on cart page, update those elements too
+    if ($('#cart-items-count').length) {
+        $('#cart-items-count').text(itemText);
+        $('#summary-item-count').text(itemText);
+        $('#summary-subtotal').text(formattedSubtotal);
+        $('#summary-total').text(formattedSubtotal);
+    }
+}
+
+function checkSidebarCartEmpty() {
+    console.log('Checking if sidebar cart is empty...');
+    if ($('#cart-sidebar-content .cart-item').length === 0) {
+        console.log('Sidebar cart is empty, reloading...');
+        loadCartSidebar();
+    }
+}
+
+function showSidebarNotification(message, type = 'info') {
     const colors = {
         success: 'bg-green-500',
         error: 'bg-red-500',
         info: 'bg-blue-500',
-        warning: 'bg-amber-700'
+        warning: 'bg-amber-500'
+    };
+    
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        info: 'fa-info-circle',
+        warning: 'fa-exclamation-triangle'
     };
     
     const notification = $(`
-        <div class="fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform">
-            ${message}
+        <div class="fixed top-4 right-4 ${colors[type]} text-white px-4 py-2 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform text-sm" style="z-index: 10000;">
+            <div class="flex items-center">
+                <i class="fas ${icons[type]} mr-2"></i>
+                <span>${message}</span>
+            </div>
         </div>
     `);
     
@@ -150,7 +371,12 @@ function showNotification(message, type = 'info') {
         setTimeout(() => {
             notification.remove();
         }, 300);
-    }, 3000);
+    }, 2000);
 }
+
+// Make functions globally accessible
+window.sidebarUpdateCartItemQuantity = sidebarUpdateCartItemQuantity;
+window.sidebarRemoveCartItem = sidebarRemoveCartItem;
+window.showSidebarConfirmModal = showSidebarConfirmModal;
 </script>
 {% endif %}

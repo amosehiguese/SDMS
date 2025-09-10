@@ -42,10 +42,46 @@
     <form id="checkout-form" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Content -->
         <div class="lg:col-span-2 space-y-8">
-            <!-- Shipping Information -->
+            <!-- Fulfillment Type -->
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-bold mb-6 flex items-center">
-                    <i class="fas fa-shipping-fast mr-3 text-yellow-500"></i>
+                    <i class="fas fa-truck mr-3 text-amber-500"></i>
+                    Fulfillment Options
+                </h2>
+                
+                <div class="space-y-4">
+                    <label class="flex items-start p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition">
+                        <input type="radio" name="fulfillment_type" value="deliver" class="mt-1 mr-3" checked>
+                        <div class="flex-1">
+                            <div class="font-semibold flex items-center">
+                                <i class="fas fa-shipping-fast mr-2 text-amber-500"></i>
+                                Ship to Address
+                            </div>
+                            <div class="text-sm text-gray-600 mt-1">
+                                Have your order delivered to your specified address
+                            </div>
+                        </div>
+                    </label>
+                    
+                    <label class="flex items-start p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition">
+                        <input type="radio" name="fulfillment_type" value="hold_asset" class="mt-1 mr-3">
+                        <div class="flex-1">
+                            <div class="font-semibold flex items-center">
+                                <i class="fas fa-warehouse mr-2 text-amber-500"></i>
+                                Hold as Asset
+                            </div>
+                            <div class="text-sm text-gray-600 mt-1">
+                                Keep your purchase as a held asset that you can liquidate later
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Shipping Information (shown only for delivery) -->
+            <div id="shipping-section" class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-shipping-fast mr-3 text-amber-500"></i>
                     Shipping Information
                 </h2>
                 
@@ -56,26 +92,26 @@
                     <div class="space-y-3">
                         {% for address in shipping_addresses %}
                         <label class="flex items-start p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition">
-                            <input type="radio" name="shipping_address" value="{{ address.id }}" class="mt-1 mr-3" {% if forloop.first %}checked{% endif %}>
+                            <input type="radio" name="shipping_address_id" value="{{ address.id }}" class="mt-1 mr-3" {% if forloop.first %}checked{% endif %}>
                             <div class="flex-1">
                                 <div class="font-semibold">{{ address.full_name }}</div>
                                 <div class="text-sm text-gray-600">
-                                    {{ address.street_address }}<br>
+                                    {{ address.address_line_1 }}{% if address.address_line_2 %}, {{ address.address_line_2 }}{% endif %}<br>
                                     {{ address.city }}, {{ address.state }} {{ address.postal_code }}<br>
                                     {{ address.country }}
                                 </div>
-                                {% if address.phone_number %}
-                                    <div class="text-sm text-gray-600">{{ address.phone_number }}</div>
+                                {% if address.phone %}
+                                    <div class="text-sm text-gray-600">{{ address.phone }}</div>
                                 {% endif %}
                             </div>
                             {% if address.is_default %}
-                                <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Default</span>
+                                <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded">Default</span>
                             {% endif %}
                         </label>
                         {% endfor %}
                     </div>
                     
-                    <button type="button" onclick="showNewAddressForm()" class="mt-4 text-amber-700 hover:text-yellow-700 flex items-center">
+                    <button type="button" onclick="showNewAddressForm()" class="mt-4 text-amber-700 hover:text-amber-800 flex items-center">
                         <i class="fas fa-plus mr-2"></i>
                         Add New Address
                     </button>
@@ -134,7 +170,7 @@
                         </div>
                         <div class="md:col-span-2">
                             <label class="flex items-center">
-                                <input type="checkbox" name="save_address" class="mr-2">
+                                <input type="checkbox" name="is_default" class="mr-2">
                                 <span class="text-sm">Save this address for future orders</span>
                             </label>
                         </div>
@@ -145,43 +181,32 @@
             <!-- Payment Method -->
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-bold mb-6 flex items-center">
-                    <i class="fas fa-credit-card mr-3 text-yellow-500"></i>
+                    <i class="fas fa-credit-card mr-3 text-amber-500"></i>
                     Payment Method
                 </h2>
                 
-                <div class="space-y-4">
-                    <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition">
-                        <input type="radio" name="payment_method" value="paystack" class="mr-3" checked>
+                <div class="p-4 border border-amber-300 bg-amber-50 rounded-lg">
+                    <div class="flex items-center justify-between">
                         <div class="flex items-center">
-                            <i class="fas fa-credit-card text-2xl text-yellow-500 mr-4"></i>
+                            <i class="fas fa-credit-card text-2xl text-amber-600 mr-4"></i>
                             <div>
-                                <div class="font-semibold">Credit/Debit Card</div>
-                                <div class="text-sm text-gray-600">Secure payment via Paystack</div>
+                                <div class="font-semibold">Secure Card Payment</div>
+                                <div class="text-sm text-gray-600">Payment processed securely via Paystack</div>
                             </div>
                         </div>
-                        <div class="ml-auto flex space-x-2">
+                        <div class="flex space-x-2">
                             <i class="fab fa-cc-visa text-2xl text-blue-600"></i>
                             <i class="fab fa-cc-mastercard text-2xl text-red-600"></i>
+                            <i class="fas fa-shield-alt text-2xl text-green-600"></i>
                         </div>
-                    </label>
-                    
-                    <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 opacity-50 cursor-not-allowed">
-                        <input type="radio" name="payment_method" value="bank_transfer" class="mr-3" disabled>
-                        <div class="flex items-center">
-                            <i class="fas fa-university text-2xl text-gray-400 mr-4"></i>
-                            <div>
-                                <div class="font-semibold text-gray-500">Bank Transfer</div>
-                                <div class="text-sm text-gray-400">Coming Soon</div>
-                            </div>
-                        </div>
-                    </label>
+                    </div>
                 </div>
             </div>
             
             <!-- Order Notes -->
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-bold mb-6 flex items-center">
-                    <i class="fas fa-sticky-note mr-3 text-yellow-500"></i>
+                    <i class="fas fa-sticky-note mr-3 text-amber-500"></i>
                     Order Notes (Optional)
                 </h2>
                 
@@ -230,13 +255,13 @@
                         <span>₦{{ cart.get_subtotal|floatformat:0 }}</span>
                     </div>
                     
-                    <div class="flex justify-between">
+                    <div class="flex justify-between" id="shipping-row">
                         <span>Shipping</span>
                         <span id="shipping-amount">
                             {% if cart.get_subtotal >= site_config.free_shipping_threshold %}
                                 <span class="text-green-600">Free</span>
                             {% else %}
-                                ₦{{ site_config.default_shipping_cost|floatformat:0 }}
+                                ₦{{ site_config.default_shipping_cost|floatformat:0|default:"2500" }}
                             {% endif %}
                         </span>
                     </div>
@@ -252,12 +277,12 @@
                     
                     <div class="flex justify-between text-lg font-bold">
                         <span>Total</span>
-                        <span class="text-amber-700">₦{{ cart.get_subtotal|floatformat:0 }}</span>
+                        <span class="text-amber-700" id="total-amount">₦{{ cart.get_total|floatformat:0 }}</span>
                     </div>
                 </div>
                 
                 <!-- Place Order Button -->
-                <button type="submit" class="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition mb-4">
+                <button type="submit" class="w-full bg-amber-700 text-white py-3 rounded-lg font-semibold hover:bg-amber-800 transition mb-4">
                     <i class="fas fa-lock mr-2"></i>
                     Place Order
                 </button>
@@ -276,30 +301,118 @@
 {% block extra_js %}
 <script>
 $(document).ready(function() {
-    // Initialize checkout form
     initializeCheckout();
 });
 
 function initializeCheckout() {
+    // Handle fulfillment type changes
+    $('input[name="fulfillment_type"]').change(function() {
+        updateFulfillmentType();
+    });
+    
     // Handle form submission
     $('#checkout-form').on('submit', function(e) {
         e.preventDefault();
         processCheckout();
     });
     
-    // Handle payment method changes
-    $('input[name="payment_method"]').change(function() {
-        updatePaymentMethod();
+    // Real-time validation
+    $('#checkout-form input, #checkout-form select').on('blur', function() {
+        validateField($(this));
     });
+    
+    // Phone number formatting
+    $('input[name="phone"]').on('input', function() {
+        let value = $(this).val().replace(/\D/g, '');
+        if (value && !value.startsWith('+')) {
+            // Auto-add + prefix
+            $(this).val('+' + value);
+        }
+    });
+    
+    // Initialize with default selection
+    updateFulfillmentType();
+}
+
+function validateField(field) {
+    const fieldName = field.attr('name');
+    const value = field.val();
+    
+    // Remove existing error message
+    field.next('.text-red-500').remove();
+    field.removeClass('border-red-500');
+    
+    if (field.attr('required') && (!value || !value.trim())) {
+        field.addClass('border-red-500');
+        field.after('<div class="text-red-500 text-xs mt-1">This field is required</div>');
+        return false;
+    }
+    
+    // Field-specific validation
+    if (fieldName === 'email' && value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+            field.addClass('border-red-500');
+            field.after('<div class="text-red-500 text-xs mt-1">Please enter a valid email address</div>');
+            return false;
+        }
+    }
+    
+    if (fieldName === 'phone' && value) {
+        const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+        if (!phoneRegex.test(value.replace(/\s/g, ''))) {
+            field.addClass('border-red-500');
+            field.after('<div class="text-red-500 text-xs mt-1">Please enter a valid phone number with country code</div>');
+            return false;
+        }
+    }
+    
+    if ((fieldName === 'first_name' || fieldName === 'last_name') && value) {
+        if (!/^[a-zA-Z\s'-]+$/.test(value)) {
+            field.addClass('border-red-500');
+            field.after('<div class="text-red-500 text-xs mt-1">Name should only contain letters, spaces, hyphens and apostrophes</div>');
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+function updateFulfillmentType() {
+    const fulfillmentType = $('input[name="fulfillment_type"]:checked').val();
+    const shippingSection = $('#shipping-section');
+    const shippingRow = $('#shipping-row');
+    
+    if (fulfillmentType === 'deliver') {
+        shippingSection.show();
+        shippingRow.show();
+        // Reset required fields for new address form
+        $('#new-address-form input[required]').each(function() {
+            $(this).attr('data-required-for-delivery', 'true');
+        });
+    } else {
+        shippingSection.hide();
+        shippingRow.hide();
+        // Remove required from address fields when holding asset
+        $('#new-address-form input[required]').each(function() {
+            $(this).removeAttr('required');
+        });
+    }
 }
 
 function showNewAddressForm() {
     $('#new-address-form').removeClass('hidden');
-    $('input[name="shipping_address"]').prop('checked', false);
+    $('input[name="shipping_address_id"]').prop('checked', false);
+    
+    // Re-add required attributes if delivery is selected
+    if ($('input[name="fulfillment_type"]:checked').val() === 'deliver') {
+        $('#new-address-form input[data-required-for-delivery]').each(function() {
+            $(this).attr('required', 'required');
+        });
+    }
 }
 
 function processCheckout() {
-    // Validate form
     if (!validateCheckoutForm()) {
         return;
     }
@@ -307,6 +420,12 @@ function processCheckout() {
     showLoading();
     
     const formData = new FormData($('#checkout-form')[0]);
+    
+    // Debug: Log form data being sent
+    console.log('Form data being sent:');
+    for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+    }
     
     $.ajax({
         url: '{% url "orders:create_order" %}',
@@ -322,93 +441,91 @@ function processCheckout() {
         hideLoading();
         if (response.success) {
             if (response.redirect_url) {
-                // Redirect to payment gateway
                 window.location.href = response.redirect_url;
             } else {
                 showNotification('Order created successfully', 'success');
+                window.location.href = '{% url "orders:order_detail" %}' + response.order_id + '/';
             }
         } else {
             showNotification(response.error || 'Error processing order', 'error');
         }
     })
-    .fail(function() {
+    .fail(function(xhr) {
         hideLoading();
-        showNotification('Error processing order. Please try again.', 'error');
+        let errorMessage = 'Error processing order. Please try again.';
+        if (xhr.responseJSON && xhr.responseJSON.error) {
+            errorMessage = xhr.responseJSON.error;
+        }
+        showNotification(errorMessage, 'error');
     });
 }
 
 function validateCheckoutForm() {
     let isValid = true;
+    const fulfillmentType = $('input[name="fulfillment_type"]:checked').val();
     
-    // Check if shipping address is selected or new address form is filled
-    const hasSelectedAddress = $('input[name="shipping_address"]:checked').length > 0;
-    const isNewAddressFormVisible = !$('#new-address-form').hasClass('hidden');
-    
-    if (!hasSelectedAddress && isNewAddressFormVisible) {
-        // Validate new address form
-        const requiredFields = ['first_name', 'last_name', 'address_line_1', 'city', 'state', 'country'];
-        
-        requiredFields.forEach(function(fieldName) {
-            const field = $(`input[name="${fieldName}"], select[name="${fieldName}"]`);
-            if (!field.val().trim()) {
-                field.addClass('border-red-500');
-                isValid = false;
-            } else {
-                field.removeClass('border-red-500');
-            }
-        });
-        
-        if (!isValid) {
-            showNotification('Please fill in all required shipping address fields', 'error');
-            return false;
-        }
-    } else if (!hasSelectedAddress) {
-        showNotification('Please select a shipping address', 'error');
+    // Validate fulfillment type
+    if (!fulfillmentType) {
+        showNotification('Please select a fulfillment option', 'error');
         return false;
     }
     
-    // Check payment method
-    if (!$('input[name="payment_method"]:checked').length) {
-        showNotification('Please select a payment method', 'error');
-        return false;
+    // Only validate shipping if delivery is selected
+    if (fulfillmentType === 'deliver') {
+        const hasSelectedAddress = $('input[name="shipping_address_id"]:checked').length > 0;
+        const isNewAddressFormVisible = !$('#new-address-form').hasClass('hidden');
+        
+        if (!hasSelectedAddress && isNewAddressFormVisible) {
+            // Validate new address form
+            const requiredFields = ['first_name', 'last_name', 'address_line_1', 'city', 'state', 'country'];
+            
+            requiredFields.forEach(function(fieldName) {
+                const field = $(`input[name="${fieldName}"], select[name="${fieldName}"]`);
+                if (!field.val() || !field.val().trim()) {
+                    field.addClass('border-red-500');
+                    isValid = false;
+                } else {
+                    field.removeClass('border-red-500');
+                }
+            });
+            
+            if (!isValid) {
+                showNotification('Please fill in all required shipping address fields', 'error');
+                return false;
+            }
+        } else if (!hasSelectedAddress) {
+            showNotification('Please select a shipping address or add a new one', 'error');
+            return false;
+        }
     }
     
     return isValid;
 }
 
-function updatePaymentMethod() {
-    const selectedMethod = $('input[name="payment_method"]:checked').val();
-    
-    // Update UI based on selected payment method
-    if (selectedMethod === 'paystack') {
-        // Show credit card info
-    } else if (selectedMethod === 'bank_transfer') {
-        // Show bank transfer info
-    }
-}
-
 function showLoading() {
-    // Show loading state
     $('button[type="submit"]').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Processing...');
 }
 
 function hideLoading() {
-    // Hide loading state
     $('button[type="submit"]').prop('disabled', false).html('<i class="fas fa-lock mr-2"></i>Place Order');
 }
 
-// Show notification
 function showNotification(message, type = 'info') {
     const colors = {
         success: 'bg-green-500',
         error: 'bg-red-500',
         info: 'bg-blue-500',
-        warning: 'bg-amber-700'
+        warning: 'bg-amber-500'
     };
     
     const notification = $(`
         <div class="fixed top-20 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform">
-            ${message}
+            <div class="flex items-center">
+                <span>${message}</span>
+                <button onclick="$(this).closest('.fixed').addClass('translate-x-full')" class="ml-4 text-white hover:text-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
         </div>
     `);
     
@@ -423,7 +540,7 @@ function showNotification(message, type = 'info') {
         setTimeout(() => {
             notification.remove();
         }, 300);
-    }, 3000);
+    }, 5000);
 }
 </script>
 {% endblock %}

@@ -19,6 +19,39 @@
     .prose p {
         margin-bottom: 1rem;
     }
+    
+    /* Ensure quantity buttons don't duplicate */
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        overflow: hidden;
+    }
+    
+    .quantity-btn {
+        background: none;
+        border: none;
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.15s ease-in-out;
+    }
+    
+    .quantity-btn:hover {
+        background-color: #f3f4f6;
+    }
+    
+    .quantity-input {
+        border: none;
+        outline: none;
+        text-align: center;
+        width: 4rem;
+        padding: 0.5rem;
+        background: none;
+    }
 </style>
 {% endblock %}
 
@@ -164,27 +197,31 @@
             <div class="space-y-4">
                 <div class="flex items-center space-x-4">
                     <label class="font-semibold">Quantity:</label>
-                    <div class="flex items-center border border-gray-300 rounded">
-                        <button type="button" onclick="changeQuantity(-1)" class="px-3 py-2 hover:bg-gray-100">-</button>
+                    <div class="quantity-controls">
+                        <button type="button" class="quantity-btn" onclick="changeQuantity(-1)">
+                            <i class="fas fa-minus"></i>
+                        </button>
                         <input type="number" id="quantity" value="1" min="1" max="{{ product.stock_quantity|default:99 }}" 
-                               class="w-16 px-3 py-2 text-center border-0 focus:outline-none">
-                        <button type="button" onclick="changeQuantity(1)" class="px-3 py-2 hover:bg-gray-100">+</button>
+                               class="quantity-input" readonly>
+                        <button type="button" class="quantity-btn" onclick="changeQuantity(1)">
+                            <i class="fas fa-plus"></i>
+                        </button>
                     </div>
                 </div>
                 
                 <div class="flex space-x-4">
                     {% if product.is_in_stock %}
-                        <button onclick="addToCart()" class="flex-1 bg-amber-700 text-white py-3 px-6 rounded-lg font-semibold hover:bg-amber-800 transition">
+                        <button id="add-to-cart-btn" onclick="addToCart()" class="flex-1 bg-amber-700 text-white py-3 px-6 rounded-lg font-semibold hover:bg-amber-800 transition disabled:opacity-50 disabled:cursor-not-allowed">
                             <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
+                        </button>
+                        <button id="buy-now-btn" onclick="buyNow()" class="bg-black text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            Buy Now
                         </button>
                     {% else %}
                         <button class="flex-1 bg-gray-400 text-white py-3 px-6 rounded-lg font-semibold cursor-not-allowed">
                             <i class="fas fa-times mr-2"></i> Out of Stock
                         </button>
                     {% endif %}
-                    <button onclick="buyNow()" class="bg-black text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-800 transition">
-                        Buy Now
-                    </button>
                 </div>
             </div>
             
@@ -515,8 +552,25 @@ function changeMainImage(imageUrl) {
 function changeQuantity(delta) {
     const quantityInput = $('#quantity');
     const currentValue = parseInt(quantityInput.val()) || 1;
-    const newValue = Math.max(1, Math.min(currentValue + delta, parseInt(quantityInput.attr('max')) || 99));
+    const maxValue = parseInt(quantityInput.attr('max')) || 99;
+    const newValue = Math.max(1, Math.min(currentValue + delta, maxValue));
     quantityInput.val(newValue);
+}
+
+// Set button loading state
+function setButtonLoading(buttonId, loading) {
+    const button = $(buttonId);
+    if (loading) {
+        button.prop('disabled', true);
+        button.addClass('opacity-50 cursor-not-allowed');
+        const originalText = button.html();
+        button.data('original-text', originalText);
+        button.html('<i class="fas fa-spinner fa-spin mr-2"></i>Processing...');
+    } else {
+        button.prop('disabled', false);
+        button.removeClass('opacity-50 cursor-not-allowed');
+        button.html(button.data('original-text') || button.html());
+    }
 }
 
 // Add to Cart
@@ -524,50 +578,59 @@ function addToCart() {
     const quantity = parseInt($('#quantity').val()) || 1;
     const purchaseOption = $('input[name="purchase_option"]:checked').val();
     
-    showLoading();
+    setButtonLoading('#add-to-cart-btn', true);
     
     $.post('{% url "orders:add_to_cart" %}', {
         product_id: '{{ product.id }}',
         quantity: quantity,
-        purchase_option: purchaseOption,
+        fulfillment_type: purchaseOption === 'hold' ? 'hold_asset' : 'deliver',
         csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
     })
     .done(function(response) {
-        hideLoading();
+        setButtonLoading('#add-to-cart-btn', false);
         if (response.success) {
-            updateCartCount();
-            showNotification('Product added to cart!', 'success');
+            // Use the global function to update cart count
+            if (typeof window.updateCartCount === 'function') {
+                window.updateCartCount();
+            }
+            showNotification(response.message || 'Product added to cart!', 'success');
         } else {
             showNotification(response.error || 'Error adding to cart', 'error');
         }
     })
-    .fail(function() {
-        hideLoading();
-        showNotification('Error adding to cart', 'error');
+    .fail(function(xhr, status, error) {
+        setButtonLoading('#add-to-cart-btn', false);
+        console.error('Add to cart error:', error);
+        showNotification('Error adding to cart. Please try again.', 'error');
     });
 }
 
 // Add Related Product to Cart
 function addToCartRelated(productId) {
-    showLoading();
+    const button = $(`button[onclick="addToCartRelated('${productId}')"]`);
+    const originalText = button.html();
+    button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
     
     $.post('{% url "orders:add_to_cart" %}', {
         product_id: productId,
         quantity: 1,
-        purchase_option: 'deliver',
+        fulfillment_type: 'deliver',
         csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
     })
     .done(function(response) {
-        hideLoading();
+        button.prop('disabled', false).html(originalText);
         if (response.success) {
-            updateCartCount();
-            showNotification('Product added to cart!', 'success');
+            // Use the global function to update cart count
+            if (typeof window.updateCartCount === 'function') {
+                window.updateCartCount();
+            }
+            showNotification(response.message || 'Product added to cart!', 'success');
         } else {
             showNotification(response.error || 'Error adding to cart', 'error');
         }
     })
     .fail(function() {
-        hideLoading();
+        button.prop('disabled', false).html(originalText);
         showNotification('Error adding to cart', 'error');
     });
 }
@@ -577,26 +640,31 @@ function buyNow() {
     const quantity = parseInt($('#quantity').val()) || 1;
     const purchaseOption = $('input[name="purchase_option"]:checked').val();
     
-    showLoading();
+    setButtonLoading('#buy-now-btn', true);
     
     $.post('{% url "orders:add_to_cart" %}', {
         product_id: '{{ product.id }}',
         quantity: quantity,
-        purchase_option: purchaseOption,
+        fulfillment_type: purchaseOption === 'hold' ? 'hold_asset' : 'deliver',
         buy_now: true,
         csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
     })
     .done(function(response) {
-        hideLoading();
+        setButtonLoading('#buy-now-btn', false);
         if (response.success) {
-            window.location.href = '{% url "orders:checkout" %}';
+            if (response.redirect_url) {
+                window.location.href = response.redirect_url;
+            } else {
+                window.location.href = '{% url "orders:checkout" %}';
+            }
         } else {
             showNotification(response.error || 'Error processing request', 'error');
         }
     })
-    .fail(function() {
-        hideLoading();
-        showNotification('Error processing request', 'error');
+    .fail(function(xhr, status, error) {
+        setButtonLoading('#buy-now-btn', false);
+        console.error('Buy now error:', error);
+        showNotification('Error processing request. Please try again.', 'error');
     });
 }
 
@@ -613,7 +681,9 @@ $('#review-form').submit(function(e) {
         return;
     }
     
-    showLoading();
+    const submitButton = $('#review-form button[type="submit"]');
+    const originalText = submitButton.html();
+    submitButton.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...');
     
     $.post('{% url "store:add_review" product.id %}', {
         rating: rating,
@@ -622,7 +692,7 @@ $('#review-form').submit(function(e) {
         csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
     })
     .done(function(response) {
-        hideLoading();
+        submitButton.prop('disabled', false).html(originalText);
         if (response.success) {
             showNotification('Review submitted successfully!', 'success');
             addReviewToList(response.review);
@@ -634,7 +704,7 @@ $('#review-form').submit(function(e) {
         }
     })
     .fail(function() {
-        hideLoading();
+        submitButton.prop('disabled', false).html(originalText);
         showNotification('Error submitting review', 'error');
     });
 });
@@ -662,18 +732,25 @@ function addReviewToList(review) {
         </div>
     `;
     
+    // Add to the top of the reviews list
+    const emptyState = $('#reviews-list').find('.text-center').first();
+    if (emptyState.length) {
+        emptyState.remove();
+    }
     $('#reviews-list').prepend(reviewHtml);
 }
 
 // Load More Reviews
 function loadMoreReviews() {
-    showLoading();
+    const loadMoreBtn = $('#load-more-reviews');
+    const originalText = loadMoreBtn.html();
+    loadMoreBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Loading...');
     
     $.get('{% url "store:load_more_reviews" product.id %}', {
         offset: reviewsOffset
     })
     .done(function(response) {
-        hideLoading();
+        loadMoreBtn.prop('disabled', false).html(originalText);
         
         response.reviews.forEach(function(review) {
             addReviewToList(review);
@@ -682,44 +759,13 @@ function loadMoreReviews() {
         reviewsOffset += response.reviews.length;
         
         if (!response.has_more) {
-            $('#load-more-reviews').hide();
+            loadMoreBtn.hide();
         }
     })
     .fail(function() {
-        hideLoading();
+        loadMoreBtn.prop('disabled', false).html(originalText);
         showNotification('Error loading more reviews', 'error');
     });
-}
-
-// Update Cart Count - Use global function from base.html
-function updateCartCount() {
-    if (typeof window.updateCartCount === 'function') {
-        window.updateCartCount();
-    } else {
-        // Fallback if global function is not available
-        $.get('{% url "orders:get_cart_count" %}')
-        .done(function(response) {
-            if (response.success) {
-                $('#cart-count').text(response.cart_count);
-                $('#sidebar-cart-count').text(`(${response.cart_count} items)`);
-            }
-        })
-        .fail(function() {
-            console.log('Failed to update cart count');
-        });
-    }
-}
-
-// Show Loading
-function showLoading() {
-    $('button').prop('disabled', true);
-    $('button').addClass('opacity-50 cursor-not-allowed');
-}
-
-// Hide Loading
-function hideLoading() {
-    $('button').prop('disabled', false);
-    $('button').removeClass('opacity-50 cursor-not-allowed');
 }
 
 // Show Notification
@@ -728,27 +774,39 @@ function showNotification(message, type = 'info') {
         success: 'bg-green-500',
         error: 'bg-red-500',
         info: 'bg-blue-500',
-        warning: 'bg-amber-700'
+        warning: 'bg-amber-500'
+    };
+    
+    const icons = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-exclamation-circle',
+        info: 'fas fa-info-circle',
+        warning: 'fas fa-exclamation-triangle'
     };
     
     const notification = $(`
-        <div class="fixed top-20 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform">
-            ${message}
+        <div class="fixed top-20 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform max-w-sm">
+            <div class="flex items-center">
+                <i class="${icons[type]} mr-3"></i>
+                <span>${message}</span>
+            </div>
         </div>
     `);
     
     $('body').append(notification);
     
+    // Slide in
     setTimeout(() => {
         notification.removeClass('translate-x-full');
     }, 100);
     
+    // Slide out and remove
     setTimeout(() => {
         notification.addClass('translate-x-full');
         setTimeout(() => {
             notification.remove();
         }, 300);
-    }, 3000);
+    }, 4000);
 }
 </script>
 

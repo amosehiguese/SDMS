@@ -193,52 +193,126 @@ def checkout(request):
 def create_order(request):
     """AJAX endpoint to create order"""
     try:
+        print(f"POST data: {request.POST}")  # Debug logging
+        
         cart = get_or_create_cart(request)
         
         if not cart.items.exists():
             return JsonResponse({'success': False, 'error': 'Cart is empty'})
         
         fulfillment_type = request.POST.get('fulfillment_type')
+        print(f"Fulfillment type: {fulfillment_type}")  # Debug logging
+        
         if fulfillment_type not in ['hold_asset', 'deliver']:
-            return JsonResponse({'success': False, 'error': 'Invalid fulfillment type'})
+            return JsonResponse({'success': False, 'error': f'Invalid fulfillment type: {fulfillment_type}'})
         
         # For delivery orders, validate shipping address
         shipping_address = None
         if fulfillment_type == 'deliver':
             address_id = request.POST.get('shipping_address_id')
-            if not address_id:
-                return JsonResponse({'success': False, 'error': 'Shipping address is required for delivery'})
-            shipping_address = get_object_or_404(ShippingAddress, id=address_id, user=request.user)
+            print(f"Address ID: {address_id}")  # Debug logging
+            
+            if address_id:
+                # Using existing address
+                try:
+                    shipping_address = get_object_or_404(ShippingAddress, id=address_id, user=request.user)
+                    print(f"Using existing address: {shipping_address}")  # Debug logging
+                except:
+                    return JsonResponse({'success': False, 'error': 'Invalid shipping address selected'})
+            else:
+                # Creating new address
+                print("Creating new address...")  # Debug logging
+                required_fields = ['first_name', 'last_name', 'address_line_1', 'city', 'state', 'country', 'phone', 'email']
+                
+                # Validate required fields
+                missing_fields = []
+                for field in required_fields:
+                    if not request.POST.get(field):
+                        missing_fields.append(field)
+                
+                if missing_fields:
+                    return JsonResponse({
+                        'success': False, 
+                        'error': f'Missing required fields: {", ".join(missing_fields)}'
+                    })
+                
+                try:
+                    shipping_address = ShippingAddress.objects.create(
+                        user=request.user,
+                        first_name=request.POST.get('first_name'),
+                        last_name=request.POST.get('last_name'),
+                        email=request.POST.get('email'),
+                        phone=request.POST.get('phone'),
+                        address_line_1=request.POST.get('address_line_1'),
+                        address_line_2=request.POST.get('address_line_2', ''),
+                        city=request.POST.get('city'),
+                        state=request.POST.get('state'),
+                        postal_code=request.POST.get('postal_code', ''),
+                        country=request.POST.get('country'),
+                        is_default=request.POST.get('is_default') == 'on'
+                    )
+                    print(f"Created new address: {shipping_address}")  # Debug logging
+                except Exception as e:
+                    print(f"Error creating address: {str(e)}")  # Debug logging
+                    return JsonResponse({'success': False, 'error': f'Error creating shipping address: {str(e)}'})
         
         # Create order
-        order = Order.objects.create(
-            user=request.user,
-            fulfillment_type=fulfillment_type,
-            shipping_address=shipping_address,
-            customer_notes=request.POST.get('notes', '')
-        )
+        print("Creating order...")  # Debug logging
+        try:
+            order = Order.objects.create(
+                user=request.user,
+                fulfillment_type=fulfillment_type,
+                shipping_address=shipping_address,
+                customer_notes=request.POST.get('notes', '')
+            )
+            print(f"Created order: {order.id}")  # Debug logging
+        except Exception as e:
+            print(f"Error creating order: {str(e)}")  # Debug logging
+            return JsonResponse({'success': False, 'error': f'Error creating order: {str(e)}'})
         
         # Create order items
-        for cart_item in cart.items.all():
-            if not cart_item.product.can_purchase(cart_item.quantity):
-                order.delete()
-                return JsonResponse({
-                    'success': False, 
-                    'error': f'{cart_item.product.title} is out of stock'
-                })
-            
-            OrderItem.objects.create(
-                order=order,
-                product=cart_item.product,
-                quantity=cart_item.quantity,
-                price=cart_item.product.get_display_price()
-            )
+        print("Creating order items...")  # Debug logging
+        try:
+            for cart_item in cart.items.all():
+                if not cart_item.product.can_purchase(cart_item.quantity):
+                    order.delete()
+                    return JsonResponse({
+                        'success': False, 
+                        'error': f'{cart_item.product.title} is out of stock'
+                    })
+                
+                OrderItem.objects.create(
+                    order=order,
+                    product=cart_item.product,
+                    quantity=cart_item.quantity,
+                    price=cart_item.product.get_display_price()
+                )
+            print("Created order items successfully")  # Debug logging
+        except Exception as e:
+            print(f"Error creating order items: {str(e)}")  # Debug logging
+            order.delete()
+            return JsonResponse({'success': False, 'error': f'Error creating order items: {str(e)}'})
         
         # Calculate totals
-        order.calculate_totals()
+        print("Calculating totals...")  # Debug logging
+        try:
+            order.calculate_totals()
+            print(f"Order total: {order.total}")  # Debug logging
+        except Exception as e:
+            print(f"Error calculating totals: {str(e)}")  # Debug logging
+            order.delete()
+            return JsonResponse({'success': False, 'error': f'Error calculating order totals: {str(e)}'})
         
         # Clear cart
-        cart.clear()
+        print("Clearing cart...")  # Debug logging
+        try:
+            cart.clear()
+            print("Cart cleared successfully")  # Debug logging
+        except Exception as e:
+            print(f"Error clearing cart: {str(e)}")  # Debug logging
+            # Don't fail the order creation if cart clearing fails
+        
+        print("Order creation successful, preparing response...")  # Debug logging
         
         return JsonResponse({
             'success': True,
@@ -247,7 +321,10 @@ def create_order(request):
         })
         
     except Exception as e:
-        return JsonResponse({'success': False, 'error': 'An error occurred while creating order'})
+        print(f"Unexpected error in create_order: {str(e)}")  # Debug logging
+        import traceback
+        print(traceback.format_exc())  # Full stack trace
+        return JsonResponse({'success': False, 'error': f'An unexpected error occurred: {str(e)}'})
 
 @login_required
 def order_detail(request, order_id):

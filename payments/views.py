@@ -16,54 +16,6 @@ from .models import Payment
 from .services import PaymentService
 
 @login_required
-def checkout(request):
-    """Checkout page where user can review cart and initiate payment"""
-    try:
-        cart = Cart.objects.get(user=request.user)
-        cart_items = cart.items.all()
-        
-        if not cart_items.exists():
-            messages.warning(request, "Your cart is empty")
-            return redirect('store:cart')
-        
-        # Get user's shipping addresses
-        shipping_addresses = ShippingAddress.objects.filter(user=request.user)
-        
-        # Calculate totals
-        subtotal = cart.get_subtotal()
-        
-        # Get site configuration for shipping and tax
-        from core.models import SiteConfiguration
-        config = SiteConfiguration.get_config()
-        
-        # Calculate shipping cost
-        shipping_cost = Decimal('0.00')
-        if subtotal < config.free_shipping_threshold:
-            shipping_cost = config.default_shipping_cost
-        
-        # Calculate tax
-        tax_rate = getattr(config, 'tax_rate', Decimal('0.00'))
-        tax_amount = subtotal * tax_rate
-        
-        total = subtotal + shipping_cost + tax_amount
-        
-        context = {
-            'cart_items': cart_items,
-            'subtotal': subtotal,
-            'shipping_cost': shipping_cost,
-            'tax_amount': tax_amount,
-            'total': total,
-            'shipping_addresses': shipping_addresses,
-            'paystack_public_key': config.paystack_public_key,
-        }
-        
-        return render(request, 'payments/checkout.html', context)
-        
-    except Cart.DoesNotExist:
-        messages.warning(request, "Your cart is empty")
-        return redirect('store:cart')
-
-@login_required
 @require_http_methods(["POST"])
 def initiate_payment(request):
     """Initiate payment process"""
