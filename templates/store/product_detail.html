@@ -172,27 +172,6 @@
                 </div>
             </div>
             
-            <!-- Purchase Options -->
-            <div class="space-y-4">
-                <h3 class="text-lg font-semibold">Choose Purchase Option:</h3>
-                <div class="space-y-3">
-                    <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition purchase-option">
-                        <input type="radio" name="purchase_option" value="deliver" class="mr-3" checked>
-                        <div>
-                            <h4 class="font-semibold">Deliver to Me</h4>
-                            <p class="text-sm text-gray-600">Standard shipping to your address</p>
-                        </div>
-                    </label>
-                    <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition purchase-option">
-                        <input type="radio" name="purchase_option" value="hold" class="mr-3">
-                        <div>
-                            <h4 class="font-semibold">Hold as Asset</h4>
-                            <p class="text-sm text-gray-600">Store digitally, liquidate later</p>
-                        </div>
-                    </label>
-                </div>
-            </div>
-            
             <!-- Quantity and Add to Cart -->
             <div class="space-y-4">
                 <div class="flex items-center space-x-4">
@@ -576,14 +555,12 @@ function setButtonLoading(buttonId, loading) {
 // Add to Cart
 function addToCart() {
     const quantity = parseInt($('#quantity').val()) || 1;
-    const purchaseOption = $('input[name="purchase_option"]:checked').val();
     
     setButtonLoading('#add-to-cart-btn', true);
     
     $.post('{% url "orders:add_to_cart" %}', {
         product_id: '{{ product.id }}',
         quantity: quantity,
-        fulfillment_type: purchaseOption === 'hold' ? 'hold_asset' : 'deliver',
         csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
     })
     .done(function(response) {
@@ -638,14 +615,12 @@ function addToCartRelated(productId) {
 // Buy Now
 function buyNow() {
     const quantity = parseInt($('#quantity').val()) || 1;
-    const purchaseOption = $('input[name="purchase_option"]:checked').val();
     
     setButtonLoading('#buy-now-btn', true);
     
     $.post('{% url "orders:add_to_cart" %}', {
         product_id: '{{ product.id }}',
         quantity: quantity,
-        fulfillment_type: purchaseOption === 'hold' ? 'hold_asset' : 'deliver',
         buy_now: true,
         csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
     })

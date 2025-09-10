@@ -415,6 +415,184 @@ def add_shipping_address(request):
     except Exception as e:
         return JsonResponse({'success': False, 'error': 'Failed to add address'})
 
+@require_http_methods(["GET"])
+@login_required
+def get_shipping_address(request, address_id):
+    """AJAX endpoint to get shipping address data"""
+    try:
+        address = get_object_or_404(ShippingAddress, id=address_id, user=request.user)
+        
+        return JsonResponse({
+            'success': True,
+            'address': {
+                'id': str(address.id),
+                'first_name': address.first_name,
+                'last_name': address.last_name,
+                'email': address.email,
+                'phone': address.phone,
+                'address_line_1': address.address_line_1,
+                'address_line_2': address.address_line_2,
+                'city': address.city,
+                'state': address.state,
+                'postal_code': address.postal_code,
+                'country': address.country,
+                'is_default': address.is_default,
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': 'Failed to get address'})
+
+@require_http_methods(["POST"])
+@login_required
+def edit_shipping_address(request, address_id):
+    """AJAX endpoint to edit shipping address"""
+    try:
+        address = get_object_or_404(ShippingAddress, id=address_id, user=request.user)
+        
+        # Update address fields
+        address.first_name = request.POST.get('first_name', '').strip()
+        address.last_name = request.POST.get('last_name', '').strip()
+        address.email = request.POST.get('email', '').strip()
+        address.phone = request.POST.get('phone', '').strip()
+        address.address_line_1 = request.POST.get('address_line_1', '').strip()
+        address.address_line_2 = request.POST.get('address_line_2', '').strip()
+        address.city = request.POST.get('city', '').strip()
+        address.state = request.POST.get('state', '').strip()
+        address.postal_code = request.POST.get('postal_code', '').strip()
+        address.country = request.POST.get('country', 'Nigeria').strip()
+        
+        # Handle default setting
+        is_default = request.POST.get('is_default') == 'true'
+        if is_default and not address.is_default:
+            # Remove default from other addresses
+            ShippingAddress.objects.filter(user=request.user, is_default=True).update(is_default=False)
+            address.is_default = True
+        elif not is_default:
+            address.is_default = False
+        
+        # Validate required fields
+        required_fields = {
+            'first_name': address.first_name,
+            'last_name': address.last_name,
+            'address_line_1': address.address_line_1,
+            'city': address.city,
+            'state': address.state,
+            'country': address.country,
+        }
+        
+        missing_fields = [field for field, value in required_fields.items() if not value]
+        if missing_fields:
+            return JsonResponse({
+                'success': False, 
+                'error': f'Missing required fields: {", ".join(missing_fields)}'
+            })
+        
+        address.save()
+        
+        return JsonResponse({
+            'success': True,
+            'address': {
+                'id': str(address.id),
+                'full_name': address.full_name,
+                'full_address': address.full_address,
+                'is_default': address.is_default,
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': 'Failed to update address'})
+
+@require_http_methods(["POST"])
+@login_required
+def set_default_address(request, address_id):
+    """AJAX endpoint to set address as default"""
+    try:
+        address = get_object_or_404(ShippingAddress, id=address_id, user=request.user)
+        
+        # Remove default from all other addresses
+        ShippingAddress.objects.filter(user=request.user, is_default=True).update(is_default=False)
+        
+        # Set this address as default
+        address.is_default = True
+        address.save()
+        
+        return JsonResponse({'success': True})
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': 'Failed to set default address'})
+
+# Update the existing add_shipping_address function to handle default setting properly
+@require_http_methods(["POST"])
+@login_required
+def add_shipping_address(request):
+    """AJAX endpoint to add shipping address"""
+    try:
+        # Get form data
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        address_line_1 = request.POST.get('address_line_1', '').strip()
+        address_line_2 = request.POST.get('address_line_2', '').strip()
+        city = request.POST.get('city', '').strip()
+        state = request.POST.get('state', '').strip()
+        postal_code = request.POST.get('postal_code', '').strip()
+        country = request.POST.get('country', 'Nigeria').strip()
+        is_default = request.POST.get('is_default') == 'true'
+        
+        # Validate required fields
+        required_fields = {
+            'first_name': first_name,
+            'last_name': last_name,
+            'address_line_1': address_line_1,
+            'city': city,
+            'state': state,
+            'country': country,
+        }
+        
+        missing_fields = [field for field, value in required_fields.items() if not value]
+        if missing_fields:
+            return JsonResponse({
+                'success': False, 
+                'error': f'Missing required fields: {", ".join(missing_fields)}'
+            })
+        
+        # If this is being set as default, remove default from other addresses
+        if is_default:
+            ShippingAddress.objects.filter(user=request.user, is_default=True).update(is_default=False)
+        # If user has no addresses yet, make this the default
+        elif not ShippingAddress.objects.filter(user=request.user).exists():
+            is_default = True
+        
+        address = ShippingAddress.objects.create(
+            user=request.user,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            phone=phone,
+            address_line_1=address_line_1,
+            address_line_2=address_line_2,
+            city=city,
+            state=state,
+            postal_code=postal_code,
+            country=country,
+            is_default=is_default
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'address': {
+                'id': str(address.id),
+                'full_name': address.full_name,
+                'full_address': address.full_address,
+                'is_default': address.is_default,
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': 'Failed to add address'})
+
 @require_http_methods(["POST"])
 @login_required
 def delete_shipping_address(request, address_id):

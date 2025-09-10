@@ -78,7 +78,7 @@ class Product(BaseModel):
     
     def get_display_price(self):
         """Get the price to display (considering flash sales)"""
-        if self.has_active_flash_sale() and self.sale_price:
+        if self.has_active_flash_sale() or self.sale_price:
             return self.sale_price
         return self.price
     

@@ -245,6 +245,11 @@ class Order(BaseModel):
         if self.fulfillment_type == 'hold_asset':
             return self.items.all()
         return self.items.none()
+
+    @property
+    def has_hold_items(self):
+        return self.items.filter(purchase_option='hold').exists()
+
     
     def liquidate_assets(self, shipping_address):
         """Convert held assets to delivery order"""

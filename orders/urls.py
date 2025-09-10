@@ -27,5 +27,8 @@ urlpatterns = [
     # Shipping addresses URLs
     path('addresses/', views.shipping_addresses, name='shipping_addresses'),
     path('ajax/address/add/', views.add_shipping_address, name='add_shipping_address'),
+    path('ajax/address/get/<uuid:address_id>/', views.get_shipping_address, name='get_shipping_address'),
+    path('ajax/address/edit/<uuid:address_id>/', views.edit_shipping_address, name='edit_shipping_address'),
+    path('ajax/address/set-default/<uuid:address_id>/', views.set_default_address, name='set_default_address'),
     path('ajax/address/delete/<uuid:address_id>/', views.delete_shipping_address, name='delete_shipping_address'),
 ]

@@ -104,36 +104,6 @@
                 {% endif %}
             </div>
             
-            <!-- Paystack Details -->
-            {% if payment.paystack_access_code or payment.paystack_authorization_url %}
-            <div class="bg-white shadow rounded-lg p-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Paystack Details</h2>
-                
-                <div class="space-y-3">
-                    {% if payment.paystack_access_code %}
-                    <div>
-                        <dt class="text-sm font-medium text-gray-500">Access Code</dt>
-                        <dd class="mt-1 text-sm text-gray-900 font-mono">{{ payment.paystack_access_code }}</dd>
-                    </div>
-                    {% endif %}
-                    
-                    {% if payment.transaction_id %}
-                    <div>
-                        <dt class="text-sm font-medium text-gray-500">Transaction ID</dt>
-                        <dd class="mt-1 text-sm text-gray-900 font-mono">{{ payment.transaction_id }}</dd>
-                    </div>
-                    {% endif %}
-                    
-                    {% if payment.paystack_authorization_url %}
-                    <div>
-                        <dt class="text-sm font-medium text-gray-500">Authorization URL</dt>
-                        <dd class="mt-1 text-sm text-gray-900 break-all">{{ payment.paystack_authorization_url }}</dd>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
-            
             <!-- Error Information (if failed) -->
             {% if payment.status == 'failed' and payment.error_message %}
             <div class="bg-white shadow rounded-lg p-6 border-l-4 border-red-400">

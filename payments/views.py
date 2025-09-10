@@ -23,6 +23,7 @@ def initiate_payment(request):
         data = json.loads(request.body)
         fulfillment_type = data.get('fulfillment_type')
         shipping_address_id = data.get('shipping_address_id')
+        shipping_address_data = data.get('shipping_address')
         customer_notes = data.get('customer_notes', '')
         
         # Validate fulfillment type
@@ -32,45 +33,91 @@ def initiate_payment(request):
                 'message': 'Invalid fulfillment type'
             }, status=400)
         
-        # Validate shipping address for delivery orders
-        if fulfillment_type == 'deliver' and not shipping_address_id:
-            return JsonResponse({
-                'success': False,
-                'message': 'Shipping address is required for delivery orders'
-            }, status=400)
+        shipping_address = None
         
-        with transaction.atomic():
-            # Get cart and items
-            cart = Cart.objects.get(user=request.user)
-            cart_items = cart.items.all()
-            
-            if not cart_items.exists():
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Cart is empty'
-                }, status=400)
-            
-            # Create order
-            order = Order.objects.create(
-                user=request.user,
-                fulfillment_type=fulfillment_type,
-                customer_notes=customer_notes
-            )
-            
-            # Add shipping address if delivery
-            if fulfillment_type == 'deliver' and shipping_address_id:
+        # Handle shipping address for delivery orders
+        if fulfillment_type == 'deliver':
+            if shipping_address_id:
+                # Using existing address
                 try:
                     shipping_address = ShippingAddress.objects.get(
                         id=shipping_address_id,
                         user=request.user
                     )
-                    order.shipping_address = shipping_address
-                    order.save()
                 except ShippingAddress.DoesNotExist:
                     return JsonResponse({
                         'success': False,
                         'message': 'Shipping address not found'
                     }, status=400)
+            elif shipping_address_data:
+                # Creating new address
+                required_fields = ['first_name', 'last_name', 'address_line_1', 'city', 'state', 'country']
+                missing_fields = [field for field in required_fields if not shipping_address_data.get(field)]
+                
+                if missing_fields:
+                    return JsonResponse({
+                        'success': False,
+                        'message': f'Missing required address fields: {", ".join(missing_fields)}'
+                    }, status=400)
+                
+                try:
+                    shipping_address = ShippingAddress.objects.create(
+                        user=request.user,
+                        first_name=shipping_address_data.get('first_name'),
+                        last_name=shipping_address_data.get('last_name'),
+                        email=shipping_address_data.get('email', ''),
+                        phone=shipping_address_data.get('phone', ''),
+                        address_line_1=shipping_address_data.get('address_line_1'),
+                        address_line_2=shipping_address_data.get('address_line_2', ''),
+                        city=shipping_address_data.get('city'),
+                        state=shipping_address_data.get('state'),
+                        postal_code=shipping_address_data.get('postal_code', ''),
+                        country=shipping_address_data.get('country'),
+                        is_default=shipping_address_data.get('is_default', False)
+                    )
+                except Exception as e:
+                    return JsonResponse({
+                        'success': False,
+                        'message': f'Error creating shipping address: {str(e)}'
+                    }, status=400)
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Shipping address is required for delivery orders'
+                }, status=400)
+        
+        with transaction.atomic():
+            # Get cart and items
+            try:
+                cart = Cart.objects.get(user=request.user)
+                cart_items = cart.items.all()
+                
+                if not cart_items.exists():
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'Cart is empty'
+                    }, status=400)
+            except Cart.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Cart not found'
+                }, status=400)
+            
+            # Check stock availability for all items
+            for cart_item in cart_items:
+                if not cart_item.product.can_purchase(cart_item.quantity):
+                    return JsonResponse({
+                        'success': False,
+                        'message': f'{cart_item.product.title} is out of stock or has insufficient quantity'
+                    }, status=400)
+            
+            # Create order
+            order = Order.objects.create(
+                user=request.user,
+                fulfillment_type=fulfillment_type,
+                shipping_address=shipping_address,
+                customer_notes=customer_notes
+            )
             
             # Create order items
             for cart_item in cart_items:

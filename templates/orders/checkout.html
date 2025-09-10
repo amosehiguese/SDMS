@@ -210,7 +210,7 @@
                     Order Notes (Optional)
                 </h2>
                 
-                <textarea name="notes" rows="4" placeholder="Any special instructions for your order..." 
+                <textarea name="customer_notes" rows="4" placeholder="Any special instructions for your order..." 
                           class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700"></textarea>
             </div>
         </div>
@@ -269,7 +269,7 @@
                     {% if site_config.tax_rate > 0 %}
                     <div class="flex justify-between">
                         <span>Tax</span>
-                        <span>₦{{ cart.get_tax_amount|floatformat:0 }}</span>
+                        <span>₦{{ cart.get_tax_amount|floatformat:0|default:"0.00" }}</span>
                     </div>
                     {% endif %}
                     
@@ -419,20 +419,17 @@ function processCheckout() {
     
     showLoading();
     
-    const formData = new FormData($('#checkout-form')[0]);
+    // Collect form data
+    const formData = collectFormData();
     
     // Debug: Log form data being sent
-    console.log('Form data being sent:');
-    for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-    }
+    console.log('Form data being sent:', formData);
     
     $.ajax({
-        url: '{% url "orders:create_order" %}',
+        url: '{% url "payments:initiate_payment" %}',
         type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
+        data: JSON.stringify(formData),
+        contentType: 'application/json',
         headers: {
             'X-CSRFToken': $('meta[name=csrf-token]').attr('content')
         }
@@ -440,24 +437,62 @@ function processCheckout() {
     .done(function(response) {
         hideLoading();
         if (response.success) {
-            if (response.redirect_url) {
-                window.location.href = response.redirect_url;
+            // Redirect to Paystack payment page
+            if (response.authorization_url) {
+                window.location.href = response.authorization_url;
             } else {
-                showNotification('Order created successfully', 'success');
-                window.location.href = '{% url "orders:order_detail" %}' + response.order_id + '/';
+                showNotification('Payment initiated successfully', 'success');
+                window.location.href = '/orders/order/' + response.order_id + '/';
             }
         } else {
-            showNotification(response.error || 'Error processing order', 'error');
+            showNotification(response.message || 'Error processing order', 'error');
         }
     })
     .fail(function(xhr) {
         hideLoading();
         let errorMessage = 'Error processing order. Please try again.';
-        if (xhr.responseJSON && xhr.responseJSON.error) {
-            errorMessage = xhr.responseJSON.error;
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+            errorMessage = xhr.responseJSON.message;
         }
         showNotification(errorMessage, 'error');
     });
+}
+
+function collectFormData() {
+    const fulfillmentType = $('input[name="fulfillment_type"]:checked').val();
+    const formData = {
+        fulfillment_type: fulfillmentType,
+        customer_notes: $('textarea[name="customer_notes"]').val() || ''
+    };
+    
+    // Add shipping address data if delivery is selected
+    if (fulfillmentType === 'deliver') {
+        const selectedAddressId = $('input[name="shipping_address_id"]:checked').val();
+        
+        if (selectedAddressId) {
+            // Using existing address
+            formData.shipping_address_id = selectedAddressId;
+        } else {
+            // Using new address form data (if visible)
+            if (!$('#new-address-form').hasClass('hidden')) {
+                formData.shipping_address = {
+                    first_name: $('input[name="first_name"]').val(),
+                    last_name: $('input[name="last_name"]').val(),
+                    email: $('input[name="email"]').val(),
+                    phone: $('input[name="phone"]').val(),
+                    address_line_1: $('input[name="address_line_1"]').val(),
+                    address_line_2: $('input[name="address_line_2"]').val(),
+                    city: $('input[name="city"]').val(),
+                    state: $('input[name="state"]').val(),
+                    postal_code: $('input[name="postal_code"]').val(),
+                    country: $('select[name="country"]').val(),
+                    is_default: $('input[name="is_default"]').is(':checked')
+                };
+            }
+        }
+    }
+    
+    return formData;
 }
 
 function validateCheckoutForm() {

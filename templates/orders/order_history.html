@@ -147,16 +147,12 @@
                                 </a>
                             {% endif %}
                             
-                            {% if order.status == 'delivered' %}
-                                {% for item in order.items.all %}
-                                    {% if item.purchase_option == 'hold' %}
-                                        <button onclick="liquidateAsset('{{ order.id }}')" class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 transition text-sm">
-                                            <i class="fas fa-exchange-alt mr-2"></i>Liquidate Assets
-                                        </button>
-                                        {% break %}
-                                    {% endif %}
-                                {% endfor %}
+                            {% if order.status == 'delivered' and order.has_hold_items %}
+                                <button onclick="liquidateAsset('{{ order.id }}')" class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 transition text-sm">
+                                    <i class="fas fa-exchange-alt mr-2"></i>Liquidate Assets
+                                </button>
                             {% endif %}
+
                             
                             <button onclick="reorderItems('{{ order.id }}')" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition text-sm">
                                 <i class="fas fa-redo mr-2"></i>Reorder
