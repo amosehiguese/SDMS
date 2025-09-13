@@ -7,6 +7,8 @@ from django.views.decorators.http import require_http_methods
 from django.contrib.sessions.models import Session
 from django.contrib import messages
 from django.urls import reverse
+
+from core.models import SiteConfiguration
 from .models import Order, OrderItem, Cart, CartItem, ShippingAddress
 from store.models import Product
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -336,6 +338,20 @@ def order_detail(request, order_id):
     return render(request, 'orders/order_detail.html', {'order': order})
 
 @login_required
+def order_receipt(request, order_id):
+    """
+    Displays a printable receipt for a specific order.
+    """
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    site_config = SiteConfiguration.get_config()
+    context = {
+        'order': order,
+        'site_config': site_config,
+        'layout': 'component' 
+    }
+    return render(request, 'orders/order_receipt.html', context)
+
+@login_required
 def order_history(request):
     """User's order history with improved, dynamic filtering."""
     orders = Order.objects.filter(user=request.user).prefetch_related('items__product')
@@ -368,7 +384,7 @@ def order_history(request):
             start_date = today - timedelta(days=365)
             orders = orders.filter(created_at__date__gte=start_date)
 
-    paginator = Paginator(orders, 10)
+    paginator = Paginator(orders, 5)
     page = request.GET.get('page')
     try:
         orders = paginator.page(page)

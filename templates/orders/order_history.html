@@ -153,8 +153,8 @@
                                 </button>
                             {% endif %}
                             
-                            {% if order.is_paid %}
-                                <a href="#" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm">
+                            {% if order.status == 'paid' %}
+                                <a href="{% url 'orders:order_receipt' order.id %}" class="bg-amber-700 text-white px-4 py-2 rounded hover:bg-amber-800 transition text-sm">
                                     <i class="fas fa-download mr-2"></i>Download Receipt
                                 </a>
                             {% endif %}
@@ -163,12 +163,6 @@
                                 <button onclick="liquidateAsset('{{ order.id }}')" class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 transition text-sm">
                                     <i class="fas fa-exchange-alt mr-2"></i>Liquidate Assets
                                 </button>
-                            {% endif %}
-                            
-                            {% if order.tracking_number %}
-                                <a href="#" onclick="trackOrder('{{ order.tracking_number }}')" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition text-sm">
-                                    <i class="fas fa-truck mr-2"></i>Track Package
-                                </a>
                             {% endif %}
                         </div>
                     </div>
@@ -298,12 +292,6 @@ function liquidateAsset(orderId) {
         hideLoading();
         showNotification('Error processing liquidation', 'error');
     });
-}
-
-// Track Order
-function trackOrder(trackingNumber) {
-    // Open tracking page or modal
-    showNotification(`Tracking number: ${trackingNumber}`, 'info');
 }
 
 // Show notification

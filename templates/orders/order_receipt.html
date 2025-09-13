@@ -1,0 +1,131 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt for Order #{{ order.order_number }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto my-10 p-5">
+        <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-8 md:p-12">
+            
+            <div class="flex justify-between items-start border-b pb-6 mb-8">
+                <div>
+                    {% if site_config.site_logo %}
+                        <img src="{{ site_config.site_logo.url }}" alt="{{ site_config.site_name }}" class="h-24">
+                    {% else %}
+                        <h1 class="text-3xl font-bold text-gray-800">{{ site_config.site_name|default:"SDMS" }}</h1>
+                    {% endif %}
+                </div>
+                <div class="text-right">
+                    <h2 class="text-2xl font-semibold text-indigo-600">Receipt</h2>
+                    <p class="text-gray-500">#{{ order.order_number }}</p>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-8">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Billed To:</h3>
+                    <p class="text-gray-600">{{ order.user.get_full_name|default:order.user.email }}</p>
+                    {% if order.shipping_address %}
+                    <p class="text-gray-600">{{ order.shipping_address.street_address }}</p>
+                    <p class="text-gray-600">{{ order.shipping_address.city }}, {{ order.shipping_address.state }} {{ order.shipping_address.zip_code }}</p>
+                    <p class="text-gray-600">{{ order.shipping_address.country }}</p>
+                    {% endif %}
+                </div>
+                <div class="text-right">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Payment Details:</h3>
+                    <p class="text-gray-600"><strong>Date:</strong> {{ order.created_at|date:"F d, Y" }}</p>
+                    <p class="text-gray-600"><strong>Status:</strong> <span class="font-medium px-2 py-1 rounded-full 
+                        {% if order.status == 'delivered' %} bg-green-100 text-green-800
+                        {% elif order.status == 'shipped' %} bg-blue-100 text-blue-800
+                        {% elif order.status == 'paid' %} bg-blue-100 text-blue-800
+                        {% elif order.status == 'pending' %} bg-yellow-100 text-yellow-800
+                        {% elif order.status == 'cancelled' %} bg-red-100 text-red-800
+                        {% else %} bg-gray-100 text-gray-800
+                        {% endif %}">
+                        {{ order.get_status_display }}
+                    </span></p>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-600 uppercase text-sm">
+                            <th class="py-3 px-4 font-semibold">Product</th>
+                            <th class="py-3 px-4 font-semibold text-center">Quantity</th>
+                            <th class="py-3 px-4 font-semibold text-right">Unit Price</th>
+                            <th class="py-3 px-4 font-semibold text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items.all %}
+                        <tr class="border-b">
+                            <td class="py-4 px-4 flex items-center">
+                                {% if item.product.images.first %}
+                                    <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.title }}" class="w-12 h-12 object-cover rounded mr-4">
+                                {% endif %}
+                                <span>{{ item.product.title }}</span>
+                            </td>
+                            <td class="py-4 px-4 text-center">{{ item.quantity }}</td>
+                            <td class="py-4 px-4 text-right">₦{{ item.price|floatformat:0 }}</td>
+                            <td class="py-4 px-4 text-right">₦{{ item.get_total_price|floatformat:0 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex justify-end mb-8">
+                <div class="w-full md:w-2/5">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Subtotal</span>
+                        <span>₦{{ order.subtotal|floatformat:0 }}</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Shipping</span>
+                        <span>₦{{ order.shipping_cost|floatformat:0 }}</span>
+                    </div>
+                     <div class="flex justify-between text-gray-600">
+                        <span>Tax</span>
+                        <span>₦{{ order.tax_amount|floatformat:0 }}</span>
+                    </div>
+                    <hr class="my-2">
+                    <div class="flex justify-between font-bold text-lg text-gray-800">
+                        <span>Total</span>
+                        <span>₦{{ order.total|floatformat:0 }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center text-gray-500 text-sm mt-10">
+                <p>Thank you for your business!</p>
+                <p>{{ site_config.site_name|default:"SDMS" }} | {{ site_config.contact_email|default:"contact@sdms.com" }}</p>
+            </div>
+            
+            <div class="text-center mt-8 no-print">
+                <button onclick="window.print()" class="bg-indigo-600 text-white py-2 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <i class="fas fa-print mr-2"></i>Print Receipt
+                </button>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
+
