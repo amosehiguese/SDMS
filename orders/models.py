@@ -2,7 +2,7 @@ from decimal import Decimal
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import EmailValidator, RegexValidator
-from core.models import BaseModel
+from core.models import BaseModel, SiteConfiguration
 from store.models import Product
 
 class ShippingAddress(BaseModel):
@@ -83,6 +83,23 @@ class Cart(BaseModel):
     def get_items(self):
         """Get all cart items"""
         return self.items.all()
+    
+    def get_shipping_cost(self):
+        """Get shipping cost for the cart"""
+        config = SiteConfiguration.get_config()
+        if self.get_subtotal() >= config.free_shipping_threshold:
+            return Decimal('0.00')
+        return config.default_shipping_cost
+
+    def get_tax_amount(self):
+        """Get tax amount for the cart"""
+        config = SiteConfiguration.get_config()
+        tax_rate = getattr(config, 'tax_rate', Decimal('0.00'))
+        return self.get_subtotal() * tax_rate
+
+    def get_total(self):
+        """Get the total price for the cart"""
+        return self.get_subtotal() + self.get_shipping_cost() + self.get_tax_amount()
     
     def clear(self):
         """Clear all items from cart"""

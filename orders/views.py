@@ -1,3 +1,5 @@
+from datetime import timezone, timedelta
+from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -7,6 +9,7 @@ from django.contrib import messages
 from django.urls import reverse
 from .models import Order, OrderItem, Cart, CartItem, ShippingAddress
 from store.models import Product
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def get_or_create_cart(request):
     """Get or create cart for user (authenticated or anonymous)"""
@@ -334,9 +337,53 @@ def order_detail(request, order_id):
 
 @login_required
 def order_history(request):
-    """User's order history"""
+    """User's order history with improved, dynamic filtering."""
     orders = Order.objects.filter(user=request.user).prefetch_related('items__product')
-    return render(request, 'orders/order_history.html', {'orders': orders})
+    
+    # Get filter parameters from the request
+    status_filter = request.GET.get('status', '')
+    period_filter = request.GET.get('period', '')
+
+    # Apply status filter
+    if status_filter and status_filter != 'all':
+        orders = orders.filter(status=status_filter)
+
+    # Apply dynamic time period filter
+    if period_filter:
+        today = timezone.now().date()
+        if period_filter == 'last_week':
+            # Orders from the last 7 days
+            start_date = today - timedelta(days=7)
+            orders = orders.filter(created_at__date__gte=start_date)
+        elif period_filter == 'last_month':
+            # Orders from the last 30 days
+            start_date = today - timedelta(days=30)
+            orders = orders.filter(created_at__date__gte=start_date)
+        elif period_filter == 'last_3_months':
+            # Orders from the last 90 days
+            start_date = today - timedelta(days=90)
+            orders = orders.filter(created_at__date__gte=start_date)
+        elif period_filter == 'last_year':
+            # Orders from the last 365 days
+            start_date = today - timedelta(days=365)
+            orders = orders.filter(created_at__date__gte=start_date)
+
+    paginator = Paginator(orders, 10)
+    page = request.GET.get('page')
+    try:
+        orders = paginator.page(page)
+    except PageNotAnInteger:
+        orders = paginator.page(1)
+    except EmptyPage:
+        orders = paginator.page(paginator.num_pages)
+
+    context = {
+        'orders': orders,
+        'status_choices': Order.STATUS_CHOICES,
+        'current_status': status_filter,
+        'current_period': period_filter
+    }
+    return render(request, 'orders/order_history.html', context)
 
 @login_required
 def held_assets(request):
@@ -603,3 +650,33 @@ def delete_shipping_address(request, address_id):
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': 'Failed to delete address'})
+
+@require_http_methods(["POST"])
+@login_required
+def cancel_order(request, order_id):
+    """AJAX endpoint to cancel order"""
+    try:
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+        
+        # Only allow cancellation of pending orders
+        if order.status != 'pending':
+            return JsonResponse({
+                'success': False, 
+                'error': 'Only pending orders can be cancelled'
+            })
+        
+        # Update order status
+        order.status = 'cancelled'
+        order.cancelled_at = timezone.now()
+        order.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Order cancelled successfully'
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False, 
+            'error': 'An error occurred while cancelling the order'
+        })

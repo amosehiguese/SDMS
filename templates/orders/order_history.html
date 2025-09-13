@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load math_filters %}
 
 {% block title %}Order History - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
 
@@ -22,24 +23,35 @@
             <p class="text-gray-600">Track and manage your orders</p>
         </div>
         
-        <!-- Filters -->
-        <div class="mt-4 md:mt-0 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
-            <select id="status-filter" class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
-                <option value="">All Orders</option>
-                <option value="pending">Pending</option>
-                <option value="paid">Paid</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-            </select>
-            
-            <select id="date-filter" class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
-                <option value="">All Time</option>
-                <option value="last_week">Last Week</option>
-                <option value="last_month">Last Month</option>
-                <option value="last_3_months">Last 3 Months</option>
-                <option value="last_year">Last Year</option>
-            </select>
+        <div class="mb-6 bg-white p-4 rounded-lg shadow">
+            <form method="get" action="{% url 'orders:order_history' %}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="status-filter" name="status" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500">
+                        <option value="all" {% if not current_status or current_status == 'all' %}selected{% endif %}>All Statuses</option>
+                        {% for value, display in status_choices %}
+                        <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="period-filter" class="block text-sm font-medium text-gray-700 mb-1">Time Period</label>
+                    <select id="period-filter" name="period" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500">
+                        <option value="" {% if not current_period %}selected{% endif %}>All Time</option>
+                        <option value="last_week" {% if current_period == 'last_week' %}selected{% endif %}>Last week</option>
+                        <option value="last_month" {% if current_period == 'last_month' %}selected{% endif %}>Last month</option>
+                        <option value="last_3_months" {% if current_period == 'last_3_months' %}selected{% endif %}>Last 3 months</option>
+                        <option value="last_year" {% if current_period == 'last_year' %}selected{% endif %}>Last year</option>
+                    </select>
+                </div>
+                
+                <div class="md:col-span-1 flex items-end">
+                    <button type="submit" class="w-full bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-amber-700 transition">
+                        Apply Filters
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
     
@@ -63,7 +75,7 @@
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-600">Total</p>
-                                    <p class="font-semibold text-amber-700">₦{{ order.total_amount|floatformat:0 }}</p>
+                                    <p class="font-semibold text-amber-700">₦{{ order.total|floatformat:0 }}</p>
                                 </div>
                             </div>
                             
@@ -108,9 +120,9 @@
                                     <h4 class="font-semibold mb-1">{{ item.product.title|truncatewords:8 }}</h4>
                                     <div class="flex items-center space-x-4 text-sm text-gray-600">
                                         <span>Qty: {{ item.quantity }}</span>
-                                        <span>₦{{ item.unit_price|floatformat:0 }} each</span>
-                                        <span class="{% if item.purchase_option == 'hold' %}text-blue-600{% else %}text-green-600{% endif %}">
-                                            {% if item.purchase_option == 'hold' %}
+                                        <span>₦{{ item.price|floatformat:0 }} each</span>
+                                        <span class="{% if order.fulfillment_type == 'hold_asset' %}text-blue-600{% else %}text-green-600{% endif %}">
+                                            {% if order.fulfillment_type == 'hold_asset' %}
                                                 Hold as Asset
                                             {% else %}
                                                 Deliver to Me
@@ -121,7 +133,7 @@
                                 
                                 <!-- Item Total -->
                                 <div class="text-right">
-                                    <p class="font-semibold">₦{{ item.total_price|floatformat:0 }}</p>
+                                    <p class="font-semibold">₦{{ item.price|floatformat:0|mul:item.quantity }}</p>
                                 </div>
                             </div>
                             {% endfor %}
@@ -147,16 +159,11 @@
                                 </a>
                             {% endif %}
                             
-                            {% if order.status == 'delivered' and order.has_hold_items %}
+                            {% if order.status == 'delivered' and order.fulfillment_type == 'hold_asset' %}
                                 <button onclick="liquidateAsset('{{ order.id }}')" class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 transition text-sm">
                                     <i class="fas fa-exchange-alt mr-2"></i>Liquidate Assets
                                 </button>
                             {% endif %}
-
-                            
-                            <button onclick="reorderItems('{{ order.id }}')" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition text-sm">
-                                <i class="fas fa-redo mr-2"></i>Reorder
-                            </button>
                             
                             {% if order.tracking_number %}
                                 <a href="#" onclick="trackOrder('{{ order.tracking_number }}')" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition text-sm">
@@ -209,6 +216,7 @@
         {% endif %}
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -244,9 +252,24 @@ function cancelOrder(orderId) {
     
     showLoading();
     
-    // This would call a cancel order endpoint
-    showNotification('Order cancellation feature coming soon!', 'info');
-    hideLoading();
+    $.post(`/orders/ajax/order/cancel/${orderId}/`, {
+        csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
+    })
+    .done(function(response) {
+        hideLoading();
+        if (response.success) {
+            showNotification('Order cancelled successfully', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            showNotification(response.error || 'Error cancelling order', 'error');
+        }
+    })
+    .fail(function() {
+        hideLoading();
+        showNotification('Error cancelling order', 'error');
+    });
 }
 
 // Liquidate Asset
@@ -275,15 +298,6 @@ function liquidateAsset(orderId) {
         hideLoading();
         showNotification('Error processing liquidation', 'error');
     });
-}
-
-// Reorder Items
-function reorderItems(orderId) {
-    showLoading();
-    
-    // This would add all items from the order back to cart
-    showNotification('Reorder feature coming soon!', 'info');
-    hideLoading();
 }
 
 // Track Order
@@ -320,5 +334,14 @@ function showNotification(message, type = 'info') {
         }, 300);
     }, 3000);
 }
+
+function showLoading() {
+    // Add loading indicator
+    $('body').append('<div id="loading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"><div class="bg-white p-4 rounded"><i class="fas fa-spinner fa-spin mr-2"></i>Please wait...</div></div>');
+}
+
+function hideLoading() {
+    $('#loading').remove();
+}
 </script>
-{% endblock %} 
+{% endblock %}

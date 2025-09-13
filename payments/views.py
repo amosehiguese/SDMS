@@ -1,6 +1,7 @@
 import json
 import uuid
-from decimal import Decimal
+import hmac
+import hashlib
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -11,7 +12,7 @@ from django.utils import timezone
 from django.db import transaction
 from django.conf import settings
 
-from orders.models import Order, OrderItem, Cart, CartItem, ShippingAddress
+from orders.models import Order, OrderItem, Cart, ShippingAddress
 from .models import Payment
 from .services import PaymentService
 
@@ -223,27 +224,60 @@ def payment_status(request, reference):
 
 @csrf_exempt
 def paystack_webhook(request):
-    """Handle Paystack webhook notifications"""
-    if request.method != 'POST':
-        return HttpResponse(status=405)
+    """
+    Paystack webhook handler to process payment events.
+    """
+    # Verify the request is from Paystack
+    paystack_sk = settings.PAYSTACK_SECRET_KEY
+    signature = request.headers.get('x-paystack-signature')
     
+    if not signature:
+        return HttpResponse(status=400)
+
     try:
-        # Get webhook signature
-        signature = request.headers.get('X-Paystack-Signature')
-        if not signature:
-            return HttpResponse('Missing signature', status=400)
+        body = request.body.decode('utf-8')
+        hash = hmac.new(paystack_sk.encode('utf-8'), body.encode('utf-8'), hashlib.sha512).hexdigest()
         
-        # Process webhook
-        payment_service = PaymentService('paystack')
-        result = payment_service.process_webhook(request.body.decode('utf-8'), signature)
-        
-        if result['success']:
-            return HttpResponse('Webhook processed successfully', status=200)
-        else:
-            return HttpResponse(f'Webhook processing failed: {result["message"]}', status=400)
+        if hash != signature:
+            return HttpResponse(status=400)
             
     except Exception as e:
-        return HttpResponse(f'Webhook error: {str(e)}', status=500)
+        # Log the error for debugging
+        print(f"Webhook signature verification failed: {e}")
+        return HttpResponse(status=400)
+
+    try:
+        payload = json.loads(body)
+        event = payload.get('event')
+
+        if event == 'charge.success':
+            data = payload.get('data')
+            reference = data.get('reference')
+            
+            # Find the corresponding payment and order
+            try:
+                payment = get_object_or_404(Payment, reference=reference)
+                order = payment.order
+
+                # Update order and payment status if payment was successful
+                if data.get('status') == 'success':
+                    order.status = 'paid'
+                    order.paid_at = timezone.now() # Make sure to import timezone
+                    order.save()
+
+                    payment.status = 'success'
+                    payment.raw_response = data # Store the full response
+                    payment.save()
+                    
+            except (Payment.DoesNotExist, Order.DoesNotExist) as e:
+                 return HttpResponse(status=404) # Not found
+
+        return HttpResponse(status=200)
+
+    except json.JSONDecodeError:
+        return HttpResponse(status=400)
+    except Exception as e:
+        return HttpResponse(status=500)
 
 @login_required
 def payment_history(request):

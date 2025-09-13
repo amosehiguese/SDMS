@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load math_filters %}
 
 {% block title %}Order #{{ order.order_number }} - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
 
@@ -163,7 +164,7 @@
                             </h3>
                             <p class="text-sm text-gray-600 mb-2">
                                 <span class="font-medium">Purchase Option:</span> 
-                                {% if item.purchase_option == 'hold' %}
+                                {% if order.fulfillment_type == 'hold_asset' %}
                                     <span class="text-blue-600">Hold as Asset</span>
                                     {% if order.status == 'delivered' %}
                                         <button onclick="liquidateAsset('{{ order.id }}')" class="ml-2 text-amber-700 hover:text-yellow-700 text-xs">
@@ -184,8 +185,8 @@
                         
                         <!-- Price -->
                         <div class="text-right">
-                            <p class="font-bold">₦{{ item.total_price|floatformat:0 }}</p>
-                            <p class="text-sm text-gray-500">₦{{ item.unit_price|floatformat:0 }} each</p>
+                            <p class="font-bold">₦{{ item.price|floatformat:0|mul:item.quantity }}</p>
+                            <p class="text-sm text-gray-500">₦{{ item.price|floatformat:0 }} each</p>
                         </div>
                     </div>
                     {% endfor %}
@@ -205,15 +206,10 @@
                         <span>₦{{ order.subtotal|floatformat:0 }}</span>
                     </div>
                     
+                    {% if order.fulfillment_type == 'deliver' %}
                     <div class="flex justify-between">
                         <span>Shipping</span>
                         <span>₦{{ order.shipping_cost|floatformat:0 }}</span>
-                    </div>
-                    
-                    {% if order.tax_amount > 0 %}
-                    <div class="flex justify-between">
-                        <span>Tax</span>
-                        <span>₦{{ order.tax_amount|floatformat:0 }}</span>
                     </div>
                     {% endif %}
                     
@@ -221,7 +217,7 @@
                     
                     <div class="flex justify-between text-lg font-bold">
                         <span>Total</span>
-                        <span class="text-amber-700">₦{{ order.total_amount|floatformat:0 }}</span>
+                        <span class="text-amber-700">₦{{ order.total|floatformat:0 }}</span>
                     </div>
                 </div>
                 
@@ -256,11 +252,14 @@
                 
                 <div class="text-sm space-y-1">
                     <p class="font-semibold">{{ order.shipping_address.full_name }}</p>
-                    <p>{{ order.shipping_address.street_address }}</p>
+                    <p>{{ order.shipping_address.address_line_1 }}</p>
+                    {% if order.shipping_address.address_line_2 %}
+                        <p>{{ order.shipping_address.address_line_2 }}</p>
+                    {% endif %}
                     <p>{{ order.shipping_address.city }}, {{ order.shipping_address.state }} {{ order.shipping_address.postal_code }}</p>
                     <p>{{ order.shipping_address.country }}</p>
-                    {% if order.shipping_address.phone_number %}
-                        <p class="mt-2"><i class="fas fa-phone mr-2"></i>{{ order.shipping_address.phone_number }}</p>
+                    {% if order.shipping_address.phone %}
+                        <p class="mt-2"><i class="fas fa-phone mr-2"></i>{{ order.shipping_address.phone }}</p>
                     {% endif %}
                 </div>
                 
@@ -317,7 +316,7 @@ function liquidateAsset(orderId) {
     
     showLoading();
     
-    $.post('{% url "orders:liquidate_asset" order.id %}', {
+    $.post(`/orders/ajax/liquidate/${order.id}/`, {
         csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
     })
     .done(function(response) {
@@ -345,9 +344,24 @@ function cancelOrder(orderId) {
     
     showLoading();
     
-    // This would call a cancel order endpoint
-    showNotification('Order cancellation feature coming soon!', 'info');
-    hideLoading();
+    $.post(`/orders/ajax/order/cancel/${orderId}/`, {
+        csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
+    })
+    .done(function(response) {
+        hideLoading();
+        if (response.success) {
+            showNotification('Order cancelled successfully', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            showNotification(response.error || 'Error cancelling order', 'error');
+        }
+    })
+    .fail(function() {
+        hideLoading();
+        showNotification('Error cancelling order', 'error');
+    });
 }
 
 // Contact Support
@@ -388,5 +402,13 @@ function showNotification(message, type = 'info') {
         }, 300);
     }, 3000);
 }
+
+function showLoading() {
+    $('body').append('<div id="loading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"><div class="bg-white p-4 rounded"><i class="fas fa-spinner fa-spin mr-2"></i>Please wait...</div></div>');
+}
+
+function hideLoading() {
+    $('#loading').remove();
+}
 </script>
-{% endblock %} 
+{% endblock %}

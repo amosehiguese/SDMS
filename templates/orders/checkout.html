@@ -162,7 +162,7 @@
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium mb-2">Phone Number</label>
-                            <input type="tel" name="phone" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
+                            <input type="tel" name="phone" placeholder="+2348012345678" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium mb-2">Email</label>
@@ -302,7 +302,27 @@
 <script>
 $(document).ready(function() {
     initializeCheckout();
+
+    updateAddressRequiredFields();
 });
+
+function updateAddressRequiredFields() {
+    // Check if an existing address is selected
+    const isExistingAddressSelected = $('input[name="shipping_address_id"]:checked').length > 0;
+    
+    // Check if the new address form is meant to be used
+    const isNewAddressFormVisible = !$('#new-address-form').hasClass('hidden');
+
+    if (isExistingAddressSelected && !isNewAddressFormVisible) {
+        // If an existing address is chosen, the new address fields are NOT required
+        $('#new-address-form input[data-required-for-delivery]').removeAttr('required');
+    } else if (isNewAddressFormVisible) {
+        // If the new address form is active, its fields ARE required
+        $('#new-address-form input[data-required-for-delivery]').each(function() {
+            $(this).attr('required', 'required');
+        });
+    }
+}
 
 function initializeCheckout() {
     // Handle fulfillment type changes
@@ -327,6 +347,13 @@ function initializeCheckout() {
         if (value && !value.startsWith('+')) {
             // Auto-add + prefix
             $(this).val('+' + value);
+        }
+    });
+
+    $('input[name="shipping_address_id"]').change(function() {
+        if ($(this).is(':checked')) {
+            $('#new-address-form').addClass('hidden');
+            $('#new-address-form input').removeAttr('required');
         }
     });
     
@@ -421,9 +448,6 @@ function processCheckout() {
     
     // Collect form data
     const formData = collectFormData();
-    
-    // Debug: Log form data being sent
-    console.log('Form data being sent:', formData);
     
     $.ajax({
         url: '{% url "payments:initiate_payment" %}',
