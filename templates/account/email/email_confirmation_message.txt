@@ -1,0 +1,13 @@
+{% load i18n %}{% autoescape off %}
+{% blocktrans with user_display=user.get_username site_name=current_site.name %}
+Hello from {{ site_name }}!
+
+You're receiving this e-mail because you have signed up for an account at {{ site_name }}.
+
+Please go to the following page to verify your e-mail address and activate your account:
+{{ activate_url }}
+
+Thank you for joining us!
+The {{ site_name }} Team
+{% endblocktrans %}
+{% endautoescape %}
