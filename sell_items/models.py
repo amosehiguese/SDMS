@@ -57,7 +57,7 @@ class SellItemSubmission(BaseModel):
         if self.source == 'held_asset' and self.held_asset_order:
             order_item = self.held_asset_order.items.first()
             if order_item:
-                return order_item.get_available_quantity()
+                return order_item.get_available_quantity(submission_to_exclude=self)
             return 0
         return None  # No limit for own items
     

@@ -17,24 +17,28 @@
         </div>
         
         <!-- Filter Tabs -->
-        <div class="mb-6">
-            <nav class="flex space-x-8" aria-label="Tabs">
-                <a href="?status=pending" 
-                   class="{% if current_status == 'pending' %}border-amber-500 text-amber-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
-                    {% trans "Pending" %}
-                    <span class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs">
-                        {{ submissions|length }}
-                    </span>
-                </a>
-                <a href="?status=accepted" 
-                   class="{% if current_status == 'accepted' %}border-amber-500 text-amber-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
-                    {% trans "Accepted" %}
-                </a>
-                <a href="?status=rejected" 
-                   class="{% if current_status == 'rejected' %}border-amber-500 text-amber-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
-                    {% trans "Rejected" %}
-                </a>
-            </nav>
+        <div class="flex">
+            <a href="?status=pending" 
+               class="px-4 py-2 {% if current_status == 'pending' %}border-b-2 border-amber-600 text-amber-600{% else %}text-gray-500{% endif %}">
+                Pending 
+                <span class="bg-gray-200 text-gray-800 text-xs font-semibold ml-2 px-2 py-0.5 rounded-full">
+                    {{ status_counts.pending|default:0 }}
+                </span>
+            </a>
+            <a href="?status=accepted" 
+               class="px-4 py-2 {% if current_status == 'accepted' %}border-b-2 border-amber-600 text-amber-600{% else %}text-gray-500{% endif %}">
+                Accepted
+                <span class="bg-gray-200 text-gray-800 text-xs font-semibold ml-2 px-2 py-0.5 rounded-full">
+                    {{ status_counts.accepted|default:0 }}
+                </span>
+            </a>
+            <a href="?status=rejected" 
+               class="px-4 py-2 {% if current_status == 'rejected' %}border-b-2 border-amber-600 text-amber-600{% else %}text-gray-500{% endif %}">
+                Rejected
+                <span class="bg-gray-200 text-gray-800 text-xs font-semibold ml-2 px-2 py-0.5 rounded-full">
+                    {{ status_counts.rejected|default:0 }}
+                </span>
+            </a>
         </div>
         
         {% if submissions %}
@@ -51,6 +55,9 @@
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     {% trans "Price" %}
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    {% trans "Quantity" %}
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     {% trans "Type" %}

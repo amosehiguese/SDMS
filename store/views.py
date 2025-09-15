@@ -87,20 +87,17 @@ def product_list(request, category_slug=None):
     """Product listing with filters - only accessible via search"""
     # Check if this is a search request
     search_query = request.GET.get('search')
-    if not search_query and not category_slug:
-        # Redirect to home if no search query
-        return render(request, 'store/home.html')
-    
+    print(search_query)
+
     products = Product.objects.filter(is_active=True).select_related('category').prefetch_related('images')
     categories = Category.objects.filter(is_active=True)
-    
-    # Category filter
+
+
     current_category = None
     if category_slug:
         current_category = get_object_or_404(Category, slug=category_slug, is_active=True)
         products = products.filter(category=current_category)
-    
-    # Search filter
+
     if search_query:
         products = products.filter(
             Q(title__icontains=search_query) |

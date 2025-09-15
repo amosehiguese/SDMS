@@ -302,18 +302,22 @@ class OrderItem(BaseModel):
             return True
         return False
 
-    def get_available_quantity(self):
+    def get_available_quantity(self, submission_to_exclude=None):
         """Get quantity available for selling (considering already submitted items)"""
         from sell_items.models import SellItemSubmission
         
         # Get total quantity already submitted for selling from this order
-        submitted_qty = SellItemSubmission.objects.filter(
+        submissions = SellItemSubmission.objects.filter(
             held_asset_order=self.order,
             status__in=['pending', 'accepted']  # Don't count rejected ones
-        ).aggregate(total=models.Sum('stock_quantity'))['total'] or 0
+        )
+
+        if submission_to_exclude:
+            submissions = submissions.exclude(pk=submission_to_exclude.pk)
+        
+        submitted_qty = submissions.aggregate(total=models.Sum('stock_quantity'))['total'] or 0
         
         return max(0, self.quantity - submitted_qty)
-
 
     def save(self, *args, **kwargs):
         # Set price from product if not set

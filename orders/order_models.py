@@ -1,9 +1,8 @@
-import uuid
 from decimal import Decimal
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import EmailValidator, RegexValidator
-from core.models import BaseModel
+from core.models import BaseModel, SiteConfiguration
 from store.models import Product
 
 class ShippingAddress(BaseModel):
@@ -33,11 +32,27 @@ class ShippingAddress(BaseModel):
         # Ensure only one default address per user
         if self.is_default:
             ShippingAddress.objects.filter(user=self.user, is_default=True).update(is_default=False)
-    def save(self, *args, **kwargs):
-        # Set price from product if not set
-        if not self.price:
-            self.price = self.product.get_display_price()
         super().save(*args, **kwargs)
+    
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+    
+    @property
+    def full_address(self):
+        address = f"{self.address_line_1}"
+        if self.address_line_2:
+            address += f", {self.address_line_2}"
+        address += f", {self.city}, {self.state} {self.postal_code}, {self.country}"
+        return address
+    
+    @property
+    def street_address(self):
+        return f"{self.address_line_1}" + (f", {self.address_line_2}" if self.address_line_2 else "")
+    
+    @property
+    def phone_number(self):
+        return self.phone
 
 class Cart(BaseModel):
     """Shopping cart for both logged-in users and anonymous users"""
@@ -64,6 +79,27 @@ class Cart(BaseModel):
     def get_subtotal(self):
         """Get cart subtotal"""
         return sum(item.get_total_price() for item in self.items.all())
+    
+    def get_items(self):
+        """Get all cart items"""
+        return self.items.all()
+    
+    def get_shipping_cost(self):
+        """Get shipping cost for the cart"""
+        config = SiteConfiguration.get_config()
+        if self.get_subtotal() >= config.free_shipping_threshold:
+            return Decimal('0.00')
+        return config.default_shipping_cost
+
+    def get_tax_amount(self):
+        """Get tax amount for the cart"""
+        config = SiteConfiguration.get_config()
+        tax_rate = getattr(config, 'tax_rate', Decimal('0.00'))
+        return self.get_subtotal() * tax_rate
+
+    def get_total(self):
+        """Get the total price for the cart"""
+        return self.get_subtotal() + self.get_shipping_cost() + self.get_tax_amount()
     
     def clear(self):
         """Clear all items from cart"""
@@ -124,18 +160,6 @@ class OrderStatusLog(BaseModel):
     
     def __str__(self):
         return f"Order {self.order.order_number}: {self.previous_status} → {self.new_status}"
-    
-    @property
-    def full_name(self):
-        return f"{self.first_name} {self.last_name}"
-    
-    @property
-    def full_address(self):
-        address = f"{self.address_line_1}"
-        if self.address_line_2:
-            address += f", {self.address_line_2}"
-        address += f", {self.city}, {self.state} {self.postal_code}, {self.country}"
-        return address
 
 class Order(BaseModel):
     STATUS_CHOICES = [
@@ -238,7 +262,11 @@ class Order(BaseModel):
         if self.fulfillment_type == 'hold_asset':
             return self.items.all()
         return self.items.none()
-    
+
+    @property
+    def has_hold_items(self):
+        return self.items.filter(purchase_option='hold').exists()
+        
     def liquidate_assets(self, shipping_address):
         """Convert held assets to delivery order"""
         if self.fulfillment_type == 'hold_asset' and self.status == 'paid':
@@ -266,6 +294,27 @@ class OrderItem(BaseModel):
         """Get total price for this item"""
         return self.price * self.quantity
     
+    def reduce_quantity(self, amount):
+        """Reduce the quantity of this order item (for selling held assets)"""
+        if self.quantity >= amount:
+            self.quantity -= amount
+            self.save(update_fields=['quantity'])
+            return True
+        return False
+
+    def get_available_quantity(self):
+        """Get quantity available for selling (considering already submitted items)"""
+        from sell_items.models import SellItemSubmission
+        
+        # Get total quantity already submitted for selling from this order
+        submitted_qty = SellItemSubmission.objects.filter(
+            held_asset_order=self.order,
+            status__in=['pending', 'accepted']  # Don't count rejected ones
+        ).aggregate(total=models.Sum('stock_quantity'))['total'] or 0
+        
+        return max(0, self.quantity - submitted_qty)
+
+
     def save(self, *args, **kwargs):
         # Set price from product if not set
         if not self.price:

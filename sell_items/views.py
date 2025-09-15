@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.db import transaction
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.db.models import Count
 import json
 
 from .models import SellItemSubmission, SellItemImage
@@ -81,8 +82,11 @@ def submit_held_asset_sell(request, order_id):
     if request.method == 'POST':
         try:
             # Check if already submitted
-            if SellItemSubmission.objects.filter(held_asset_order=order).exists():
-                messages.warning(request, 'This asset has already been submitted for selling.')
+            if SellItemSubmission.objects.filter(
+                held_asset_order=order, 
+                status__in=['pending', 'accepted']
+            ).exists():
+                messages.warning(request, 'This asset already has a pending or accepted submission.')
                 return redirect('sell_items:sell_item_list')
             
             with transaction.atomic():
@@ -102,10 +106,28 @@ def submit_held_asset_sell(request, order_id):
                         'order_item': order_item,
                         'available_quantity': available_qty
                     })
+
+                title = request.POST.get('title')
+                if title is None or  title == "":
+                    messages.error(request, 'Please set product title')
+                    return render(request, 'sell_items/submit_held_asset_sell.html', {
+                        'order': order,
+                        'order_item': order_item,
+                        'available_quantity': available_qty
+                    })
+                elif title == order_item.product.title:
+                    messages.error(request, 'Product title same with original. Change it')
+                    return render(request, 'sell_items/submit_held_asset_sell.html', {
+                        'order': order,
+                        'order_item': order_item,
+                        'available_quantity': available_qty
+                    })
+
+                
                 
                 submission = SellItemSubmission.objects.create(
                     user=request.user,
-                    title=request.POST.get('title', order_item.product.title),
+                    title=title,
                     description=request.POST.get('description', order_item.product.description),
                     category=order_item.product.category,
                     price=request.POST.get('price'),
@@ -159,10 +181,15 @@ def admin_submissions(request):
     """Admin page to view all sell submissions"""
     status_filter = request.GET.get('status', 'pending')
     submissions = SellItemSubmission.objects.filter(status=status_filter).prefetch_related('images', 'user')
+
+    counts = SellItemSubmission.objects.values('status').annotate(count=Count('id'))
     
+    status_counts = {item['status']: item['count'] for item in counts}
+
     return render(request, 'sell_items/admin_submissions.html', {
         'submissions': submissions,
-        'current_status': status_filter
+        'current_status': status_filter,
+        'status_counts': status_counts, 
     })
 
 @staff_member_required
@@ -203,6 +230,14 @@ def edit_sell_submission(request, submission_id):
     
     if request.method == 'POST':
         try:
+            title = request.POST.get('title')
+            if title is None or title == '':
+                messages.error(request, 'Please set product title')
+                return render(request, 'sell_items/edit_sell_submission.html', {
+                    'submission': submission,
+                    'categories': Category.objects.filter(is_active=True)
+                })                
+
             with transaction.atomic():
                 # Update submission fields
                 submission.title = request.POST.get('title')
@@ -343,4 +378,5 @@ def create_product_from_submission(request):
             })
             
     except Exception as e:
+        print(e)
         return JsonResponse({'success': False, 'error': 'Failed to create product'})
