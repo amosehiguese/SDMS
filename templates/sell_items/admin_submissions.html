@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Sell Item Submissions" %} - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">
+                <i class="fas fa-clipboard-list mr-2"></i>
+                {% trans "Sell Item Submissions" %}
+            </h1>
+            <p class="mt-2 text-gray-600">
+                {% trans "Review and manage user submissions for selling items back to the platform." %}
+            </p>
+        </div>
+        
+        <!-- Filter Tabs -->
+        <div class="mb-6">
+            <nav class="flex space-x-8" aria-label="Tabs">
+                <a href="?status=pending" 
+                   class="{% if current_status == 'pending' %}border-amber-500 text-amber-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                    {% trans "Pending" %}
+                    <span class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs">
+                        {{ submissions|length }}
+                    </span>
+                </a>
+                <a href="?status=accepted" 
+                   class="{% if current_status == 'accepted' %}border-amber-500 text-amber-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                    {% trans "Accepted" %}
+                </a>
+                <a href="?status=rejected" 
+                   class="{% if current_status == 'rejected' %}border-amber-500 text-amber-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                    {% trans "Rejected" %}
+                </a>
+            </nav>
+        </div>
+        
+        {% if submissions %}
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    {% trans "Item" %}
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    {% trans "Seller" %}
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    {% trans "Price" %}
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    {% trans "Type" %}
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    {% trans "Submitted" %}
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    {% trans "Actions" %}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for submission in submissions %}
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            {% if submission.images.exists %}
+                                                <img src="{{ submission.images.first.image.url }}" 
+                                                     alt="{{ submission.title }}" 
+                                                     class="w-12 h-12 object-cover rounded">
+                                            {% else %}
+                                                <div class="w-12 h-12 bg-gray-200 flex items-center justify-center rounded">
+                                                    <i class="fas fa-image text-gray-400"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">{{ submission.title }}</div>
+                                                {% if submission.category %}
+                                                    <div class="text-sm text-gray-500">{{ submission.category.name }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ submission.user.get_full_name|default:submission.user.email }}</div>
+                                        <div class="text-sm text-gray-500">{{ submission.user.email }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-semibold text-gray-900">
+                                            ₦{{ submission.price|floatformat:2 }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">
+                                            {{ submission.stock_quantity }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs rounded-full 
+                                            {% if submission.source == 'own_item' %}bg-blue-100 text-blue-800
+                                            {% else %}bg-purple-100 text-purple-800{% endif %}">
+                                            {% if submission.source == 'own_item' %}
+                                                {% trans "Own Item" %}
+                                            {% else %}
+                                                {% trans "Held Asset" %}
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ submission.created_at|date:"M j, Y H:i" }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <a href="{% url 'sell_items:admin_review_submission' submission.id %}" 
+                                           class="text-amber-600 hover:text-amber-700 mr-4">
+                                            <i class="fas fa-eye mr-1"></i>
+                                            {% trans "Review" %}
+                                        </a>
+                                        {% if submission.status == 'accepted' %}
+                                            <button onclick="createProduct('{{ submission.id }}')"
+                                                    class="text-green-600 hover:text-green-700">
+                                                <i class="fas fa-plus-circle mr-1"></i>
+                                                {% trans "Create Product" %}
+                                            </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center py-12">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100 mb-4">
+                    <i class="fas fa-clipboard-list text-gray-400 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">
+                    {% trans "No Submissions Found" %}
+                </h3>
+                <p class="text-gray-600">
+                    {% if current_status == 'pending' %}
+                        {% trans "No pending submissions at the moment." %}
+                    {% elif current_status == 'accepted' %}
+                        {% trans "No accepted submissions found." %}
+                    {% else %}
+                        {% trans "No rejected submissions found." %}
+                    {% endif %}
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Create Product Modal -->
+<div id="create-product-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg max-w-md w-full p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">
+                {% trans "Create Product" %}
+            </h3>
+            
+            <form id="create-product-form">
+                {% csrf_token %}
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            {% trans "Admin Price (₦)" %}
+                        </label>
+                        <input type="number" 
+                               id="admin-price" 
+                               min="1" 
+                               step="1"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                               placeholder="Leave empty to use seller's price">
+                        <p class="text-sm text-gray-500 mt-1">
+                            {% trans "Set your own price or leave empty to use seller's price" %}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-3 mt-6">
+                    <button type="button" onclick="closeCreateProductModal()" 
+                            class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        {% trans "Cancel" %}
+                    </button>
+                    <button type="submit" 
+                            class="flex-1 px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700">
+                        {% trans "Create Product" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentSubmissionId = null;
+
+function createProduct(submissionId) {
+    currentSubmissionId = submissionId;
+    document.getElementById('create-product-modal').classList.remove('hidden');
+}
+
+function closeCreateProductModal() {
+    document.getElementById('create-product-modal').classList.add('hidden');
+    currentSubmissionId = null;
+    document.getElementById('admin-price').value = '';
+}
+
+function showNotification(message, type = 'info') {
+    const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500',
+        warning: 'bg-amber-500'
+    };
+    
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        info: 'fa-info-circle',
+        warning: 'fa-exclamation-triangle'
+    };
+    
+    const notification = $(`
+        <div class="fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform max-w-md">
+            <div class="flex items-center">
+                <i class="fas ${icons[type]} mr-2"></i>
+                <span>${message}</span>
+            </div>
+        </div>
+    `);
+    
+    $('body').append(notification);
+    
+    setTimeout(() => {
+        notification.removeClass('translate-x-full');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.addClass('translate-x-full');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
+document.getElementById('create-product-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (!currentSubmissionId) return;
+    
+    const adminPrice = document.getElementById('admin-price').value;
+    
+    fetch('{% url "sell_items:create_product_from_submission" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: JSON.stringify({
+            submission_id: currentSubmissionId,
+            admin_price: adminPrice || null
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification("Product created successfully!" , "success")
+            closeCreateProductModal();
+            location.reload();
+        } else {
+            showNotification(data.error || "Error creating product", "error")
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification(data.error || "Error creating product", "error")
+    });
+});
+</script>
+{% endblock %}

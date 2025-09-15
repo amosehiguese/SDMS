@@ -408,9 +408,40 @@ def held_assets(request):
         user=request.user,
         fulfillment_type='hold_asset',
         status='paid'
-    ).prefetch_related('items__product')
+    ).prefetch_related('items__product__images')
     
-    return render(request, 'orders/held_assets.html', {'held_orders': held_orders})
+    # Create a list of assets with proper order association
+    held_assets = []
+    for order in held_orders:
+        for item in order.items.all():
+            held_assets.append({
+                'order': order,
+                'product': item.product,
+                'quantity': item.quantity,
+                'price': item.price
+            })
+    
+    return render(request, 'orders/held_assets.html', {'held_assets': held_assets})
+
+@login_required
+def get_shipping_addresses(request):
+    """AJAX endpoint to get user's shipping addresses"""
+    addresses = request.user.shipping_addresses.all()
+    
+    addresses_data = []
+    for address in addresses:
+        addresses_data.append({
+            'id': str(address.id),
+            'full_name': address.full_name,
+            'address_line_1': address.address_line_1,
+            'city': address.city,
+            'is_default': address.is_default
+        })
+    
+    return JsonResponse({
+        'success': True,
+        'addresses': addresses_data
+    })
 
 @require_http_methods(["POST"])
 @login_required

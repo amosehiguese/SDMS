@@ -266,8 +266,7 @@ class Order(BaseModel):
     @property
     def has_hold_items(self):
         return self.items.filter(purchase_option='hold').exists()
-
-    
+        
     def liquidate_assets(self, shipping_address):
         """Convert held assets to delivery order"""
         if self.fulfillment_type == 'hold_asset' and self.status == 'paid':
@@ -295,6 +294,27 @@ class OrderItem(BaseModel):
         """Get total price for this item"""
         return self.price * self.quantity
     
+    def reduce_quantity(self, amount):
+        """Reduce the quantity of this order item (for selling held assets)"""
+        if self.quantity >= amount:
+            self.quantity -= amount
+            self.save(update_fields=['quantity'])
+            return True
+        return False
+
+    def get_available_quantity(self):
+        """Get quantity available for selling (considering already submitted items)"""
+        from sell_items.models import SellItemSubmission
+        
+        # Get total quantity already submitted for selling from this order
+        submitted_qty = SellItemSubmission.objects.filter(
+            held_asset_order=self.order,
+            status__in=['pending', 'accepted']  # Don't count rejected ones
+        ).aggregate(total=models.Sum('stock_quantity'))['total'] or 0
+        
+        return max(0, self.quantity - submitted_qty)
+
+
     def save(self, *args, **kwargs):
         # Set price from product if not set
         if not self.price:

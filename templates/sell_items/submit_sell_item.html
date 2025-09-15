@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Sell an Item" %} - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">
+                <i class="fas fa-store mr-2"></i>
+                {% trans "Sell an Item" %}
+            </h1>
+            <p class="mt-2 text-gray-600">
+                {% trans "Submit your item for review. Our team will evaluate and get back to you." %}
+            </p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Left Column -->
+                    <div class="space-y-6">
+                        <div>
+                            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">
+                                {% trans "Item Title" %} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" 
+                                   id="title" 
+                                   name="title" 
+                                   required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                   placeholder="Enter item title">
+                        </div>
+                        
+                        <div>
+                            <label for="category_name" class="block text-sm font-medium text-gray-700 mb-1">
+                                {% trans "Category" %}
+                            </label>
+                            <input type="text" 
+                                   id="category_name" 
+                                   name="category_name"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                   placeholder="Enter product category (e.g., Electronics, Clothing, etc.)">
+                            <p class="mt-1 text-sm text-gray-500">
+                                {% trans "Enter a category name. If it doesn't exist, we'll create it for you." %}
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label for="price" class="block text-sm font-medium text-gray-700 mb-1">
+                                {% trans "Selling Price (₦)" %} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="number" 
+                                   id="price" 
+                                   name="price" 
+                                   required
+                                   min="1"
+                                   step="1"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                   placeholder="Enter selling price">
+                        </div>
+                        
+                        <div>
+                            <label for="stock_quantity" class="block text-sm font-medium text-gray-700 mb-1">
+                                {% trans "Stock Quantity" %} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="number" 
+                                   id="stock_quantity" 
+                                   name="stock_quantity" 
+                                   required
+                                   min="1"
+                                   value="1"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                   placeholder="Number of items available">
+                            <p class="mt-1 text-sm text-gray-500">
+                                {% trans "How many of this item do you have available for sale?" %}
+                            </p>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">
+                                    {% trans "Weight (kg)" %}
+                                </label>
+                                <input type="number" 
+                                       id="weight" 
+                                       name="weight"
+                                       step="0.01"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                       placeholder="e.g., 1.5">
+                            </div>
+                            
+                            <div>
+                                <label for="dimensions" class="block text-sm font-medium text-gray-700 mb-1">
+                                    {% trans "Dimensions" %}
+                                </label>
+                                <input type="text" 
+                                       id="dimensions" 
+                                       name="dimensions"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                       placeholder="L x W x H in cm">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column -->
+                    <div class="space-y-6">
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+                                {% trans "Description" %} <span class="text-red-500">*</span>
+                            </label>
+                            <textarea id="description" 
+                                      name="description" 
+                                      required
+                                      rows="4"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                      placeholder="Describe your item in detail, including condition, features, etc."></textarea>
+                        </div>
+                        
+                        <!-- Bank Account Details -->
+                        <div class="bg-blue-50 p-4 rounded-md">
+                            <h3 class="text-md font-medium text-gray-900 mb-3">
+                                <i class="fas fa-university mr-2"></i>
+                                {% trans "Bank Account Details" %}
+                            </h3>
+                            <p class="text-sm text-gray-600 mb-3">
+                                {% trans "Provide your bank details for payment when your item is sold." %}
+                            </p>
+                            
+                            <div class="space-y-3">
+                                <div>
+                                    <label for="bank_name" class="block text-sm font-medium text-gray-700 mb-1">
+                                        {% trans "Bank Name" %}
+                                    </label>
+                                    <input type="text" 
+                                           id="bank_name" 
+                                           name="bank_name"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                           placeholder="e.g., First Bank, GTBank, etc.">
+                                </div>
+                                
+                                <div>
+                                    <label for="account_number" class="block text-sm font-medium text-gray-700 mb-1">
+                                        {% trans "Account Number" %}
+                                    </label>
+                                    <input type="text" 
+                                           id="account_number" 
+                                           name="account_number"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                           placeholder="Enter your account number">
+                                </div>
+                                
+                                <div>
+                                    <label for="account_holder_name" class="block text-sm font-medium text-gray-700 mb-1">
+                                        {% trans "Account Holder Name" %}
+                                    </label>
+                                    <input type="text" 
+                                           id="account_holder_name" 
+                                           name="account_holder_name"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                           placeholder="Full name as on bank account">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="images" class="block text-sm font-medium text-gray-700 mb-1">
+                                {% trans "Images" %} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="file" 
+                                   id="images" 
+                                   name="images" 
+                                   multiple 
+                                   accept="image/*"
+                                   required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
+                            <p class="mt-1 text-sm text-gray-500">
+                                {% trans "Upload multiple images. First image will be the main image." %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Terms and Conditions -->
+                <div class="mt-8 p-4 bg-amber-50 rounded-md">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        {% trans "Important Information" %}
+                    </h3>
+                    <ul class="text-sm text-gray-700 space-y-1 list-disc list-inside">
+                        <li>{% trans "All submissions are subject to admin review and approval" %}</li>
+                        <li>{% trans "Items must be in good condition and accurately described" %}</li>
+                        <li>{% trans "Final pricing is subject to admin discretion" %}</li>
+                        <li>{% trans "Provide accurate bank account details for payment" %}</li>
+                        <li>{% trans "You can update bank details later if needed" %}</li>
+                    </ul>
+                </div>
+                
+                <div class="mt-8 flex justify-between">
+                    <a href="{% url 'sell_items:sell_item_list' %}" 
+                       class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        {% trans "Back" %}
+                    </a>
+                    
+                    <button type="submit" 
+                            class="px-6 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        {% trans "Submit Item" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

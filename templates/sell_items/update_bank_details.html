@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Update Bank Details" %} - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">
+                <i class="fas fa-university mr-2"></i>
+                {% trans "Update Bank Details" %}
+            </h1>
+            <p class="mt-2 text-gray-600">
+                {% trans "Update your bank account details for receiving payments." %}
+            </p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <!-- Item Info -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h2 class="text-lg font-semibold text-gray-900 mb-2">
+                    <i class="fas fa-tag mr-2"></i>
+                    {% trans "Submission Details" %}
+                </h2>
+                <div class="flex items-center space-x-4">
+                    {% if submission.images.exists %}
+                        <img src="{{ submission.images.first.image.url }}" 
+                             alt="{{ submission.title }}" 
+                             class="w-16 h-16 object-cover rounded">
+                    {% else %}
+                        <div class="w-16 h-16 bg-gray-200 flex items-center justify-center rounded">
+                            <i class="fas fa-image text-gray-400"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div>
+                        <h3 class="font-semibold text-gray-900">{{ submission.title }}</h3>
+                        <p class="text-sm text-gray-600">
+                            {% trans "Price:" %} ₦{{ submission.price|floatformat:2 }}
+                        </p>
+                        <span class="px-2 py-1 text-xs rounded-full 
+                            {% if submission.status == 'pending' %}bg-yellow-100 text-yellow-800
+                            {% elif submission.status == 'accepted' %}bg-green-100 text-green-800
+                            {% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ submission.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Current Bank Details -->
+            {% if submission.has_complete_bank_details %}
+                <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+                    <h3 class="text-md font-medium text-gray-900 mb-3">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        {% trans "Current Bank Details" %}
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <strong>{% trans "Bank Name:" %}</strong><br>
+                            {{ submission.bank_name }}
+                        </div>
+                        <div>
+                            <strong>{% trans "Account Number:" %}</strong><br>
+                            {{ submission.account_number }}
+                        </div>
+                        <div>
+                            <strong>{% trans "Account Holder:" %}</strong><br>
+                            {{ submission.account_holder_name }}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Update Form -->
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="space-y-6">
+                    <div>
+                        <label for="bank_name" class="block text-sm font-medium text-gray-700 mb-1">
+                            {% trans "Bank Name" %} <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="bank_name" 
+                               name="bank_name"
+                               value="{{ submission.bank_name }}"
+                               required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                               placeholder="e.g., First Bank, GTBank, Access Bank">
+                    </div>
+                    
+                    <div>
+                        <label for="account_number" class="block text-sm font-medium text-gray-700 mb-1">
+                            {% trans "Account Number" %} <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="account_number" 
+                               name="account_number"
+                               value="{{ submission.account_number }}"
+                               required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                               placeholder="Enter your 10-digit account number">
+                    </div>
+                    
+                    <div>
+                        <label for="account_holder_name" class="block text-sm font-medium text-gray-700 mb-1">
+                            {% trans "Account Holder Name" %} <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="account_holder_name" 
+                               name="account_holder_name"
+                               value="{{ submission.account_holder_name }}"
+                               required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                               placeholder="Full name as appears on bank account">
+                    </div>
+                </div>
+                
+                <!-- Important Notice -->
+                <div class="mt-6 p-4 bg-amber-50 rounded-md">
+                    <h3 class="text-md font-medium text-gray-900 mb-2">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        {% trans "Important Notice" %}
+                    </h3>
+                    <ul class="text-sm text-gray-700 space-y-1 list-disc list-inside">
+                        <li>{% trans "Ensure all details are accurate to avoid payment delays" %}</li>
+                        <li>{% trans "Account holder name must match your identity documents" %}</li>
+                        <li>{% trans "Double-check your account number for accuracy" %}</li>
+                        <li>{% trans "You can update these details anytime before payment" %}</li>
+                    </ul>
+                </div>
+                
+                <div class="mt-8 flex justify-between">
+                    <a href="{% url 'sell_items:sell_submission_detail' submission.id %}" 
+                       class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        {% trans "Back" %}
+                    </a>
+                    
+                    <button type="submit" 
+                            class="px-6 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
+                        <i class="fas fa-save mr-2"></i>
+                        {% trans "Update Bank Details" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

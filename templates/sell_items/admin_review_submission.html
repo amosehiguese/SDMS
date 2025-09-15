@@ -1,0 +1,441 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Review Submission" %} - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">
+                    <i class="fas fa-clipboard-check mr-2"></i>
+                    {% trans "Review Submission" %}
+                </h1>
+                <p class="mt-2 text-gray-600">
+                    {% trans "Review and approve or reject this sell item submission." %}
+                </p>
+            </div>
+            
+            <a href="{% url 'sell_items:admin_submissions' %}" 
+               class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>
+                {% trans "Back to Submissions" %}
+            </a>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Column - Item Details -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    {% trans "Item Details" %}
+                </h2>
+                
+                <!-- Images -->
+                {% if submission.images.exists %}
+                    <div class="mb-6">
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">{% trans "Images" %}</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            {% for image in submission.images.all %}
+                                <div class="relative">
+                                    <img src="{{ image.image.url }}" 
+                                         alt="{{ submission.title }}" 
+                                         class="w-full h-32 object-cover rounded-lg border">
+                                    {% if image.is_primary %}
+                                        <span class="absolute top-2 left-2 bg-amber-500 text-white text-xs px-2 py-1 rounded">
+                                            {% trans "Primary" %}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <!-- Item Information -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">{% trans "Title" %}</label>
+                        <p class="text-lg font-semibold text-gray-900">{{ submission.title }}</p>
+                    </div>
+                    
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">{% trans "Category" %}</label>
+                        <p class="text-gray-900">
+                            {% if submission.category %}{{ submission.category.name }}{% else %}{% trans "Not specified" %}{% endif %}
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">{% trans "Seller's Price" %}</label>
+                        <p class="text-xl font-bold text-amber-600">₦{{ submission.price|floatformat:2 }}</p>
+                    </div>
+                    
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">{% trans "Stock Quantity" %}</label>
+                        <p class="text-gray-900">
+                            {{ submission.stock_quantity }} {% if submission.stock_quantity == 1 %}{% trans "item" %}{% else %}{% trans "items" %}{% endif %}
+                            {% if submission.source == 'held_asset' and submission.held_asset_order %}
+                                {% with order_item=submission.held_asset_order.items.first %}
+                                    {% if order_item %}
+                                        <span class="text-sm text-gray-500">
+                                            ({% trans "out of" %} {{ order_item.quantity }} {% trans "originally purchased" %})
+                                        </span>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-500">{% trans "Weight" %}</label>
+                            <p class="text-gray-900">
+                                {% if submission.weight %}{{ submission.weight }} kg{% else %}{% trans "Not specified" %}{% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-500">{% trans "Dimensions" %}</label>
+                            <p class="text-gray-900">
+                                {% if submission.dimensions %}{{ submission.dimensions }}{% else %}{% trans "Not specified" %}{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">{% trans "Description" %}</label>
+                        <p class="text-gray-900 mt-1 whitespace-pre-wrap">{{ submission.description }}</p>
+                    </div>
+                    
+                    <!-- Bank Details -->
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">{% trans "Bank Account Details" %}</label>
+                        {% if submission.has_complete_bank_details %}
+                            <div class="mt-2 p-3 bg-green-50 rounded-lg">
+                                <div class="grid grid-cols-1 gap-2 text-sm">
+                                    <div>
+                                        <strong>{% trans "Bank:" %}</strong> {{ submission.bank_name }}
+                                    </div>
+                                    <div>
+                                        <strong>{% trans "Account:" %}</strong> {{ submission.account_number }}
+                                    </div>
+                                    <div>
+                                        <strong>{% trans "Holder:" %}</strong> {{ submission.account_holder_name }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="mt-2 p-3 bg-red-50 rounded-lg">
+                                <p class="text-red-700 text-sm">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    {% trans "Bank details not provided" %}
+                                </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column - Review & Actions -->
+            <div class="space-y-6">
+                <!-- Seller Information -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-user mr-2"></i>
+                        {% trans "Seller Information" %}
+                    </h2>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-sm font-medium text-gray-500">{% trans "Name" %}</label>
+                            <p class="text-gray-900">{{ submission.user.get_full_name|default:submission.user.email }}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-500">{% trans "Email" %}</label>
+                            <p class="text-gray-900">{{ submission.user.email }}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-500">{% trans "Submission Type" %}</label>
+                            <span class="inline-flex px-2 py-1 text-xs rounded-full 
+                                {% if submission.source == 'own_item' %}bg-blue-100 text-blue-800
+                                {% else %}bg-purple-100 text-purple-800{% endif %}">
+                                {% if submission.source == 'own_item' %}
+                                    {% trans "Own Item" %}
+                                {% else %}
+                                    {% trans "Held Asset" %}
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-500">{% trans "Submitted" %}</label>
+                            <p class="text-gray-900">{{ submission.created_at|date:"M j, Y H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Current Status -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-flag mr-2"></i>
+                        {% trans "Current Status" %}
+                    </h2>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-sm font-medium text-gray-500">{% trans "Status" %}</label>
+                            <p>
+                                <span class="px-3 py-1 text-sm rounded-full 
+                                    {% if submission.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% elif submission.status == 'accepted' %}bg-green-100 text-green-800
+                                    {% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ submission.get_status_display }}
+                                </span>
+                            </p>
+                        </div>
+                        
+                        {% if submission.reviewed_by %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">{% trans "Reviewed By" %}</label>
+                                <p class="text-gray-900">{{ submission.reviewed_by.get_full_name|default:submission.reviewed_by.email }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">{% trans "Reviewed At" %}</label>
+                                <p class="text-gray-900">{{ submission.reviewed_at|date:"M j, Y H:i" }}</p>
+                            </div>
+                        {% endif %}
+                        
+                        {% if submission.admin_notes %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">{% trans "Admin Notes" %}</label>
+                                <p class="text-gray-900 mt-1 whitespace-pre-wrap">{{ submission.admin_notes }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Review Actions -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-clipboard-check mr-2"></i>
+                        {% trans "Review Actions" %}
+                    </h2>
+                    
+                    <form id="review-form">
+                        {% csrf_token %}
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    {% trans "Status" %}
+                                </label>
+                                <select id="status" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
+                                    <option value="pending" {% if submission.status == 'pending' %}selected{% endif %}>
+                                        {% trans "Pending Review" %}
+                                    </option>
+                                    <option value="accepted" {% if submission.status == 'accepted' %}selected{% endif %}>
+                                        {% trans "Accepted" %}
+                                    </option>
+                                    <option value="rejected" {% if submission.status == 'rejected' %}selected{% endif %}>
+                                        {% trans "Rejected" %}
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    {% trans "Admin Notes" %}
+                                </label>
+                                <textarea id="admin-notes" 
+                                          rows="4"
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                          placeholder="Provide reason for acceptance/rejection...">{{ submission.admin_notes }}</textarea>
+                            </div>
+                            
+                            <button type="submit" 
+                                    class="w-full bg-amber-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-amber-700 transition-colors">
+                                <i class="fas fa-save mr-2"></i>
+                                {% trans "Update Status" %}
+                            </button>
+                        </div>
+                    </form>
+                    
+                    {% if submission.status == 'accepted' %}
+                        <div class="mt-6 pt-6 border-t">
+                            <button onclick="createProduct('{{ submission.id }}')"
+                                    class="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                                <i class="fas fa-plus-circle mr-2"></i>
+                                {% trans "Create Product on Site" %}
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Product Modal -->
+<div id="create-product-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg max-w-md w-full p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">
+                {% trans "Create Product" %}
+            </h3>
+            
+            <form id="create-product-form">
+                {% csrf_token %}
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            {% trans "Admin Price (₦)" %}
+                        </label>
+                        <input type="number" 
+                               id="admin-price" 
+                               min="1" 
+                               step="1"
+                               value="{{ submission.price }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
+                        <p class="text-sm text-gray-500 mt-1">
+                            {% trans "Current seller price: ₦" %}{{ submission.price|floatformat:2 }}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-3 mt-6">
+                    <button type="button" onclick="closeCreateProductModal()" 
+                            class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        {% trans "Cancel" %}
+                    </button>
+                    <button type="submit" 
+                            class="flex-1 px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700">
+                        {% trans "Create Product" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentSubmissionId = null;
+
+// Review form submission
+document.getElementById('review-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const status = document.getElementById('status').value;
+    const adminNotes = document.getElementById('admin-notes').value;
+    
+    fetch('{% url "sell_items:update_submission_status" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: JSON.stringify({
+            submission_id: '{{ submission.id }}',
+            status: status,
+            admin_notes: adminNotes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification("Status updated successfully!", "success");
+            location.reload();
+        } else {
+            showNotification(data.error || "Error updating status", "error");
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification("Error updating status", "error")
+    });
+});
+
+// Create product functions
+function createProduct(submissionId) {
+    currentSubmissionId = submissionId;
+    document.getElementById('create-product-modal').classList.remove('hidden');
+}
+
+function closeCreateProductModal() {
+    document.getElementById('create-product-modal').classList.add('hidden');
+    currentSubmissionId = null;
+}
+
+function showNotification(message, type = 'info') {
+    const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500',
+        warning: 'bg-amber-500'
+    };
+    
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        info: 'fa-info-circle',
+        warning: 'fa-exclamation-triangle'
+    };
+    
+    const notification = $(`
+        <div class="fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform max-w-md">
+            <div class="flex items-center">
+                <i class="fas ${icons[type]} mr-2"></i>
+                <span>${message}</span>
+            </div>
+        </div>
+    `);
+    
+    $('body').append(notification);
+    
+    setTimeout(() => {
+        notification.removeClass('translate-x-full');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.addClass('translate-x-full');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
+document.getElementById('create-product-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (!currentSubmissionId) return;
+    
+    const adminPrice = document.getElementById('admin-price').value;
+    
+    fetch('{% url "sell_items:create_product_from_submission" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: JSON.stringify({
+            submission_id: currentSubmissionId,
+            admin_price: adminPrice
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification("Product created successfully!" , "success")
+            closeCreateProductModal();
+            window.open('/admin/store/product/', '_blank');
+        } else {
+            showNotification(data.error || "Error creating product", "error")
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification(data.error || "Error creating product", "error")
+    });
+});
+
+</script>
+{% endblock %}

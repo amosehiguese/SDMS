@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Edit Submission" %} - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">
+                <i class="fas fa-edit mr-2"></i>
+                {% trans "Edit Submission" %}
+            </h1>
+            <p class="mt-2 text-gray-600">
+                {% trans "Update your submission based on admin feedback and resubmit for review." %}
+            </p>
+        </div>
+        
+        <!-- Admin Feedback (if any) -->
+        {% if submission.admin_notes %}
+            <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-400 rounded-md">
+                <h3 class="text-md font-medium text-red-800 mb-2">
+                    <i class="fas fa-comment mr-2"></i>
+                    {% trans "Admin Feedback" %}
+                </h3>
+                <p class="text-red-700 whitespace-pre-wrap">{{ submission.admin_notes }}</p>
+            </div>
+        {% endif %}
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Left Column -->
+                    <div class="space-y-6">
+                        <div>
+                            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">
+                                {% trans "Item Title" %} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" 
+                                   id="title" 
+                                   name="title" 
+                                   value="{{ submission.title }}"
+                                   required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
+                        </div>
+                        
+                        {% if submission.source == 'own_item' %}
+                        <div>
+                            <label for="category_name" class="block text-sm font-medium text-gray-700 mb-1">
+                                {% trans "Category" %}
+                            </label>
+                            <input type="text" 
+                                   id="category_name" 
+                                   name="category_name"
+                                   value="{{ submission.category.name|default:'' }}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                   placeholder="Enter product category">
+                        </div>
+                        {% endif %}
+                        
+                        <div>
+                            <label for="price" class="block text-sm font-medium text-gray-700 mb-1">
+                                {% trans "Selling Price (₦)" %} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="number" 
+                                   id="price" 
+                                   name="price" 
+                                   value="{{ submission.price }}"
+                                   required
+                                   min="1"
+                                   step="1"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
+                        </div>
+                        
+                        <div>
+                            <label for="stock_quantity" class="block text-sm font-medium text-gray-700 mb-1">
+                                {% trans "Stock Quantity" %} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="number" 
+                                   id="stock_quantity" 
+                                   name="stock_quantity" 
+                                   value="{{ submission.stock_quantity }}"
+                                   required
+                                   min="1"
+                                   {% if submission.source == 'held_asset' %}max="{{ submission.max_allowed_quantity }}"{% endif %}
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
+                            {% if submission.source == 'held_asset' %}
+                                <p class="mt-1 text-sm text-gray-500">
+                                    {% trans "Maximum allowed:" %} {{ submission.max_allowed_quantity }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">
+                                    {% trans "Weight (kg)" %}
+                                </label>
+                                <input type="number" 
+                                       id="weight" 
+                                       name="weight"
+                                       value="{{ submission.weight|default:'' }}"
+                                       step="0.01"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
+                            </div>
+                            
+                            <div>
+                                <label for="dimensions" class="block text-sm font-medium text-gray-700 mb-1">
+                                    {% trans "Dimensions" %}
+                                </label>
+                                <input type="text" 
+                                       id="dimensions" 
+                                       name="dimensions"
+                                       value="{{ submission.dimensions|default:'' }}"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                       placeholder="L x W x H in cm">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column -->
+                    <div class="space-y-6">
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+                                {% trans "Description" %} <span class="text-red-500">*</span>
+                            </label>
+                            <textarea id="description" 
+                                      name="description" 
+                                      required
+                                      rows="4"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">{{ submission.description }}</textarea>
+                        </div>
+                        
+                        <!-- Bank Account Details -->
+                        <div class="bg-blue-50 p-4 rounded-md">
+                            <h3 class="text-md font-medium text-gray-900 mb-3">
+                                <i class="fas fa-university mr-2"></i>
+                                {% trans "Bank Account Details" %}
+                            </h3>
+                            
+                            <div class="space-y-3">
+                                <div>
+                                    <label for="bank_name" class="block text-sm font-medium text-gray-700 mb-1">
+                                        {% trans "Bank Name" %}
+                                    </label>
+                                    <input type="text" 
+                                           id="bank_name" 
+                                           name="bank_name"
+                                           value="{{ submission.bank_name }}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
+                                </div>
+                                
+                                <div>
+                                    <label for="account_number" class="block text-sm font-medium text-gray-700 mb-1">
+                                        {% trans "Account Number" %}
+                                    </label>
+                                    <input type="text" 
+                                           id="account_number" 
+                                           name="account_number"
+                                           value="{{ submission.account_number }}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
+                                </div>
+                                
+                                <div>
+                                    <label for="account_holder_name" class="block text-sm font-medium text-gray-700 mb-1">
+                                        {% trans "Account Holder Name" %}
+                                    </label>
+                                    <input type="text" 
+                                           id="account_holder_name" 
+                                           name="account_holder_name"
+                                           value="{{ submission.account_holder_name }}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Current Images Display -->
+                        {% if submission.images.exists %}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{% trans "Current Images" %}</label>
+                                <div class="grid grid-cols-3 gap-2 mb-3">
+                                    {% for image in submission.images.all %}
+                                        <img src="{{ image.image.url }}" alt="{{ submission.title }}" class="w-full h-20 object-cover rounded border">
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <div>
+                            <label for="images" class="block text-sm font-medium text-gray-700 mb-1">
+                                {% trans "Update Images" %} {% trans "(Optional)" %}
+                            </label>
+                            <input type="file" 
+                                   id="images" 
+                                   name="images" 
+                                   multiple 
+                                   accept="image/*"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
+                            <p class="mt-1 text-sm text-gray-500">
+                                {% trans "Leave empty to keep current images, or upload new ones to replace all existing images." %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex justify-between">
+                    <a href="{% url 'sell_items:sell_submission_detail' submission.id %}" 
+                       class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        {% trans "Back" %}
+                    </a>
+                    
+                    <button type="submit" 
+                            class="px-6 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        {% trans "Update & Resubmit" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

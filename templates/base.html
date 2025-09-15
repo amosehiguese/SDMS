@@ -139,6 +139,14 @@
                                 <a href="{% url 'orders:held_assets' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <i class="fas fa-box mr-2"></i>Assets
                                 </a>
+                                <a href="{% url 'sell_items:sell_item_list' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-store mr-2"></i>Sell Items
+                                </a>
+                                {% if user.is_staff %}
+                                    <a href="{% url 'sell_items:admin_submissions' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-clipboard-list mr-2"></i>Review Submissions
+                                    </a>
+                                {% endif %}
                                 <a href="{% url 'orders:order_history' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <i class="fas fa-shopping-bag mr-2"></i>Order History
                                 </a>

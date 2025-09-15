@@ -57,6 +57,13 @@
                                         {{ asset.order.get_status_display }}
                                     </span>
                                 </p>
+
+                                <p class="text-sm text-gray-600">
+                                    <i class="fas fa-box mr-1"></i>
+                                    <strong>{% trans "Remaining Quantity:" %}</strong> 
+                                    {{ asset.order.items.first.quantity }} 
+                                    {% if asset.order.items.first.quantity == 1 %}{% trans "item" %}{% else %}{% trans "items" %}{% endif %}
+                                </p>
                             </div>
                             
                             <div class="flex space-x-2">
@@ -66,6 +73,11 @@
                                         <i class="fas fa-shipping-fast mr-1"></i>
                                         {% trans "Liquidate" %}
                                     </button>
+                                    <a href="{% url 'sell_items:submit_held_asset_sell' asset.order.id %}" 
+                                       class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium text-center transition-colors">
+                                        <i class="fas fa-store mr-1"></i>
+                                        {% trans "Resell" %}
+                                    </a>
                                 {% else %}
                                     <button disabled 
                                             class="flex-1 bg-gray-300 text-gray-500 px-4 py-2 rounded-md text-sm font-medium cursor-not-allowed">
@@ -106,7 +118,7 @@
 </div>
 
 <!-- Liquidation Modal -->
-<div id="liquidation-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+<div id="liquidation-modal" class="fixed inset-0 bg-gray-600 opacity-75 hidden z-50">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-lg max-w-md w-full p-6">
             <h3 class="text-lg font-medium text-gray-900 mb-4">
@@ -167,23 +179,76 @@ function closeLiquidationModal() {
 }
 
 function loadShippingAddresses() {
-    // Load user's shipping addresses
-    fetch('{% url "orders:shipping_addresses" %}')
-        .then(response => response.json())
+    // Load user's shipping addresses via AJAX
+    fetch('{% url "orders:get_shipping_addresses" %}')  // This should be an AJAX endpoint
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             const select = document.getElementById('shipping-address');
             select.innerHTML = '<option value="">{% trans "Select an address" %}</option>';
             
-            data.addresses.forEach(address => {
+            if (data.addresses && data.addresses.length > 0) {
+                data.addresses.forEach(address => {
+                    const option = document.createElement('option');
+                    option.value = address.id;
+                    option.textContent = `${address.full_name} - ${address.address_line_1}, ${address.city}`;
+                    select.appendChild(option);
+                });
+            } else {
                 const option = document.createElement('option');
-                option.value = address.id;
-                option.textContent = `${address.full_name} - ${address.address_line_1}, ${address.city}`;
+                option.value = '';
+                option.textContent = 'No addresses found';
+                option.disabled = true;
                 select.appendChild(option);
-            });
+            }
         })
         .catch(error => {
             console.error('Error loading addresses:', error);
+            const select = document.getElementById('shipping-address');
+            select.innerHTML = '<option value="">Error loading addresses</option>';
         });
+}
+
+function showNotification(message, type = 'info') {
+    const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500',
+        warning: 'bg-amber-500'
+    };
+    
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        info: 'fa-info-circle',
+        warning: 'fa-exclamation-triangle'
+    };
+    
+    const notification = $(`
+        <div class="fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform max-w-md">
+            <div class="flex items-center">
+                <i class="fas ${icons[type]} mr-2"></i>
+                <span>${message}</span>
+            </div>
+        </div>
+    `);
+    
+    $('body').append(notification);
+    
+    setTimeout(() => {
+        notification.removeClass('translate-x-full');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.addClass('translate-x-full');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
 }
 
 document.getElementById('liquidation-form').addEventListener('submit', function(e) {
@@ -193,7 +258,7 @@ document.getElementById('liquidation-form').addEventListener('submit', function(
     
     const addressId = document.getElementById('shipping-address').value;
     if (!addressId) {
-        alert('{% trans "Please select a shipping address" %}');
+        showNotification("Please select a shipping address", "error")
         return;
     }
     
@@ -211,15 +276,15 @@ document.getElementById('liquidation-form').addEventListener('submit', function(
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('{% trans "Asset liquidation initiated successfully!" %}');
+            showNotification("Asset liquidation initiated successfully!", "succes");
             location.reload();
         } else {
-            alert(data.message || '{% trans "Error liquidating asset" %}');
+            showNotification(data.message || "Error liquidating asset", "error");
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('{% trans "Error liquidating asset" %}');
+        showNotification("Error liquidating asset", "error")
     });
 });
 </script>

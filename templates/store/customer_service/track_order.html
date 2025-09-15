@@ -163,12 +163,50 @@
 
 {% block extra_js %}
 <script>
+    function showNotification(message, type = 'info') {
+        const colors = {
+            success: 'bg-green-500',
+            error: 'bg-red-500',
+            info: 'bg-blue-500',
+            warning: 'bg-amber-500'
+        };
+        
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            info: 'fa-info-circle',
+            warning: 'fa-exclamation-triangle'
+        };
+        
+        const notification = $(`
+            <div class="fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform max-w-md">
+                <div class="flex items-center">
+                    <i class="fas ${icons[type]} mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            </div>
+        `);
+        
+        $('body').append(notification);
+        
+        setTimeout(() => {
+            notification.removeClass('translate-x-full');
+        }, 100);
+        
+        setTimeout(() => {
+            notification.addClass('translate-x-full');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 3000);
+    }
+
     function trackOrder() {
         const orderNumber = document.getElementById('order_number').value.trim();
         const email = document.getElementById('email').value.trim();
         
         if (!orderNumber || !email) {
-            alert('Please enter both order number and email address.');
+            showNotification('Please enter both order number and email address.', 'error')
             return;
         }
         

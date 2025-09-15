@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'orders',
     'payments',
     'blog',
+    'sell_items',
 
     'theme',
     'tailwind'
