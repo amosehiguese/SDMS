@@ -11,7 +11,7 @@ urlpatterns = [
     path('sell-items/', include('sell_items.urls')), 
     path('payments/', include('payments.urls')),
     path('blog/', include('blog.urls')),
-    path('api/', include('core.urls')),
+    path('c/', include('core.urls')),
 ]
 
 if settings.DEBUG:

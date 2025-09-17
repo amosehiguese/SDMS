@@ -1,0 +1,95 @@
+{% extends "emails/base/admin_base.html" %}
+
+{% block email_title %}Item Submission Review Required{% endblock %}
+
+{% block alert_title %}📋 Item Submission Requires Review{% endblock %}
+
+{% block main_content %}
+<div class="priority-high">
+    <h3 style="margin-bottom: 15px;">New item submission awaiting review</h3>
+    <p>A user has submitted an item for sale that requires admin approval.</p>
+</div>
+
+<table class="data-table">
+    <tr>
+        <th>Submission Details</th>
+        <th>Information</th>
+    </tr>
+    <tr>
+        <td>Submitted by</td>
+        <td><strong>{{ submission.user.email }}</strong></td>
+    </tr>
+    <tr>
+        <td>Item Title</td>
+        <td><strong>{{ submission.title }}</strong></td>
+    </tr>
+    <tr>
+        <td>Category</td>
+        <td>{{ submission.category.name|default:"Uncategorized" }}</td>
+    </tr>
+    <tr>
+        <td>Asking Price</td>
+        <td><strong>₦{{ submission.price|floatformat:0 }}</strong></td>
+    </tr>
+    <tr>
+        <td>Quantity</td>
+        <td>{{ submission.stock_quantity }}</td>
+    </tr>
+    <tr>
+        <td>Source</td>
+        <td>
+            {% if submission.source == 'held_asset' %}
+                <span style="background-color: #fff3cd; padding: 3px 8px; border-radius: 3px; color: #856404;">Held Asset</span>
+            {% else %}
+                <span style="background-color: #e7f3ff; padding: 3px 8px; border-radius: 3px; color: #0056b3;">Own Item</span>
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td>Submitted</td>
+        <td>{{ submission.created_at|date:"F d, Y at g:i A" }}</td>
+    </tr>
+</table>
+
+<h3 style="margin: 25px 0 15px 0;">Item Description:</h3>
+<div class="priority-low">
+    {{ submission.description|linebreaks }}
+</div>
+
+{% if submission.has_complete_bank_details %}
+<h3 style="margin: 25px 0 15px 0;">Bank Details:</h3>
+<table class="data-table">
+    <tr>
+        <td>Bank Name</td>
+        <td>{{ submission.bank_name }}</td>
+    </tr>
+    <tr>
+        <td>Account Number</td>
+        <td>{{ submission.account_number }}</td>
+    </tr>
+    <tr>
+        <td>Account Holder</td>
+        <td>{{ submission.account_holder_name }}</td>
+    </tr>
+</table>
+{% else %}
+<div style="background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 20px 0;">
+    <p><strong>⚠️ Warning:</strong> Bank details are incomplete. User needs to provide complete banking information.</p>
+</div>
+{% endif %}
+
+{% if submission.held_asset_order %}
+<h3 style="margin: 25px 0 15px 0;">Original Order:</h3>
+<div class="priority-medium">
+    <p><strong>Order Number:</strong> {{ submission.held_asset_order.order_number }}</p>
+    <p><strong>Purchase Date:</strong> {{ submission.held_asset_order.created_at|date:"F d, Y" }}</p>
+    <p><strong>Available Quantity:</strong> {{ submission.max_allowed_quantity }}</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block action_button %}
+<div style="text-align: center;">
+    <a href="{{ site_url }}/admin/review/{{ submission.id }}/" class="button">Review Submission</a>
+</div>
+{% endblock %}

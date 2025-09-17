@@ -236,7 +236,7 @@
                         <p>{{ site_config.footer_about_text|default:"Your trusted marketplace for quality products at great prices." }}</p>
                         <p><i class="fas fa-map-marker-alt"></i> {{ site_config.address|default:"Lagos, Nigeria" }}</p>
                         <p><i class="fas fa-phone"></i> {{ site_config.phone_number|default:"+234 XXX XXX XXXX" }}</p>
-                        <p><i class="fas fa-envelope"></i> {{ site_config.contact_email|default:"info@store.com" }}</p>
+                        <p class="text-sm"><i class="fas fa-envelope"></i> {{ site_config.contact_email|default:"info@store.com" }}</p>
                         {% if site_config.business_hours %}
                             <p><i class="fas fa-clock"></i> {{ site_config.business_hours }}</p>
                         {% endif %}
@@ -265,7 +265,7 @@
                         {% endif %}
                         <li><a href="{% url 'store:about' %}" class="hover:text-amber-700">About Us</a></li>
                         <li><a href="{% url 'store:contact' %}" class="hover:text-amber-700">Contact</a></li>
-                    </ul>
+                    </ul>                
                 </div>
 
                 <!-- Connect -->
@@ -418,7 +418,7 @@
                 const dropdown = $('#profile-dropdown');
                 
                 // On mobile, toggle the dropdown
-                if (window.innerWidth < 768) { // md breakpoint
+                if (window.innerWidth < 1080) { // md breakpoint
                     dropdown.toggleClass('opacity-0 invisible');
                 }
             });

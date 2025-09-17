@@ -55,10 +55,12 @@ INSTALLED_APPS = [
     'payments',
     'blog',
     'sell_items',
+    'emails',
 
     'theme',
     'tailwind'
 ]
+
 
 TAILWIND_APP_NAME = 'theme'
 
@@ -97,7 +99,7 @@ WSGI_APPLICATION = 'sdms.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-if DEBUG:
+if not DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -108,11 +110,11 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME', 'sdms'),
-            'USER': os.getenv('DB_USER', 'sdms_user'),
-            'PASSWORD': os.getenv('DB_PASSWORD', ''),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', '5432'),
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': os.getenv('DB_HOST'),
+            'PORT': os.getenv('DB_PORT'),
         }
     }
 
@@ -163,7 +165,7 @@ AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
 
 # File Storage and Email
-if DEBUG:
+if not DEBUG:
     #For development: Email
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
@@ -260,8 +262,8 @@ CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
 
 # Django Unfold settings
 UNFOLD = {
-    "SITE_TITLE": "SuccessDirectMarketStore Admin",
-    "SITE_HEADER": "SuccessDirectMarketStore",
+    "SITE_TITLE": "Success Direct MarketStore Admin",
+    "SITE_HEADER": "Success Direct MarketStore",
     "SITE_URL": os.getenv('SITE_URL', 'http://localhost:8000'),
     "COLORS": {
         "primary": {
@@ -278,3 +280,5 @@ UNFOLD = {
         },
     },
 }
+
+ACCOUNT_ADAPTER = "core.adapters.NoMessageAccountAdapter"

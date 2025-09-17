@@ -218,7 +218,7 @@ class Order(BaseModel):
         if not self.order_number:
             # Generate order number
             import random
-            self.order_number = f"ORD{random.randint(100000, 999999)}"
+            self.order_number = f"ORD-{random.randint(100000, 999999)}"
         super().save(*args, **kwargs)
     
     def calculate_totals(self):

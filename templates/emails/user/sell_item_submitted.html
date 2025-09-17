@@ -1,0 +1,59 @@
+{% extends "emails/base/user_base.html" %}
+
+{% block email_title %}Item Submission Received{% endblock %}
+
+{% block main_content %}
+<h2 style="color: #333; margin-bottom: 20px;">📦 Item Submission Received</h2>
+
+<p>Thank you for submitting your item for sale! We've received your submission and our team is now reviewing it.</p>
+
+<div class="info-box">
+    <h3 style="margin-bottom: 15px; color: #333;">Submission Details</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Item Title:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ submission.title }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Asking Price:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">₦{{ submission.price|floatformat:0 }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Quantity:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ submission.stock_quantity }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Source:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">
+                {% if submission.source == 'held_asset' %}
+                    Held Asset
+                {% else %}
+                    Own Item
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0;"><strong>Submitted:</strong></td>
+            <td style="padding: 8px 0;">{{ submission.created_at|date:"F d, Y at g:i A" }}</td>
+        </tr>
+    </table>
+</div>
+
+<div style="background-color: #e7f3ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
+    <h3 style="color: #0056b3; margin-bottom: 10px;">What happens next?</h3>
+    <ul style="margin-left: 20px; color: #0056b3;">
+        <li>Our team will review your item submission within 24-48 hours</li>
+        <li>We'll check the item details, pricing, and quality standards</li>
+        <li>You'll receive an email notification once the review is complete</li>
+        <li>If approved, your item will be listed on our marketplace</li>
+    </ul>
+</div>
+
+<p>If you have any questions about your submission or our review process, feel free to contact our support team.</p>
+{% endblock %}
+
+{% block action_button %}
+<div style="text-align: center;">
+    <a href="{{ site_url }}/sell-items/" class="button">View My Submissions</a>
+</div>
+{% endblock %}

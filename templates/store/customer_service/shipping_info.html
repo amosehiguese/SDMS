@@ -27,7 +27,7 @@
             </div>
 
             <!-- Shipping Information Grid -->
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            <div class="grid md:grid-cols-2 gap-8 mb-16">
                 <!-- Delivery Times -->
                 <div class="bg-white border border-gray-200 rounded-lg p-8 text-center hover:shadow-lg transition-shadow duration-300">
                     <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -84,25 +84,7 @@
                     </div>
                 </div>
 
-                <!-- Order Tracking -->
-                <div class="bg-white border border-gray-200 rounded-lg p-8 text-center hover:shadow-lg transition-shadow duration-300">
-                    <div class="bg-amber-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-search text-2xl text-amber-700"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">Order Tracking</h3>
-                    <div class="text-gray-600 mb-4">
-                        <p class="mb-3">Track your order every step of the way</p>
-                        <ul class="text-sm space-y-1">
-                            <li>• Email notifications</li>
-                            <li>• SMS updates</li>
-                            <li>• Real-time tracking</li>
-                        </ul>
-                    </div>
-                    <a href="{% url 'store:track_order' %}" 
-                       class="bg-amber-700 text-white px-6 py-2 rounded-lg font-semibold hover:bg-amber-800 transition-colors inline-block">
-                        Track Order
-                    </a>
-                </div>
+                
             </div>
 
             <!-- Detailed Information -->
@@ -140,7 +122,7 @@
                                 <h4 class="font-semibold text-gray-800 mb-3">Business Hours</h4>
                                 <div class="text-gray-600 space-y-2">
                                     <p><strong>Order Processing:</strong> Monday - Friday, 9 AM - 6 PM</p>
-                                    <p><strong>Customer Support:</strong> Monday - Saturday, 8 AM - 8 PM</p>
+                                    <p><strong>Customer Support:</strong> {{ site_config.business_hours }} </p>
                                     <p class="text-sm text-gray-500 mt-3">
                                         Orders placed on weekends will be processed on the next business day.
                                     </p>

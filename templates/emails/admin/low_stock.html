@@ -1,0 +1,70 @@
+{% extends "emails/base/admin_base.html" %}
+
+{% block email_title %}Low Stock Alert - {{ product.title }}{% endblock %}
+
+{% block alert_title %}📦 Low Stock Alert{% endblock %}
+
+{% block main_content %}
+<div class="priority-medium">
+    <h3 style="margin-bottom: 15px;">Product running low on stock</h3>
+    <p>One of your products is running low on inventory and may need restocking.</p>
+</div>
+
+<table class="data-table">
+    <tr>
+        <th>Product Details</th>
+        <th>Information</th>
+    </tr>
+    <tr>
+        <td>Product Name</td>
+        <td><strong>{{ product.title }}</strong></td>
+    </tr>
+    <tr>
+        <td>SKU</td>
+        <td>{{ product.sku }}</td>
+    </tr>
+    <tr>
+        <td>Category</td>
+        <td>{{ product.category.name|default:"Uncategorized" }}</td>
+    </tr>
+    <tr>
+        <td>Current Stock</td>
+        <td>
+            <strong style="color: #dc3545;">{{ product.stock_quantity }} units</strong>
+        </td>
+    </tr>
+    <tr>
+        <td>Price</td>
+        <td>₦{{ product.price|floatformat:0 }}</td>
+    </tr>
+    <tr>
+        <td>Status</td>
+        <td>
+            {% if product.is_active %}
+                <span style="background-color: #d4edda; padding: 3px 8px; border-radius: 3px; color: #155724;">Active</span>
+            {% else %}
+                <span style="background-color: #f8d7da; padding: 3px 8px; border-radius: 3px; color: #721c24;">Inactive</span>
+            {% endif %}
+        </td>
+    </tr>
+</table>
+
+{% if order %}
+<h3 style="margin: 25px 0 15px 0;">Triggered by Order:</h3>
+<div class="priority-low">
+    <p><strong>Order:</strong> {{ order.order_number }}</p>
+    <p><strong>Customer:</strong> {{ order.user.email }}</p>
+    <p><strong>Date:</strong> {{ order.created_at|date:"F d, Y at g:i A" }}</p>
+</div>
+{% endif %}
+
+<div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+    <p><strong>💡 Recommendation:</strong> Consider restocking this product soon to avoid running out of inventory.</p>
+</div>
+{% endblock %}
+
+{% block action_button %}
+<div style="text-align: center;">
+    <a href="{{ site_url }}/admin/store/product/{{ product.id }}/change/" class="button">Update Product</a>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "emails/base/admin_base.html" %}
+
+{% block email_title %}New User Registration - {{ user_email }}{% endblock %}
+
+{% block alert_title %}👤 New User Registration{% endblock %}
+
+{% block main_content %}
+<div class="priority-low">
+    <p>A new user has registered on the platform.</p>
+</div>
+
+<table class="data-table">
+    <tr>
+        <th>User Details</th>
+        <th>Information</th>
+    </tr>
+    <tr>
+        <td>Email</td>
+        <td><strong>{{ user_email }}</strong></td>
+    </tr>
+    <tr>
+        <td>Full Name</td>
+        <td>{{ user_first_name }} {{ user_last_name }}</td>
+    </tr>
+    <tr>
+        <td>Registration Date</td>
+        <td>{{ user_date_joined|date:"F d, Y at g:i A" }}</td>
+    </tr>
+    <tr>
+        <td>Account Status</td>
+        <td>
+            {% if is_active %}
+                <span style="background-color: #d4edda; padding: 3px 8px; border-radius: 3px; color: #155724;">Active</span>
+            {% else %}
+                <span style="background-color: #f8d7da; padding: 3px 8px; border-radius: 3px; color: #721c24;">Inactive</span>
+            {% endif %}
+        </td>
+    </tr>
+</table>
+
+<div style="margin-top: 20px; font-size: 14px; color: #666;">
+    <p>The user has been automatically sent a welcome email.</p>
+</div>
+{% endblock %}
+
+{% block action_button %}
+<div style="text-align: center;">
+    <a href="{{ site_url }}/admin/auth/user/{{ user_id }}/change/" class="button">View User Profile</a>
+</div>
+{% endblock %}

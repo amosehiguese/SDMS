@@ -1,0 +1,28 @@
+{% extends "emails/base/user_base.html" %}
+
+{% block email_title %}Welcome to {{ site_name }}!{% endblock %}
+
+{% block main_content %}
+<h2 style="color: #333; margin-bottom: 20px;">Welcome to {{ site_name }}!</h2>
+
+<p>We're thrilled to have you join our community of smart shoppers. Your account has been successfully created, and you're now ready to explore our amazing deals and flash sales.</p>
+
+<div class="info-box">
+    <h3 style="margin-bottom: 10px; color: #333;">What you can do now:</h3>
+    <ul style="margin-left: 20px;">
+        <li>Browse our latest flash sales and deals</li>
+        <li>Add items to your cart and checkout securely</li>
+        <li>Choose to hold items as assets or get them delivered</li>
+        <li>Track your orders in real-time</li>
+        <li>Sell your held assets through our marketplace</li>
+    </ul>
+</div>
+
+<p>If you have any questions or need assistance, our support team is here to help!</p>
+{% endblock %}
+
+{% block action_button %}
+<div style="text-align: center;">
+    <a href="{{ site_url }}" class="button">Start Shopping</a>
+</div>
+{% endblock %}

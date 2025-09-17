@@ -1,0 +1,54 @@
+{% extends "emails/base/user_base.html" %}
+
+{% block email_title %}Item Submission Update{% endblock %}
+
+{% block main_content %}
+<h2 style="color: #dc3545; margin-bottom: 20px;">Item Submission Update</h2>
+
+<p>Thank you for your item submission. After careful review, we're unable to approve your item for sale at this time.</p>
+
+<div class="info-box" style="border-left-color: #dc3545;">
+    <h3 style="margin-bottom: 15px; color: #333;">Submission Details</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Item Title:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ submission.title }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Submitted Price:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">₦{{ submission.price|floatformat:0 }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0;"><strong>Reviewed:</strong></td>
+            <td style="padding: 8px 0;">{{ submission.reviewed_at|date:"F d, Y at g:i A" }}</td>
+        </tr>
+    </table>
+</div>
+
+{% if submission.admin_notes %}
+<div style="background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0;">
+    <h4 style="color: #721c24; margin-bottom: 10px;">Reason for Rejection:</h4>
+    <p style="color: #721c24; margin: 0;">{{ submission.admin_notes }}</p>
+</div>
+{% endif %}
+
+<div style="background-color: #e7f3ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
+    <h3 style="color: #0056b3; margin-bottom: 10px;">💡 Don't give up!</h3>
+    <p style="color: #0056b3; margin-bottom: 10px;">You can submit your item again with the following improvements:</p>
+    <ul style="margin-left: 20px; color: #0056b3;">
+        <li>Address the feedback provided above</li>
+        <li>Update your item description with more details</li>
+        <li>Ensure your photos are clear and high-quality</li>
+        <li>Check that your pricing is competitive</li>
+        <li>Make sure all required information is complete</li>
+    </ul>
+</div>
+
+<p>Our team is here to help you succeed. If you have questions about the rejection or need guidance on resubmitting, please contact our support team.</p>
+{% endblock %}
+
+{% block action_button %}
+<div style="text-align: center;">
+    <a href="{{ site_url }}/sell-items/submit/" class="button">Submit New Item</a>
+</div>
+{% endblock %}

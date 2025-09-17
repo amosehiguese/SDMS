@@ -1,0 +1,56 @@
+{% extends "emails/base/user_base.html" %}
+
+{% block email_title %}Item Approved for Sale!{% endblock %}
+
+{% block main_content %}
+<h2 style="color: #28a745; margin-bottom: 20px;">🎉 Congratulations! Your Item is Approved</h2>
+
+<p>Great news! Your item submission has been approved and is now live on our marketplace.</p>
+
+<div class="info-box" style="border-left-color: #28a745;">
+    <h3 style="margin-bottom: 15px; color: #333;">Approved Item Details</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Item Title:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ submission.title }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Selling Price:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">₦{{ submission.price|floatformat:0 }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Quantity:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ submission.stock_quantity }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0;"><strong>Approved:</strong></td>
+            <td style="padding: 8px 0;">{{ submission.reviewed_at|date:"F d, Y at g:i A" }}</td>
+        </tr>
+    </table>
+</div>
+
+{% if submission.admin_notes %}
+<div style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
+    <h4 style="color: #155724; margin-bottom: 10px;">Admin Notes:</h4>
+    <p style="color: #155724; margin: 0;">{{ submission.admin_notes }}</p>
+</div>
+{% endif %}
+
+<div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+    <h3 style="color: #856404; margin-bottom: 10px;">💰 What happens when your item sells?</h3>
+    <ul style="margin-left: 20px; color: #856404;">
+        <li>You'll receive an email notification immediately</li>
+        <li>Payment will be processed to your provided bank account</li>
+        <li>We'll handle shipping and customer service</li>
+        <li>You'll receive your earnings within 2-3 business days</li>
+    </ul>
+</div>
+
+<p>Thank you for choosing our platform to sell your items. We're excited to help you reach more customers!</p>
+{% endblock %}
+
+{% block action_button %}
+<div style="text-align: center;">
+    <a href="{{ site_url }}/products/" class="button" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">View Your Item</a>
+</div>
+{% endblock %}

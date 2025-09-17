@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block email_title %}{{ site_name }}{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .email-header {
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .logo {
+            max-width: 200px;
+            max-height: 60px;
+            margin-bottom: 10px;
+        }
+        
+        .site-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #FFD700;
+        }
+        
+        .email-body {
+            padding: 40px 30px;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .content {
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #000;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+        
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #FFD700;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .email-footer {
+            background-color: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .footer-links {
+            margin-bottom: 20px;
+        }
+        
+        .footer-links a {
+            color: #333;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 14px;
+        }
+        
+        .footer-links a:hover {
+            color: #FFD700;
+        }
+        
+        .contact-info {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .copyright {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .social-links {
+            margin: 20px 0;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #333;
+            text-decoration: none;
+        }
+        
+        @media (max-width: 600px) {
+            .email-body {
+                padding: 20px 15px;
+            }
+            
+            .email-footer {
+                padding: 20px 15px;
+            }
+            
+            .site-name {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="email-header">
+            {% if site_logo %}
+                <img src="{{ site_url }}{{ site_logo.url }}" alt="{{ site_name }}" class="logo">
+            {% endif %}
+            <div class="site-name">{{ site_name }}</div>
+        </div>
+        
+        <!-- Body -->
+        <div class="email-body">
+            {% block email_content %}
+            <div class="greeting">
+                Hello {% if user %}{{ user.first_name|default:user.email }}{% else %}there{% endif %}!
+            </div>
+            
+            <div class="content">
+                {% block main_content %}
+                <!-- Main email content goes here -->
+                {% endblock %}
+            </div>
+            
+            {% block action_button %}
+            <!-- action button -->
+            {% endblock %}
+            {% endblock %}
+        </div>
+        
+        <!-- Footer -->
+        <div class="email-footer">
+            <div class="footer-links">
+                <a href="{{ site_url }}">Home</a>
+                <a href="{{ site_url }}/orders/history">My Orders</a>
+                <a href="{{ site_url }}/contact/">Contact Us</a>
+            </div>
+            
+            <div class="contact-info">
+                <div>📧 {{ contact_email }}</div>
+                {% if phone_number %}<div>📞 {{ phone_number }}</div>{% endif %}
+            </div>
+            
+            {% block footer_content %}
+            <!-- Additional footer content -->
+            {% endblock %}
+            
+            <div class="copyright">
+                © {{ year }} {{ site_name }}. All rights reserved.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

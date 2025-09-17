@@ -73,7 +73,7 @@ class Product(BaseModel):
         if not self.slug:
             self.slug = slugify(self.title)
         if not self.sku:
-            self.sku = f"SKU{str(self.id)[:8]}" if self.id else f"SKU{uuid.uuid4().hex[:8]}"
+            self.sku = f"SKU-{str(self.id)[:8]}" if self.id else f"SKU{uuid.uuid4().hex[:8]}"
         super().save(*args, **kwargs)
     
     def get_display_price(self):

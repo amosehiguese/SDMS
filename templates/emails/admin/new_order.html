@@ -1,0 +1,94 @@
+{% extends "emails/base/admin_base.html" %}
+
+{% block email_title %}New Order - {{ order.order_number }}{% endblock %}
+
+{% block alert_title %}🛒 New Order Received{% endblock %}
+
+{% block main_content %}
+<div class="priority-high">
+    <h3 style="margin-bottom: 15px;">New order requiring attention</h3>
+    <p>A new order has been placed and payment has been confirmed.</p>
+</div>
+
+<table class="data-table">
+    <tr>
+        <th>Order Details</th>
+        <th>Information</th>
+    </tr>
+    <tr>
+        <td>Order Number</td>
+        <td><strong>{{ order.order_number }}</strong></td>
+    </tr>
+    <tr>
+        <td>Customer</td>
+        <td>{{ order.user.email }}</td>
+    </tr>
+    <tr>
+        <td>Order Date</td>
+        <td>{{ order.created_at|date:"F d, Y at g:i A" }}</td>
+    </tr>
+    <tr>
+        <td>Total Amount</td>
+        <td><strong>₦{{ order.total|floatformat:0 }}</strong></td>
+    </tr>
+    <tr>
+        <td>Fulfillment Type</td>
+        <td>
+            {% if order.fulfillment_type == 'hold_asset' %}
+                <span style="background-color: #fff3cd; padding: 3px 8px; border-radius: 3px; color: #856404;">Hold as Asset</span>
+            {% else %}
+                <span style="background-color: #d4edda; padding: 3px 8px; border-radius: 3px; color: #155724;">Deliver</span>
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td>Status</td>
+        <td><span style="background-color: #d4edda; padding: 3px 8px; border-radius: 3px; color: #155724;">{{ order.get_status_display }}</span></td>
+    </tr>
+</table>
+
+<h3 style="margin: 25px 0 15px 0;">Order Items:</h3>
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in order.items.all %}
+        <tr>
+            <td>{{ item.product.title }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>₦{{ item.price|floatformat:0 }}</td>
+            <td>₦{{ item.get_total_price|floatformat:0 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if order.fulfillment_type == 'deliver' %}
+<h3 style="margin: 25px 0 15px 0;">Shipping Information:</h3>
+<div class="priority-medium">
+    <strong>{{ order.shipping_address.full_name }}</strong><br>
+    {{ order.shipping_address.full_address }}<br>
+    <strong>Phone:</strong> {{ order.shipping_address.phone }}<br>
+    <strong>Email:</strong> {{ order.shipping_address.email }}
+</div>
+{% endif %}
+
+{% if order.customer_notes %}
+<h3 style="margin: 25px 0 15px 0;">Customer Notes:</h3>
+<div class="priority-low">
+    {{ order.customer_notes }}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block action_button %}
+<div style="text-align: center;">
+    <a href="{{ site_url }}/admin/orders/order/{{ order.id }}/change/" class="button">Process Order</a>
+</div>
+{% endblock %}
