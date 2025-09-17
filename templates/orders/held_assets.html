@@ -61,14 +61,14 @@
                                 <p class="text-sm text-gray-600">
                                     <i class="fas fa-box mr-1"></i>
                                     <strong>{% trans "Remaining Quantity:" %}</strong> 
-                                    {{ asset.order.items.first.quantity }} 
+                                    {{ asset.quantity }}  
                                     {% if asset.order.items.first.quantity == 1 %}{% trans "item" %}{% else %}{% trans "items" %}{% endif %}
                                 </p>
                             </div>
                             
                             <div class="flex space-x-2">
                                 {% if asset.order.status == 'paid' %}
-                                    <button onclick="liquidateAsset('{{ asset.order.id }}')" 
+                                    <button onclick="liquidateAsset('{{ asset.order.id }}', '{{ asset.product.id }}')" 
                                             class="flex-1 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
                                         <i class="fas fa-shipping-fast mr-1"></i>
                                         {% trans "Liquidate" %}
@@ -184,9 +184,11 @@
 
 <script>
 let currentAssetId = null;
+let currentAssetProductId = null;
 
-function liquidateAsset(orderId) {
+function liquidateAsset(orderId, productId) {
     currentAssetId = orderId;
+    currentAssetProductId = productId;
     loadShippingAddresses();
     document.getElementById('liquidation-modal').classList.remove('hidden');
 }
@@ -284,8 +286,6 @@ document.getElementById('liquidation-form').addEventListener('submit', function(
         return;
     }
 
-    console.log(selectedProductId)
-
     fetch(`/orders/ajax/liquidate/${currentAssetId}/`, {
         method: 'POST',
         headers: {
@@ -294,7 +294,7 @@ document.getElementById('liquidation-form').addEventListener('submit', function(
         },
         body: JSON.stringify({
             address_id: addressId,
-            product_id: selectedProductId,
+            product_id: currentAssetProductId,
             quantity: quantity
         })
     })

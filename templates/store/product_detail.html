@@ -395,17 +395,17 @@
                         <div class="flex items-center justify-between mb-3">
                             <span class="text-lg font-bold text-amber-700">₦{{ product.get_display_price|floatformat:0 }}</span>
                         </div>
-                        {% if product.is_in_stock %}
-                            <button onclick="addToCartRelated('{{ product.id }}')" class="w-full bg-amber-700 text-white py-2 rounded hover:bg-amber-800 transition">
-                                Add to Cart
-                            </button>
-                        {% else %}
-                            <button class="w-full bg-gray-400 text-white py-2 rounded cursor-not-allowed">
-                                Out of Stock
-                            </button>
-                        {% endif %}
                     </a>
-                </div>
+                    {% if product.is_in_stock %}
+                        <button onclick="addToCartRelated('{{ product.id }}')" class="w-full bg-amber-700 text-white py-2 rounded hover:bg-amber-800 transition">
+                            Add to Cart
+                        </button>
+                    {% else %}
+                        <button class="w-full bg-gray-400 text-white py-2 rounded cursor-not-allowed">
+                            Out of Stock
+                        </button>
+                    {% endif %}
+            </div>
             </div>
             {% endfor %}
         </div>
@@ -591,7 +591,6 @@ function addToCartRelated(productId) {
     $.post('{% url "orders:add_to_cart" %}', {
         product_id: productId,
         quantity: 1,
-        fulfillment_type: 'deliver',
         csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
     })
     .done(function(response) {

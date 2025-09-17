@@ -81,13 +81,21 @@
                         <!-- Social Share -->
                         <div class="flex items-center space-x-2">
                             <span class="text-sm text-gray-500">Share:</span>
-                            <a href="#" class="text-gray-400 hover:text-blue-600 transition-colors">
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
+                                target="_blank" rel="noopener noreferrer"
+                                class="text-gray-400 hover:text-blue-600 transition-colors">
                                 <i class="fab fa-facebook"></i>
                             </a>
-                            <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors">
+                            
+                            <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ post.title }}"
+                                target="_blank" rel="noopener noreferrer"
+                                class="text-gray-400 hover:text-blue-400 transition-colors">
                                 <i class="fab fa-twitter"></i>
                             </a>
-                            <a href="#" class="text-gray-400 hover:text-blue-800 transition-colors">
+                            
+                            <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}&title={{ post.title }}&summary={{ post.excerpt|default:post.title }}"
+                                target="_blank" rel="noopener noreferrer"
+                                class="text-gray-400 hover:text-blue-800 transition-colors">
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
@@ -95,9 +103,15 @@
                 </div>
                 
                 <!-- Post Image Placeholder -->
-                <div class="h-64 bg-gradient-to-br from-amber-100 to-yellow-200 flex items-center justify-center">
-                    <i class="fas fa-newspaper text-6xl text-amber-600"></i>
-                </div>
+                {% if post.featured_image %}
+                <img src="{{ post.featured_image.url }}" 
+                        alt="{{ post.title }}" 
+                        class="h-48 w-full object-cover">
+                {% else %}
+                    <div class="h-48 bg-gradient-to-br from-amber-100 to-yellow-200 flex items-center justify-center">
+                        <i class="fas fa-newspaper text-4xl text-amber-600"></i>
+                    </div>
+                {% endif %}
                 
                 <!-- Post Content -->
                 <div class="p-8">
@@ -124,13 +138,21 @@
                         
                         <div class="flex items-center space-x-2">
                             <span class="text-sm text-gray-500">Share this article:</span>
-                            <a href="#" class="text-gray-400 hover:text-blue-600 transition-colors">
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
+                                target="_blank" rel="noopener noreferrer"
+                                class="text-gray-400 hover:text-blue-600 transition-colors">
                                 <i class="fab fa-facebook"></i>
                             </a>
-                            <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors">
+                            
+                            <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ post.title }}"
+                                target="_blank" rel="noopener noreferrer"
+                                class="text-gray-400 hover:text-blue-400 transition-colors">
                                 <i class="fab fa-twitter"></i>
                             </a>
-                            <a href="#" class="text-gray-400 hover:text-blue-800 transition-colors">
+                            
+                            <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}&title={{ post.title }}&summary={{ post.excerpt|default:post.title }}"
+                                target="_blank" rel="noopener noreferrer"
+                                class="text-gray-400 hover:text-blue-800 transition-colors">
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
@@ -220,9 +242,15 @@
                     <div class="space-y-4">
                         {% for related_post in related_posts %}
                         <div class="flex space-x-3">
-                            <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-file-alt text-gray-500"></i>
-                            </div>
+                            {% if related_post.featured_image %}
+                                <img src="{{ related_post.featured_image.url }}" 
+                                    alt="{{ related_post.title }}" 
+                                    class="w-16 h-16 rounded object-cover flex-shrink-0">
+                            {% else %}
+                                <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-file-alt text-gray-500"></i>
+                                </div>
+                            {% endif %}
                             <div class="flex-1 min-w-0">
                                 <h4 class="font-medium text-gray-900 mb-1 line-clamp-2">
                                     <a href="{{ related_post.get_absolute_url }}" class="hover:text-amber-700 transition-colors">
@@ -236,21 +264,6 @@
                     </div>
                 </div>
                 {% endif %}
-                
-                <!-- Newsletter Signup -->
-                <div class="bg-gradient-to-br from-amber-50 to-yellow-100 rounded-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Stay Updated</h3>
-                    <p class="text-sm text-gray-600 mb-4">Get the latest articles delivered to your inbox.</p>
-                    <form class="space-y-3">
-                        <input type="email" 
-                               placeholder="Your email address" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm">
-                        <button type="submit" 
-                                class="w-full bg-amber-600 text-white py-2 rounded font-medium hover:bg-amber-700 transition-colors text-sm">
-                            Subscribe
-                        </button>
-                    </form>
-                </div>
             </div>
         </div>
     </div>

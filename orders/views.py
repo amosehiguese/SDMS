@@ -456,7 +456,6 @@ def liquidate_asset(request, order_id):
 
         data = json.loads(request.body)
         address_id = data.get('address_id')
-        order_item_id = data.get("order_item_id")
         product_id = data.get('product_id')
         quantity_to_liquidate = int(data.get('quantity', 0))
 
@@ -467,13 +466,9 @@ def liquidate_asset(request, order_id):
 
         shipping_address = get_object_or_404(ShippingAddress, id=address_id, user=request.user)
         order_item = get_object_or_404(order.items, product_id=product_id)
-
+        
         if quantity_to_liquidate > order_item.quantity:
             return JsonResponse({'success': False, 'error': 'Quantity exceeds available amount'})
-
-        # Perform liquidation
-        if not order.liquidate_assets(shipping_address):
-            return JsonResponse({'success': False, 'error': 'Failed to liquidate asset'})
 
         # Create new order
         new_order = Order.objects.create(
@@ -494,7 +489,10 @@ def liquidate_asset(request, order_id):
 
         # Deduct from original order item
         order_item.quantity -= quantity_to_liquidate
-        order_item.save()
+        if order_item.quantity == 0:
+            order_item.delete()
+        else:
+            order_item.save()
 
         # Recalculate totals for both orders
         order.calculate_totals()

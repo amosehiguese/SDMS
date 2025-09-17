@@ -52,11 +52,20 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {% for post in page_obj %}
             <article class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
-                <!-- Post Image Placeholder -->
-                <div class="h-48 bg-gradient-to-br from-amber-100 to-yellow-200 flex items-center justify-center">
-                    <i class="fas fa-newspaper text-4xl text-amber-600"></i>
-                </div>
-                
+                {% if post.featured_image %}
+                    <a href="{{ post.get_absolute_url }}">
+                        <img src="{{ post.featured_image.url }}" 
+                            alt="{{ post.title }}" 
+                            class="h-48 w-full object-cover">
+                    </a>
+                {% else %}
+                    <a href="{{ post.get_absolute_url }}">
+                        <div class="h-48 bg-gradient-to-br from-amber-100 to-yellow-200 flex items-center justify-center">
+                            <i class="fas fa-newspaper text-4xl text-amber-600"></i>
+                        </div>
+                    </a>
+                {% endif %}
+            
                 <div class="p-6">
                     <!-- Category and Tags -->
                     <div class="flex items-center space-x-2 mb-3">

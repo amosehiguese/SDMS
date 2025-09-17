@@ -267,16 +267,6 @@ class Order(BaseModel):
     def has_hold_items(self):
         return self.items.filter(purchase_option='hold').exists()
         
-    def liquidate_assets(self, shipping_address):
-        """Convert held assets to delivery order"""
-        if self.fulfillment_type == 'hold_asset' and self.status == 'paid':
-            self.fulfillment_type = 'deliver'
-            self.shipping_address = shipping_address
-            self.status = 'paid'  # Keep paid status
-            self.calculate_totals()  # Recalculate with shipping
-            self.save()
-            return True
-        return False
 
 class OrderItem(BaseModel):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
