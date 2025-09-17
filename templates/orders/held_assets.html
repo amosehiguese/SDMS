@@ -118,51 +118,69 @@
 </div>
 
 <!-- Liquidation Modal -->
-<div id="liquidation-modal" class="fixed inset-0 bg-gray-600 opacity-75 hidden z-50">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">
-                {% trans "Liquidate Asset" %}
-            </h3>
-            
-            <form id="liquidation-form">
-                {% csrf_token %}
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            {% trans "Shipping Address" %}
-                        </label>
-                        <select id="shipping-address" required 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
-                            <option value="">{% trans "Select an address" %}</option>
-                            <!-- Addresses will be loaded here -->
-                        </select>
-                    </div>
-                    
-                    <div class="text-sm text-gray-600">
-                        <p>{% trans "By liquidating this asset, you agree to:" %}</p>
-                        <ul class="list-disc list-inside mt-2 space-y-1">
-                            <li>{% trans "Provide a valid shipping address" %}</li>
-                            <li>{% trans "Pay any additional shipping costs" %}</li>
-                            <li>{% trans "Asset will be shipped to the provided address" %}</li>
-                        </ul>
-                    </div>
+<div id="liquidation-modal" class="fixed inset-0 hidden z-50 flex items-center justify-center p-4">
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black opacity-50"></div>
+
+    <!-- Modal Content -->
+    <div class="relative bg-white rounded-lg max-w-md w-full p-6 shadow-lg">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">
+            {% trans "Liquidate Asset" %}
+        </h3>
+        
+        <form id="liquidation-form">
+            {% csrf_token %}
+            <div class="space-y-4">
+                <!-- Shipping Address -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        {% trans "Shipping Address" %}
+                    </label>
+                    <select id="shipping-address" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
+                        <option value="">{% trans "Select an address" %}</option>
+                        <!-- Addresses will be loaded here -->
+                    </select>
+                </div>
+
+                <!-- Quantity -->
+                <div>
+                    <label for="liquidation-quantity" class="block text-sm font-medium text-gray-700 mb-1">
+                        {% trans "Quantity to Liquidate" %}
+                    </label>
+                    <input type="number" id="liquidation-quantity" name="quantity" min="1" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                           placeholder="{% trans 'Enter quantity' %}">
+                    <p id="max-quantity-hint" class="mt-1 text-xs text-gray-500"></p>
                 </div>
                 
-                <div class="flex space-x-3 mt-6">
-                    <button type="button" onclick="closeLiquidationModal()" 
-                            class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-                        {% trans "Cancel" %}
-                    </button>
-                    <button type="submit" 
-                            class="flex-1 px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700">
-                        {% trans "Confirm Liquidation" %}
-                    </button>
+                <!-- Info -->
+                <div class="text-sm text-gray-600">
+                    <p>{% trans "By liquidating this asset, you agree to:" %}</p>
+                    <ul class="list-disc list-inside mt-2 space-y-1">
+                        <li>{% trans "Provide a valid shipping address" %}</li>
+                        <li>{% trans "Pay any additional shipping costs" %}</li>
+                        <li>{% trans "Asset will be shipped to the provided address" %}</li>
+                    </ul>
                 </div>
-            </form>
-        </div>
+            </div>
+            
+            <!-- Buttons -->
+            <div class="flex space-x-3 mt-6">
+                <button type="button" onclick="closeLiquidationModal()" 
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                    {% trans "Cancel" %}
+                </button>
+                <button type="submit" 
+                        class="flex-1 px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700">
+                    {% trans "Confirm Liquidation" %}
+                </button>
+            </div>
+        </form>
     </div>
 </div>
+
+
 
 <script>
 let currentAssetId = null;
@@ -179,8 +197,7 @@ function closeLiquidationModal() {
 }
 
 function loadShippingAddresses() {
-    // Load user's shipping addresses via AJAX
-    fetch('{% url "orders:get_shipping_addresses" %}')  // This should be an AJAX endpoint
+    fetch('{% url "orders:get_shipping_addresses" %}')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -250,19 +267,25 @@ function showNotification(message, type = 'info') {
         }, 300);
     }, 3000);
 }
-
 document.getElementById('liquidation-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    
+
     if (!currentAssetId) return;
-    
+
     const addressId = document.getElementById('shipping-address').value;
+    const quantity = document.getElementById('liquidation-quantity').value;
+
     if (!addressId) {
-        showNotification("Please select a shipping address", "error")
+        showNotification("Please select a shipping address", "error");
         return;
     }
-    
-    // Submit liquidation request
+    if (!quantity || quantity <= 0) {
+        showNotification("Please enter a valid quantity", "error");
+        return;
+    }
+
+    console.log(selectedProductId)
+
     fetch(`/orders/ajax/liquidate/${currentAssetId}/`, {
         method: 'POST',
         headers: {
@@ -270,22 +293,25 @@ document.getElementById('liquidation-form').addEventListener('submit', function(
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
         },
         body: JSON.stringify({
-            address_id: addressId
+            address_id: addressId,
+            product_id: selectedProductId,
+            quantity: quantity
         })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showNotification("Asset liquidation initiated successfully!", "succes");
+            showNotification(data.message, "success");
             location.reload();
         } else {
-            showNotification(data.message || "Error liquidating asset", "error");
+            showNotification(data.error || "Error liquidating asset", "error");
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showNotification("Error liquidating asset", "error")
+        showNotification("Error liquidating asset", "error");
     });
 });
+
 </script>
 {% endblock %}

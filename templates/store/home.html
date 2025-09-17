@@ -99,10 +99,10 @@
     <div class="container mx-auto px-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
             <div class="flex items-center justify-center space-x-3">
-                <i class="fas fa-shipping-fast text-amber-700 text-2xl"></i>
+                <i class="fas fa-certificate text-amber-700 text-2xl"></i>
                 <div>
-                    <h3 class="font-semibold">Free Shipping</h3>
-                    <p class="text-sm text-gray-600">On orders over ₦{{ site_config.free_shipping_threshold|floatformat:0|default:"50000" }}</p>
+                    <h3 class="font-semibold">Quality Guarantee</h3>
+                    <p class="text-sm text-gray-600">Premium products you can trust</p>
                 </div>
             </div>
             <div class="flex items-center justify-center space-x-3">
@@ -113,10 +113,10 @@
                 </div>
             </div>
             <div class="flex items-center justify-center space-x-3">
-                <i class="fas fa-undo text-amber-700 text-2xl"></i>
+                <i class="fas fa-headset text-amber-700 text-2xl"></i>
                 <div>
-                    <h3 class="font-semibold">Easy Returns</h3>
-                    <p class="text-sm text-gray-600">30-day return policy</p>
+                    <h3 class="font-semibold">24/7 Support</h3>
+                    <p class="text-sm text-gray-600">We’re always here to help you</p>
                 </div>
             </div>
         </div>
@@ -126,19 +126,20 @@
 <!-- Categories Section (Carousel) -->
 <section class="py-12">
     <div class="container mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center mb-8">Shop by Category</h2>
+        <h2 class="text-3xl font-bold text-center mb-4">Explore your interests</h2>
         <div class="relative">
             <button type="button" aria-label="Previous" class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow rounded-full p-2" onclick="scrollCategories(-1)"><i class="fas fa-chevron-left"></i></button>
-            <div id="categories-scroll" class="categories-scroll-container overflow-hidden px-10">
+            <div id="categories-scroll" class="categories-scroll-container overflow-hidden px-10 py-4">
                 <div id="categories-track" class="categories-track">
-            {% for category in categories %}
-                    <div class="category-card bg-white rounded-lg shadow-md p-4 text-center hover:shadow-lg transition-shadow cursor-pointer" onclick="searchProducts('{{ category.name }}')">
-                <div class="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-                    <i class="fas fa-{{ category.icon|default:'tag' }} text-amber-700 text-2xl"></i>
-                </div>
-                <h3 class="font-semibold text-sm">{{ category.name }}</h3>
-            </div>
-            {% endfor %}
+                    <div class="category-card bg-white rounded-lg shadow-xl p-4 text-center hover:shadow-lg transition-shadow cursor-pointer" onclick="searchProducts(null)">
+                        <h3 class="font-semibold text-sm">All Products</h3>
+                    </div>
+                    
+                    {% for category in categories %}
+                    <div class="category-card bg-white rounded-lg shadow-xl p-4 text-center hover:shadow-lg transition-shadow cursor-pointer" onclick="searchProducts('{{ category.name }}')">
+                        <h3 class="font-semibold text-sm">{{ category.name }}</h3>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
             <button type="button" aria-label="Next" class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow rounded-full p-2" onclick="scrollCategories(1)"><i class="fas fa-chevron-right"></i></button>
@@ -175,6 +176,7 @@
 let currentPage = 1;
 let isLoading = false;
 let hasMoreProducts = true;
+let currentCategory = null; 
 
 $(document).ready(function() {
     loadProducts();
@@ -186,29 +188,32 @@ $(document).ready(function() {
     {% endif %}
 });
 
-function loadProducts(page = 1, append = false) {
+function loadProducts(page = 1, append = false, category = null) {
     if (isLoading) return;
-    
+
     isLoading = true;
     showLoading();
-    
+
     $.get('{% url "store:home_products" %}', {
         page: page,
-        featured: true
+        category: category || currentCategory
     })
     .done(function(response) {
         hideLoading();
+
         if (append) {
             $('#products-container').append(response.products_html);
         } else {
             $('#products-container').html(response.products_html);
         }
-        
+
         hasMoreProducts = response.has_next;
         currentPage = page;
-        
+
         if (!hasMoreProducts) {
             $('#load-more-container').hide();
+        } else {
+            $('#load-more-container').show();
         }
     })
     .fail(function() {
@@ -221,12 +226,14 @@ function loadProducts(page = 1, append = false) {
     });
 }
 
+
 function loadMoreProducts() {
     if (hasMoreProducts && !isLoading) {
         $('#loading-indicator').removeClass('hidden');
-        loadProducts(currentPage + 1, true);
+        loadProducts(currentPage + 1, true, currentCategory);
     }
 }
+
 
 function initializeInfiniteScroll() {
     $(window).scroll(function() {
@@ -242,9 +249,55 @@ function scrollCategories(direction) {
     container.scrollBy({ left: direction * itemWidth * 3, behavior: 'smooth' });
 }
 
-function searchProducts(query) {
-    window.location.href = '{% url "store:product_list" %}?search=' + encodeURIComponent(query);
+function searchProducts(categoryName) {
+    currentCategory = categoryName; 
+    currentPage = 1;
+    hasMoreProducts = true;
+
+    $('#loading-indicator').removeClass('hidden');
+
+    loadProducts(1, false, categoryName);
 }
+
+function loadProducts(page = 1, append = false, category = null) {
+    if (isLoading) return;
+
+    isLoading = true;
+    showLoading();
+
+    $.get('{% url "store:home_products" %}', {
+        page: page,
+        featured: !category,   
+        category: category || currentCategory
+    })
+    .done(function(response) {
+        hideLoading();
+
+        if (append) {
+            $('#products-container').append(response.products_html);
+        } else {
+            $('#products-container').html(response.products_html);
+        }
+
+        hasMoreProducts = response.has_next;
+        currentPage = page;
+
+        if (!hasMoreProducts) {
+            $('#load-more-container').hide();
+        } else {
+            $('#load-more-container').show();
+        }
+    })
+    .fail(function() {
+        hideLoading();
+        showNotification('Error loading products', 'error');
+    })
+    .always(function() {
+        isLoading = false;
+        $('#loading-indicator').addClass('hidden');
+    });
+}
+
 
 function addToCart(productId) {
     showLoading();

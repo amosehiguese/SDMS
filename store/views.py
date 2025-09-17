@@ -29,28 +29,26 @@ def home(request):
         'categories': categories,
     })
 
-
 def home_products(request):
-    """AJAX endpoint for loading products on home page"""
     page = int(request.GET.get('page', 1))
-    featured = request.GET.get('featured', 'false').lower() == 'true'
-    
+    category_name = request.GET.get('category')
+
+    # Start with all active products
     products = Product.objects.filter(is_active=True).select_related('category').prefetch_related('images')
-    
-    if featured:
-        products = products.filter(is_featured=True)
-    
-    # Pagination
+
+    # If a category is chosen, filter by it
+    if category_name:
+        products = products.filter(category__name__iexact=category_name)
+    else:
+        # No category: order with featured first, then others
+        products = products.order_by('-is_featured', '-id')  # adjust ordering as needed
+
     paginator = Paginator(products, 20)
     page_obj = paginator.get_page(page)
-    
-    # Generate product cards HTML
+
     products_html = ''
     for product in page_obj:
-        image_url = None
-        if product.images.exists():
-            image_url = product.images.first().image.url
-        
+        image_url = product.images.first().image.url if product.images.exists() else None
         products_html += f'''
         <div class="product-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow group">
             <div class="relative">
@@ -73,31 +71,31 @@ def home_products(request):
             </div>
         </div>
         '''
-    
+
     return JsonResponse({
         'products_html': products_html,
         'has_next': page_obj.has_next(),
-        'has_previous': page_obj.has_previous(),
         'page_number': page_obj.number,
         'total_pages': paginator.num_pages,
     })
 
 
-def product_list(request, category_slug=None):
-    """Product listing with filters - only accessible via search"""
-    # Check if this is a search request
-    search_query = request.GET.get('search')
-    print(search_query)
 
+
+def product_list(request, category_slug=None):
+    """Product listing with filters"""
+    # Get search query from URL parameters
+    search_query = request.GET.get('search', '').strip()
+    
     products = Product.objects.filter(is_active=True).select_related('category').prefetch_related('images')
     categories = Category.objects.filter(is_active=True)
-
 
     current_category = None
     if category_slug:
         current_category = get_object_or_404(Category, slug=category_slug, is_active=True)
         products = products.filter(category=current_category)
 
+    # Apply search filter
     if search_query:
         products = products.filter(
             Q(title__icontains=search_query) |
@@ -108,7 +106,10 @@ def product_list(request, category_slug=None):
     # Additional filters
     category_id = request.GET.get('category')
     if category_id:
-        products = products.filter(category_id=category_id)
+        try:
+            products = products.filter(category_id=int(category_id))
+        except (ValueError, TypeError):
+            pass
     
     # Price filter
     price_range = request.GET.get('price')
@@ -136,40 +137,13 @@ def product_list(request, category_slug=None):
         products = products.order_by('-created_at')
     
     # Pagination
-    paginator = Paginator(products, 20)
+    paginator = Paginator(products, 2)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
     
+    # Handle AJAX requests for filtering
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        # Generate product cards HTML for AJAX
-        products_html = ''
-        for product in page_obj:
-            image_url = None
-            if product.images.exists():
-                image_url = product.images.first().image.url
-            
-            products_html += f'''
-            <div class="product-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow group">
-                <div class="relative">
-                    {f'<img src="{image_url}" alt="{product.title}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform">' if image_url else '<div class="w-full h-48 bg-gray-200 flex items-center justify-center"><i class="fas fa-image text-gray-400 text-3xl"></i></div>'}
-                    {f'<div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold"><i class="fas fa-bolt"></i> {product.get_savings_percentage()}% OFF</div>' if product.has_active_flash_sale() else ''}
-                    <button onclick="addToCart('{product.id}')" class="absolute bottom-2 right-2 bg-amber-700 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition">
-                        <i class="fas fa-shopping-cart"></i>
-                    </button>
-                </div>
-                <div class="p-4">
-                    <a href="/product/{product.slug}/" class="block">
-                        <h3 class="font-semibold mb-2 hover:text-amber-700 transition-colors line-clamp-2">{product.title}</h3>
-                        {f'<p class="text-gray-500 text-xs mb-2">{product.category.name}</p>' if product.category else ''}
-                        <div class="flex items-center justify-between mb-3">
-                            <div>
-                                {f'<span class="text-lg font-bold text-amber-700">₦{product.get_display_price()}</span><span class="text-gray-500 line-through text-sm ml-1">₦{product.price}</span>' if product.sale_price else f'<span class="text-lg font-bold text-amber-700">₦{product.get_display_price()}</span>'}
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-            '''
+        products_html = generate_product_cards_html(page_obj)
         
         return JsonResponse({
             'products_html': products_html,
@@ -177,6 +151,7 @@ def product_list(request, category_slug=None):
             'has_previous': page_obj.has_previous(),
             'page_number': page_obj.number,
             'total_pages': paginator.num_pages,
+            'total_products': paginator.count,
         })
     
     return render(request, 'store/product_list.html', {
@@ -186,6 +161,52 @@ def product_list(request, category_slug=None):
         'search_query': search_query,
         'total_products': paginator.count,
     })
+
+
+def generate_product_cards_html(page_obj):
+    """Helper function to generate product cards HTML"""
+    products_html = ''
+    for product in page_obj:
+        image_url = None
+        if product.images.exists():
+            image_url = product.images.first().image.url
+        
+        flash_sale_badge = ''
+        if product.has_active_flash_sale():
+            flash_sale_badge = f'<div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold"><i class="fas fa-bolt"></i> {product.get_savings_percentage()}% OFF</div>'
+        
+        image_html = f'<img src="{image_url}" alt="{product.title}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform">' if image_url else '<div class="w-full h-48 bg-gray-200 flex items-center justify-center"><i class="fas fa-image text-gray-400 text-3xl"></i></div>'
+        
+        category_html = f'<p class="text-gray-500 text-xs mb-2">{product.category.name}</p>' if product.category else ''
+        
+        price_html = f'<span class="text-lg font-bold text-amber-700">₦{product.get_display_price()}</span>'
+        if product.sale_price:
+            price_html += f'<span class="text-gray-500 line-through text-sm ml-1">₦{product.price}</span>'
+        
+        products_html += f'''
+        <div class="product-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow group">
+            <div class="relative">
+                {image_html}
+                {flash_sale_badge}
+                <button onclick="addToCart('{product.id}')" class="absolute bottom-2 right-2 bg-amber-700 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition">
+                    <i class="fas fa-shopping-cart"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <a href="/product/{product.slug}/" class="block">
+                    <h3 class="font-semibold mb-2 hover:text-amber-700 transition-colors line-clamp-2">{product.title}</h3>
+                    {category_html}
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            {price_html}
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        '''
+    
+    return products_html
 
 
 def product_detail(request, slug):

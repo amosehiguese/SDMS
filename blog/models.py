@@ -62,6 +62,7 @@ class BlogPost(BaseModel):
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     excerpt = models.TextField(max_length=500, blank=True, help_text="Short description for post previews")
+    featured_image = models.ImageField(upload_to='blog/', blank=True, help_text="Featured image for the blog post")
     
     # Content
     content = models.TextField(help_text="Write your post in Markdown")

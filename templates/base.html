@@ -48,7 +48,6 @@
         }
     </style>
     
-    <!-- AJAX Setup -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <meta name="csrf-token" content="{{ csrf_token }}">
     
@@ -61,17 +60,26 @@
         <div class="container mx-auto">
             <div class="flex flex-col sm:flex-row justify-between items-center space-y-1 sm:space-y-0">
                 <div class="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-6 text-center sm:text-left">
+                    {% if site_config.free_shipping_threshold > 0 %}
                     <span class="flex items-center justify-center sm:justify-start">
                         <i class="fas fa-shipping-fast mr-1"></i> 
                         <span class="hidden sm:inline">Free shipping on orders over </span>
                         <span class="sm:hidden">Free shipping over </span>
                         ₦{{ site_config.free_shipping_threshold|floatformat:0|default:"50000" }}
                     </span>
+                    {% else %}
+                    <span class="flex items-center justify-center sm:justify-start">
+                        <i class="fas fa-lock mr-1"></i> 
+                        Secure Payment
+                    </span>
+                    {% endif %}
+                
                     <span class="flex items-center justify-center sm:justify-start">
                         <i class="fas fa-phone mr-1"></i> 
                         {{ site_config.phone_number|default:"+234 XXX XXX XXXX" }}
                     </span>
                 </div>
+                
                 <div class="flex space-x-3 sm:space-x-4">
                     {% if user.is_authenticated %}
                         <a href="{% url 'core:profile' %}" class="hover:text-amber-200 text-xs sm:text-sm">
@@ -129,10 +137,10 @@
                     <!-- User Account -->
                     {% if user.is_authenticated %}
                         <div class="relative group">
-                            <div class="hover:text-amber-700">
+                            <button id="profile-toggle"  class="hover:text-amber-700 focus:outline-none">
                                 <i class="fas fa-user text-lg sm:text-xl"></i>
-                            </div>
-                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                            </button>
+                            <div id="profile-dropdown"  class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                                 <a href="{% url 'core:profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <i class="fas fa-user mr-2"></i>Profile
                                 </a>
@@ -171,11 +179,6 @@
                             </div>
                         </div>
                     {% endif %}
-                    
-                    <!-- Mobile Menu Toggle -->
-                    <button class="md:hidden" onclick="toggleMobileMenu()">
-                        <i class="fas fa-bars text-lg sm:text-xl"></i>
-                    </button>
                 </div>
             </div>
         </div>
@@ -377,6 +380,25 @@
             }
         });
 
+        $(document).ready(function () {
+            const $btn = $('#userMenuButton');
+            const $menu = $('#userMenuDropdown');
+
+            // Desktop: still works with hover via Tailwind classes
+            // Mobile: toggle on click
+            $btn.on('click', function (e) {
+                e.preventDefault();
+                $menu.toggleClass('opacity-0 invisible opacity-100 visible');
+            });
+
+            // Close when clicking outside
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('#userMenuButton, #userMenuDropdown').length) {
+                    $menu.removeClass('opacity-100 visible').addClass('opacity-0 invisible');
+                }
+            });
+        });
+
         // Show/Hide loading overlay
         function showLoading() {
             $('#loading-overlay').removeClass('hidden');
@@ -386,16 +408,27 @@
             $('#loading-overlay').addClass('hidden');
         }
 
-        // Mobile menu toggle
-        function toggleMobileMenu() {
-            // Implementation for mobile menu
-            console.log('Mobile menu toggled');
-        }
-
         // Load cart count on page load
         $(document).ready(function() {
             loadCartCount();
             initializeSearch();
+
+            $('#profile-toggle').on('click', function(e) {
+                e.stopPropagation();
+                const dropdown = $('#profile-dropdown');
+                
+                // On mobile, toggle the dropdown
+                if (window.innerWidth < 768) { // md breakpoint
+                    dropdown.toggleClass('opacity-0 invisible');
+                }
+            });
+            
+            // Close dropdown when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.group').length) {
+                    $('#profile-dropdown').addClass('opacity-0 invisible');
+                }
+            });
         });
 
         function loadCartCount() {

@@ -1,3 +1,4 @@
+import json
 from datetime import timezone, timedelta
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
@@ -446,29 +447,70 @@ def get_shipping_addresses(request):
 @require_http_methods(["POST"])
 @login_required
 def liquidate_asset(request, order_id):
-    """AJAX endpoint to liquidate held assets"""
+    """AJAX endpoint to liquidate held assets with partial quantity support"""
     try:
         order = get_object_or_404(Order, id=order_id, user=request.user)
-        
+
         if order.fulfillment_type != 'hold_asset' or order.status != 'paid':
             return JsonResponse({'success': False, 'error': 'Order cannot be liquidated'})
-        
-        address_id = request.POST.get('shipping_address_id')
+
+        data = json.loads(request.body)
+        address_id = data.get('address_id')
+        order_item_id = data.get("order_item_id")
+        product_id = data.get('product_id')
+        quantity_to_liquidate = int(data.get('quantity', 0))
+
         if not address_id:
             return JsonResponse({'success': False, 'error': 'Shipping address is required'})
-        
+        if quantity_to_liquidate <= 0:
+            return JsonResponse({'success': False, 'error': 'Invalid quantity'})
+
         shipping_address = get_object_or_404(ShippingAddress, id=address_id, user=request.user)
-        
-        if order.liquidate_assets(shipping_address):
-            return JsonResponse({
-                'success': True,
-                'message': 'Asset liquidated successfully. Your order will be shipped soon.'
-            })
-        
-        return JsonResponse({'success': False, 'error': 'Failed to liquidate asset'})
-        
+        order_item = get_object_or_404(order.items, product_id=product_id)
+
+        if quantity_to_liquidate > order_item.quantity:
+            return JsonResponse({'success': False, 'error': 'Quantity exceeds available amount'})
+
+        # Perform liquidation
+        if not order.liquidate_assets(shipping_address):
+            return JsonResponse({'success': False, 'error': 'Failed to liquidate asset'})
+
+        # Create new order
+        new_order = Order.objects.create(
+            user=request.user,
+            fulfillment_type='deliver',
+            shipping_address=shipping_address,
+            status=order.status,
+            customer_notes=f"Liquidated from order #{order.id}"
+        )
+
+        # Create new order item with specified quantity
+        OrderItem.objects.create(
+            order=new_order,
+            product=order_item.product,
+            quantity=quantity_to_liquidate,
+            price=order_item.price
+        )
+
+        # Deduct from original order item
+        order_item.quantity -= quantity_to_liquidate
+        order_item.save()
+
+        # Recalculate totals for both orders
+        order.calculate_totals()
+        new_order.calculate_totals()
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Asset liquidated successfully. Your order has been created.',
+            'new_order_id': str(new_order.id),
+            'redirect_url': reverse('orders:order_detail', args=[new_order.id])
+        })
+
     except Exception as e:
+        print(f"Liquidation error: {e}")
         return JsonResponse({'success': False, 'error': 'An error occurred'})
+
 
 @login_required
 def shipping_addresses(request):

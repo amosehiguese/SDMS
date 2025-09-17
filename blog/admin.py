@@ -44,7 +44,7 @@ class BlogPostAdmin(ModelAdmin):
             'fields': ('title', 'slug', 'excerpt', 'author')
         }),
         ('Content', {
-            'fields': ('content', 'content_html'),
+            'fields': ('content', 'content_html', 'featured_image'),
             'classes': ('wide',)
         }),
         ('Categorization', {
