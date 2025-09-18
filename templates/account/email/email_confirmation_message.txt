@@ -1,6 +1,6 @@
 {% load i18n %}{% autoescape off %}
 {% blocktrans with user_display=user.get_username site_name=current_site.name %}
-Hello from {{ site_name }}!
+Hello!
 
 You're receiving this e-mail because you have signed up for an account at {{ site_name }}.
 

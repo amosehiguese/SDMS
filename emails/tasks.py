@@ -47,9 +47,15 @@ def send_admin_email_task(self, email_type, context=None):
 def send_user_email_task(self, email_type, user_id, context=None):
     """
     Async task to send emails to specific user by ID
+    
+    FIXED: Now properly handles user retrieval and context serialization
     """
     try:
         user = User.objects.get(id=user_id)
+        
+        if context is None:
+            context = {}
+        
         success = EmailService.send_user_email(email_type, user, context)
         if not success:
             raise Exception(f"Failed to send user email type: {email_type}")
@@ -89,50 +95,38 @@ def send_receipt_email_task(order_id):
     """
     Special task for sending receipt emails with PDF generation
     """
-    from orders.models import Order, Receipt
-    from django.utils import timezone
-    
     try:
+        from orders.models import Order, Receipt
+        
         order = Order.objects.get(id=order_id)
-        receipt, created = Receipt.objects.get_or_create(order=order)
         
-        # Generate receipt data if needed
-        if not receipt.receipt_data:
-            receipt.receipt_data = {
-                'order_number': order.order_number,
-                'total': str(order.total),
-                'items': [
-                    {
-                        'title': item.product.title,
-                        'quantity': item.quantity,
-                        'price': str(item.price),
-                        'total': str(item.get_total_price())
-                    }
-                    for item in order.items.all()
-                ],
-                'payment_date': order.paid_at.isoformat() if order.paid_at else None,
+        if Receipt:
+            # Use Receipt model if available
+            receipt = Receipt.objects.filter(order=order).first()
+            context = {
+                'order': order,
+                'receipt': receipt,
+                'customer': order.user,
             }
-            receipt.save()
-        
-        # Send receipt email
-        context = {
-            'order_id': str(order.id),
-            'receipt_id': str(receipt.id),
-            'receipt_data': receipt.receipt_data
-        }
+        else:
+            # Fallback to basic order information
+            context = {
+                'order_id': order.id,
+                'order_total': str(order.calculate_totals()),
+                'customer_email': order.user.email,
+                'customer_name': f"{order.user.first_name} {order.user.last_name}",
+                'order_date': order.created_at.strftime('%Y-%m-%d'),
+            }
         
         success = EmailService.send_user_email('receipt', order.user, context)
-        
         if success:
-            receipt.email_sent = True
-            receipt.email_sent_at = timezone.now()
-            receipt.save()
-        
-        return f"Receipt email sent for order {order.order_number}"
-        
+            return f"Receipt email sent for order {order_id}"
+        else:
+            raise Exception("Failed to send receipt email")
+            
     except Order.DoesNotExist:
         logger.error(f"Order not found for receipt email: order_id={order_id}")
         raise Exception("Order not found")
     except Exception as e:
-        logger.error(f"Receipt email task failed for order_id={order_id}: {str(e)}")
+        logger.error(f"Receipt email task failed for order {order_id}: {str(e)}")
         raise e

@@ -99,7 +99,7 @@ WSGI_APPLICATION = 'sdms.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-if not DEBUG:
+if DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -158,27 +158,28 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 TAILWIND_APP_NAME = 'theme'
 
 # AWS
-AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
+# AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+# AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+# AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+# AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+# AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
+
+#For development: File Storage
+STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 # File Storage and Email
 if not DEBUG:
     #For development: Email
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-    #For development: File Storage
-    STATIC_URL = 'static/'
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
-    STATICFILES_DIRS = [
-        BASE_DIR / 'static',
-    ]
-
-    # Media files
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
 
     # Installed app
     INSTALLED_APPS += ['django_browser_reload']
@@ -195,38 +196,38 @@ else:
     EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
     EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
     EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL') == 'True'
-    DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'SDMS Team <support@successdirectmarketstore.com>')
-    ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'support@successdirectmarketstore.com')
+    DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'SDMS Team <support@successdirectmarketstores.com>')
+    ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'admin@successdirectmarketstores.com')
 
     #For production: File Storage
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
+    # DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
 
-    STORAGES = {
-            'default': {
-                'BACKEND': DEFAULT_FILE_STORAGE,
-                'OPTIONS': {
-                    'bucket_name': AWS_STORAGE_BUCKET_NAME,
-                    'region_name': AWS_S3_REGION_NAME,
-                    'custom_domain': AWS_S3_CUSTOM_DOMAIN,
-                    'location': 'media',
-                    'default_acl': None,
-                    'file_overwrite': False
-                },
-            },
-            'staticfiles': {
-                'BACKEND': DEFAULT_FILE_STORAGE,
-                'OPTIONS': {
-                    'bucket_name': AWS_STORAGE_BUCKET_NAME,
-                    'region_name': AWS_S3_REGION_NAME,
-                    'custom_domain': AWS_S3_CUSTOM_DOMAIN,
-                    'location': 'static',
-                    'default_acl': None,
-                },
-            },
-    }
+    # STORAGES = {
+    #         'default': {
+    #             'BACKEND': DEFAULT_FILE_STORAGE,
+    #             'OPTIONS': {
+    #                 'bucket_name': AWS_STORAGE_BUCKET_NAME,
+    #                 'region_name': AWS_S3_REGION_NAME,
+    #                 'custom_domain': AWS_S3_CUSTOM_DOMAIN,
+    #                 'location': 'media',
+    #                 'default_acl': None,
+    #                 'file_overwrite': False
+    #             },
+    #         },
+    #         'staticfiles': {
+    #             'BACKEND': DEFAULT_FILE_STORAGE,
+    #             'OPTIONS': {
+    #                 'bucket_name': AWS_STORAGE_BUCKET_NAME,
+    #                 'region_name': AWS_S3_REGION_NAME,
+    #                 'custom_domain': AWS_S3_CUSTOM_DOMAIN,
+    #                 'location': 'static',
+    #                 'default_acl': None,
+    #             },
+    #         },
+    # }
 
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'   
+    # STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+    # MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'   
 
 # Site ID for django-allauth
 SITE_ID = 1
@@ -236,6 +237,9 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
+
+ACCOUNT_EMAIL_CONFIRMATION_HTML = 'account/email/email_confirmation_message.html'
+ACCOUNT_EMAIL_CONFIRMATION_SIGNUP = True
 
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '' 
 ACCOUNT_LOGOUT_ON_GET = True
@@ -282,3 +286,12 @@ UNFOLD = {
 }
 
 ACCOUNT_ADAPTER = "core.adapters.NoMessageAccountAdapter"
+
+if not DEBUG:
+    # Production
+    SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'localhost.com')
+    SITE_NAME = os.getenv('SITE_NAME', 'Success Direct MarketStore')
+else:
+    # Development
+    SITE_DOMAIN = 'localhost:8000'
+    SITE_NAME = 'Success Direct MarketStore'

@@ -19,14 +19,6 @@
         <td><strong>{{ user_email }}</strong></td>
     </tr>
     <tr>
-        <td>Full Name</td>
-        <td>{{ user_first_name }} {{ user_last_name }}</td>
-    </tr>
-    <tr>
-        <td>Registration Date</td>
-        <td>{{ user_date_joined|date:"F d, Y at g:i A" }}</td>
-    </tr>
-    <tr>
         <td>Account Status</td>
         <td>
             {% if is_active %}

@@ -119,7 +119,10 @@ class CartItem(BaseModel):
     
     def get_total_price(self):
         """Get total price for this cart item"""
-        return self.product.get_display_price() * self.quantity
+        display_price = self.product.get_display_price()
+        if display_price is None:
+            return Decimal('0.00')
+        return display_price * self.quantity
     
     def can_add_quantity(self, additional_quantity=1):
         """Check if we can add more quantity"""
@@ -309,8 +312,15 @@ class OrderItem(BaseModel):
         
         return max(0, self.quantity - submitted_qty)
 
+    def get_total_price(self):
+        """Get total price for this item"""
+        if self.price is None:
+            return Decimal('0.00')
+        return self.price * self.quantity
+
     def save(self, *args, **kwargs):
         # Set price from product if not set
         if not self.price:
-            self.price = self.product.get_display_price()
+            display_price = self.product.get_display_price()
+            self.price = display_price if display_price is not None else Decimal('0.00')
         super().save(*args, **kwargs)

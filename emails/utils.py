@@ -1,4 +1,5 @@
 from django.core.mail import send_mail
+from django.db import models
 from django.template.loader import render_to_string
 from django.conf import settings
 from .tasks import send_email_task, send_user_email_task, send_admin_email_task
