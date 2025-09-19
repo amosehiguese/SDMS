@@ -4,6 +4,20 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from .tasks import send_email_task, send_user_email_task, send_admin_email_task
 
+import uuid
+from datetime import datetime
+from django.utils.timezone import is_naive, make_aware, get_current_timezone
+
+def serialize_for_task(value):
+    """Ensure values are JSON-serializable for Celery tasks"""
+    if isinstance(value, uuid.UUID):
+        return str(value)
+    if isinstance(value, datetime):
+        if is_naive(value):
+            value = make_aware(value, timezone=get_current_timezone())
+        return value.isoformat()
+    return value
+
 def send_test_email(email_type, recipient_email, context=None):
     """
     Send test email immediately (not async) for testing purposes

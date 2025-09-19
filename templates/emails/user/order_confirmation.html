@@ -1,6 +1,6 @@
 {% extends "emails/base/user_base.html" %}
 
-{% block email_title %}Order Confirmation - {{ order.order_number }}{% endblock %}
+{% block email_title %}Order Confirmation - {{ order_number }}{% endblock %}
 
 {% block main_content %}
 <h2 style="color: #333; margin-bottom: 20px;">Order Confirmed!</h2>
@@ -12,20 +12,20 @@
     <table style="width: 100%; border-collapse: collapse;">
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Order Number:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ order.order_number }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ order_number }}</td>
         </tr>
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Order Date:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ order.created_at|date:"F d, Y" }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ order_date|date:"F d, Y" }}</td>
         </tr>
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Total Amount:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>₦{{ order.total|floatformat:0 }}</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>₦{{ total_amount|floatformat:0 }}</strong></td>
         </tr>
         <tr>
             <td style="padding: 8px 0;"><strong>Fulfillment Type:</strong></td>
             <td style="padding: 8px 0;">
-                {% if order.fulfillment_type == 'hold_asset' %}
+                {% if fulfillment_type == 'hold_asset' %}
                     Hold as Asset
                 {% else %}
                     Deliver to Me
@@ -36,23 +36,29 @@
 </div>
 
 <h3 style="color: #333; margin: 25px 0 15px 0;">Items Ordered:</h3>
-{% for item in order.items.all %}
-<div style="border: 1px solid #eee; padding: 15px; margin: 10px 0; border-radius: 5px;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <strong>{{ item.product.title }}</strong><br>
-            <small style="color: #666;">Quantity: {{ item.quantity }}</small>
-        </div>
-        <div style="text-align: right;">
-            <strong>₦{{ item.get_total_price|floatformat:0 }}</strong>
+{% if order_items %}
+    {% for item in order_items %}
+    <div style="border: 1px solid #eee; padding: 15px; margin: 10px 0; border-radius: 5px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong>{{ item.product_title }}</strong><br>
+                <small style="color: #666;">Quantity: {{ item.quantity }}</small>
+            </div>
+            <div style="text-align: right;">
+                <strong>₦{{ item.total_price|floatformat:0 }}</strong>
+            </div>
         </div>
     </div>
-</div>
-{% endfor %}
+    {% endfor %}
+{% else %}
+    <p style="color: #666;">{{ items_count }} item{{ items_count|pluralize }} ordered</p>
+{% endif %}
 
-{% if order.fulfillment_type == 'deliver' %}
-<p style="margin-top: 20px;"><strong>Shipping Address:</strong><br>
-{{ order.shipping_address.full_address }}</p>
+{% if fulfillment_type == 'deliver' %}
+    {% if shipping_address %}
+    <p style="margin-top: 20px;"><strong>Shipping Address:</strong><br>
+    {{ shipping_address }}</p>
+    {% endif %}
 {% else %}
 <div style="background-color: #e7f3ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
     <p><strong>📦 Assets Held Securely</strong></p>
@@ -63,6 +69,6 @@
 
 {% block action_button %}
 <div style="text-align: center;">
-    <a href="{{ site_url }}/orders/{{ order.id }}/" class="button">Track Your Order</a>
+    <a href="{{ site_url }}/orders/{{ order_id }}/" class="button">Track Your Order</a>
 </div>
 {% endblock %}

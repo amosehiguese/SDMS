@@ -1,13 +1,13 @@
 {% extends "emails/base/admin_base.html" %}
 
-{% block email_title %}Payment Failed - {{ order.order_number }}{% endblock %}
+{% block email_title %}Payment Failed - {{ order_number|default:"Unknown Order" }}{% endblock %}
 
 {% block alert_title %}💳 Payment Failed{% endblock %}
 
 {% block main_content %}
 <div class="priority-high">
     <h3 style="margin-bottom: 15px;">Payment failure requires attention</h3>
-    <p>A payment has failed for order {{ order.order_number }}. The customer and order may need follow-up.</p>
+    <p>A payment has failed{% if order_number %} for order {{ order_number }}{% endif %}. The customer and order may need follow-up.</p>
 </div>
 
 <table class="data-table">
@@ -16,41 +16,52 @@
         <th>Information</th>
     </tr>
     <tr>
-        <td>Order Number</td>
-        <td><strong>{{ order.order_number }}</strong></td>
+        <td>Payment ID</td>
+        <td><strong>{{ payment_id }}</strong></td>
     </tr>
+    {% if order_number %}
+    <tr>
+        <td>Order Number</td>
+        <td><strong>{{ order_number }}</strong></td>
+    </tr>
+    {% endif %}
     <tr>
         <td>Customer</td>
-        <td>{{ order.user.email }}</td>
+        <td>{{ customer_email }}</td>
     </tr>
+    {% if payment_reference %}
     <tr>
         <td>Payment Reference</td>
-        <td>{{ payment.payment_reference }}</td>
+        <td>{{ payment_reference }}</td>
     </tr>
+    {% endif %}
     <tr>
         <td>Amount</td>
-        <td><strong>₦{{ order.total|floatformat:0 }}</strong></td>
+        <td><strong>₦{{ amount|floatformat:0 }}</strong></td>
     </tr>
+    {% if payment_method %}
     <tr>
         <td>Payment Method</td>
-        <td>{{ payment.payment_method|title }}</td>
+        <td>{{ payment_method|title }}</td>
     </tr>
+    {% endif %}
     <tr>
         <td>Failed At</td>
-        <td>{{ payment.updated_at|date:"F d, Y at g:i A" }}</td>
+        <td>{{ failed_at|date:"F d, Y at g:i A" }}</td>
     </tr>
 </table>
 
-{% if payment.error_message %}
+{% if error_message %}
 <h3 style="margin: 25px 0 15px 0;">Error Details:</h3>
 <div class="priority-high">
-    <p><strong>Error Message:</strong> {{ payment.error_message }}</p>
-    {% if payment.error_code %}
-    <p><strong>Error Code:</strong> {{ payment.error_code }}</p>
+    <p><strong>Error Message:</strong> {{ error_message }}</p>
+    {% if error_code %}
+    <p><strong>Error Code:</strong> {{ error_code }}</p>
     {% endif %}
 </div>
 {% endif %}
 
+{% if order_items %}
 <h3 style="margin: 25px 0 15px 0;">Order Items:</h3>
 <table class="data-table">
     <thead>
@@ -61,23 +72,28 @@
         </tr>
     </thead>
     <tbody>
-        {% for item in order.items.all %}
+        {% for item in order_items %}
         <tr>
-            <td>{{ item.product.title }}</td>
+            <td>{{ item.product_title }}</td>
             <td>{{ item.quantity }}</td>
-            <td>₦{{ item.get_total_price|floatformat:0 }}</td>
+            <td>₦{{ item.total_price|floatformat:0 }}</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+{% endif %}
 
-<div style="background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 20px 0;">
+<div class="priority-high">
     <p><strong>⚠️ Action Required:</strong> You may want to contact the customer to help resolve the payment issue or provide alternative payment options.</p>
 </div>
 {% endblock %}
 
 {% block action_button %}
 <div style="text-align: center;">
-    <a href="{{ site_url }}/admin/orders/order/{{ order.id }}/change/" class="button">Review Order</a>
+    {% if order_id %}
+    <a href="{{ site_url }}/admin/orders/order/{{ order_id }}/change/" class="button">Review Order</a>
+    {% else %}
+    <a href="{{ site_url }}/admin/payments/payment/{{ payment_id }}/change/" class="button">Review Payment</a>
+    {% endif %}
 </div>
 {% endblock %}

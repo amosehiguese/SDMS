@@ -21,6 +21,6 @@ if settings.DEBUG:
         path("__reload__/", include("django_browser_reload.urls")),
     ]
 
-admin.site.site_header = "SuccessDirectMarketStore Admin"
-admin.site.site_title = "SuccessDirectMarketStore Admin Portal"
-admin.site.index_title = "Welcome to SuccessDirectMarketStore Administration"
+admin.site.site_header = "Success Direct Marketstore Admin"
+admin.site.site_title = "Success Direct MarketStore Admin Portal"
+admin.site.index_title = "Welcome to Success Direct Marketstore Administration"

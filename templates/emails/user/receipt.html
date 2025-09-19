@@ -1,26 +1,26 @@
 {% extends "emails/base/user_base.html" %}
 
-{% block email_title %}Receipt for Order {{ order.order_number }}{% endblock %}
+{% block email_title %}Receipt for Order {{ order_number }}{% endblock %}
 
 {% block main_content %}
 <h2 style="color: #333; margin-bottom: 20px;">Payment Receipt</h2>
 
-<p>Thank you for your payment! Here's your receipt for order <strong>{{ order.order_number }}</strong>.</p>
+<p>Thank you for your payment! Here's your receipt for order <strong>{{ order_number }}</strong>.</p>
 
 <div class="info-box">
     <h3 style="margin-bottom: 15px; color: #333;">Receipt Details</h3>
     <table style="width: 100%; border-collapse: collapse;">
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Receipt Number:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ receipt.receipt_number }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ receipt_number }}</td>
         </tr>
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Payment Date:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ order.paid_at|date:"F d, Y at g:i A" }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ paid_at|date:"F d, Y at g:i A" }}</td>
         </tr>
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Payment Method:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ order.payment_method|title }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ payment_method|title }}</td>
         </tr>
     </table>
 </div>
@@ -36,35 +36,35 @@
         </tr>
     </thead>
     <tbody>
-        {% for item in order.items.all %}
+        {% for item in order_items %}
         <tr>
-            <td style="padding: 12px; border-bottom: 1px solid #eee;">{{ item.product.title }}</td>
+            <td style="padding: 12px; border-bottom: 1px solid #eee;">{{ item.product_title }}</td>
             <td style="padding: 12px; text-align: center; border-bottom: 1px solid #eee;">{{ item.quantity }}</td>
             <td style="padding: 12px; text-align: right; border-bottom: 1px solid #eee;">₦{{ item.price|floatformat:0 }}</td>
-            <td style="padding: 12px; text-align: right; border-bottom: 1px solid #eee;">₦{{ item.get_total_price|floatformat:0 }}</td>
+            <td style="padding: 12px; text-align: right; border-bottom: 1px solid #eee;">₦{{ item.total_price|floatformat:0 }}</td>
         </tr>
         {% endfor %}
     </tbody>
     <tfoot>
         <tr>
             <td colspan="3" style="padding: 12px; text-align: right; border-top: 2px solid #333;"><strong>Subtotal:</strong></td>
-            <td style="padding: 12px; text-align: right; border-top: 2px solid #333;"><strong>₦{{ order.subtotal|floatformat:0 }}</strong></td>
+            <td style="padding: 12px; text-align: right; border-top: 2px solid #333;"><strong>₦{{ subtotal|floatformat:0 }}</strong></td>
         </tr>
-        {% if order.shipping_cost > 0 %}
+        {% if shipping_cost and shipping_cost != "0" %}
         <tr>
             <td colspan="3" style="padding: 12px; text-align: right;"><strong>Shipping:</strong></td>
-            <td style="padding: 12px; text-align: right;"><strong>₦{{ order.shipping_cost|floatformat:0 }}</strong></td>
+            <td style="padding: 12px; text-align: right;"><strong>₦{{ shipping_cost|floatformat:0 }}</strong></td>
         </tr>
         {% endif %}
-        {% if order.tax_amount > 0 %}
+        {% if tax_amount and tax_amount != "0" %}
         <tr>
             <td colspan="3" style="padding: 12px; text-align: right;"><strong>Tax:</strong></td>
-            <td style="padding: 12px; text-align: right;"><strong>₦{{ order.tax_amount|floatformat:0 }}</strong></td>
+            <td style="padding: 12px; text-align: right;"><strong>₦{{ tax_amount|floatformat:0 }}</strong></td>
         </tr>
         {% endif %}
         <tr>
             <td colspan="3" style="padding: 12px; text-align: right; font-size: 18px;"><strong>TOTAL PAID:</strong></td>
-            <td style="padding: 12px; text-align: right; font-size: 18px; color: #28a745;"><strong>₦{{ order.total|floatformat:0 }}</strong></td>
+            <td style="padding: 12px; text-align: right; font-size: 18px; color: #28a745;"><strong>₦{{ total|floatformat:0 }}</strong></td>
         </tr>
     </tfoot>
 </table>

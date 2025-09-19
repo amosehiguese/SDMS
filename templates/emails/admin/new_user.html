@@ -18,13 +18,29 @@
         <td>Email</td>
         <td><strong>{{ user_email }}</strong></td>
     </tr>
+    {% if user_first_name or user_last_name %}
+    <tr>
+        <td>Name</td>
+        <td>{{ user_first_name }} {{ user_last_name }}</td>
+    </tr>
+    {% endif %}
+    {% if username %}
+    <tr>
+        <td>Username</td>
+        <td>{{ username }}</td>
+    </tr>
+    {% endif %}
+    <tr>
+        <td>Registration Date</td>
+        <td>{{ user_date_joined|date:"F d, Y at g:i A" }}</td>
+    </tr>
     <tr>
         <td>Account Status</td>
         <td>
             {% if is_active %}
-                <span style="background-color: #d4edda; padding: 3px 8px; border-radius: 3px; color: #155724;">Active</span>
+                <span class="status-badge status-active">Active</span>
             {% else %}
-                <span style="background-color: #f8d7da; padding: 3px 8px; border-radius: 3px; color: #721c24;">Inactive</span>
+                <span class="status-badge status-inactive">Inactive</span>
             {% endif %}
         </td>
     </tr>

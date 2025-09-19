@@ -13,9 +13,12 @@ def send_email_task(self, email_type, recipient_email, context=None):
     Args:
         email_type: Type of email to send
         recipient_email: Recipient email address
-        context: Dictionary of context variables
+        context: Dictionary of context variables (all serializable)
     """
     try:
+        if context is None:
+            context = {}
+            
         success = EmailService.send_email(email_type, recipient_email, context)
         if not success:
             raise Exception(f"Failed to send email type: {email_type}")
@@ -31,8 +34,15 @@ def send_email_task(self, email_type, recipient_email, context=None):
 def send_admin_email_task(self, email_type, context=None):
     """
     Async task to send emails to admin
+    
+    Args:
+        email_type: Type of admin email to send
+        context: Dictionary of context variables (all serializable)
     """
     try:
+        if context is None:
+            context = {}
+            
         success = EmailService.send_admin_email(email_type, context)
         if not success:
             raise Exception(f"Failed to send admin email type: {email_type}")
@@ -48,21 +58,35 @@ def send_user_email_task(self, email_type, user_id, context=None):
     """
     Async task to send emails to specific user by ID
     
-    FIXED: Now properly handles user retrieval and context serialization
+    Args:
+        email_type: Type of email to send
+        user_id: User ID (not user object)
+        context: Dictionary of context variables (all serializable)
     """
     try:
-        user = User.objects.get(id=user_id)
+        # Retrieve user object from ID
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            logger.error(f"User not found for email task: user_id={user_id}")
+            raise Exception(f"User with ID {user_id} not found")
         
         if context is None:
             context = {}
+        
+        # Add user info to context if not already present
+        if 'user_email' not in context:
+            context['user_email'] = user.email
+        if 'user_first_name' not in context:
+            context['user_first_name'] = user.first_name or ''
+        if 'user_last_name' not in context:
+            context['user_last_name'] = user.last_name or ''
         
         success = EmailService.send_user_email(email_type, user, context)
         if not success:
             raise Exception(f"Failed to send user email type: {email_type}")
         return f"User email sent successfully: {email_type} to {user.email}"
-    except User.DoesNotExist:
-        logger.error(f"User not found for email task: user_id={user_id}")
-        raise Exception("User not found")
+        
     except Exception as e:
         logger.error(f"User email task failed: {email_type} for user_id={user_id} - {str(e)}")
         if self.request.retries < 3:
@@ -73,7 +97,15 @@ def send_user_email_task(self, email_type, user_id, context=None):
 def send_bulk_email_task(email_type, recipient_emails, context=None):
     """
     Send bulk emails (useful for newsletters or announcements)
+    
+    Args:
+        email_type: Type of email to send
+        recipient_emails: List of email addresses
+        context: Dictionary of context variables (all serializable)
     """
+    if context is None:
+        context = {}
+        
     successful = 0
     failed = 0
     
@@ -90,33 +122,62 @@ def send_bulk_email_task(email_type, recipient_emails, context=None):
     
     return f"Bulk email completed: {successful} successful, {failed} failed"
 
-@shared_task
-def send_receipt_email_task(order_id):
+@shared_task(bind=True, max_retries=3)
+def send_receipt_email_task(self, order_id):
     """
-    Special task for sending receipt emails with PDF generation
+    Special task for sending receipt emails with order data retrieval
+    
+    Args:
+        order_id: Order ID (not order object)
     """
     try:
-        from orders.models import Order, Receipt
+        from orders.models import Order
         
-        order = Order.objects.get(id=order_id)
+        # Retrieve order object from ID
+        try:
+            order = Order.objects.select_related('user').prefetch_related('items__product').get(id=order_id)
+        except Order.DoesNotExist:
+            logger.error(f"Order not found for receipt email: order_id={order_id}")
+            raise Exception(f"Order with ID {order_id} not found")
         
-        if Receipt:
-            # Use Receipt model if available
+        # Build context with serializable data
+        context = {
+            'order_id': order.id,
+            'order_number': getattr(order, 'order_number', str(order.id)),
+            'customer_email': order.user.email,
+            'customer_name': f"{order.user.first_name} {order.user.last_name}".strip(),
+            'customer_first_name': order.user.first_name or '',
+            'customer_last_name': order.user.last_name or '',
+            'order_date': order.created_at.isoformat(),
+            'paid_at': getattr(order, 'paid_at', order.created_at).isoformat(),
+            'payment_method': getattr(order, 'payment_method', 'Card'),
+            'subtotal': str(getattr(order, 'subtotal', 0)),
+            'shipping_cost': str(getattr(order, 'shipping_cost', 0)),
+            'tax_amount': str(getattr(order, 'tax_amount', 0)),
+            'total': str(order.calculate_totals()),
+        }
+        
+        # Add receipt-specific info if Receipt model exists
+        try:
+            from orders.models import Receipt
             receipt = Receipt.objects.filter(order=order).first()
-            context = {
-                'order': order,
-                'receipt': receipt,
-                'customer': order.user,
-            }
-        else:
-            # Fallback to basic order information
-            context = {
-                'order_id': order.id,
-                'order_total': str(order.calculate_totals()),
-                'customer_email': order.user.email,
-                'customer_name': f"{order.user.first_name} {order.user.last_name}",
-                'order_date': order.created_at.strftime('%Y-%m-%d'),
-            }
+            if receipt:
+                context['receipt_number'] = getattr(receipt, 'receipt_number', f"RCP-{order.id}")
+        except ImportError:
+            # Receipt model doesn't exist, generate receipt number
+            context['receipt_number'] = f"RCP-{order.id}"
+        
+        # Add order items as serializable data
+        order_items = []
+        for item in order.items.all():
+            order_items.append({
+                'product_title': item.product.title,
+                'product_name': getattr(item.product, 'name', item.product.title),
+                'quantity': item.quantity,
+                'price': str(item.price),
+                'total_price': str(item.get_total_price()),
+            })
+        context['order_items'] = order_items
         
         success = EmailService.send_user_email('receipt', order.user, context)
         if success:
@@ -124,9 +185,67 @@ def send_receipt_email_task(order_id):
         else:
             raise Exception("Failed to send receipt email")
             
-    except Order.DoesNotExist:
-        logger.error(f"Order not found for receipt email: order_id={order_id}")
-        raise Exception("Order not found")
     except Exception as e:
         logger.error(f"Receipt email task failed for order {order_id}: {str(e)}")
+        if self.request.retries < 3:
+            raise self.retry(countdown=60 * (self.request.retries + 1))
+        raise e
+
+@shared_task(bind=True, max_retries=3) 
+def send_order_status_email_task(self, order_id, email_type, additional_context=None):
+    """
+    Task for sending order status emails (shipped, delivered, etc.)
+    
+    Args:
+        order_id: Order ID (not order object)
+        email_type: Type of status email (order_shipped, order_delivered, etc.)
+        additional_context: Additional context data (all serializable)
+    """
+    try:
+        from orders.models import Order
+        
+        # Retrieve order object from ID
+        try:
+            order = Order.objects.select_related('user', 'shipping_address').prefetch_related('items__product').get(id=order_id)
+        except Order.DoesNotExist:
+            logger.error(f"Order not found for status email: order_id={order_id}")
+            raise Exception(f"Order with ID {order_id} not found")
+        
+        # Build base context
+        context = {
+            'order_id': order.id,
+            'order_number': getattr(order, 'order_number', str(order.id)),
+            'user_email': order.user.email,
+            'user_first_name': order.user.first_name or '',
+            'user_last_name': order.user.last_name or '',
+            'status': order.status,
+            'total': str(order.calculate_totals()),
+            'tracking_number': getattr(order, 'tracking_number', ''),
+            'shipped_at': order.shipped_at.isoformat() if getattr(order, 'shipped_at', None) else None,
+            'delivered_at': order.delivered_at.isoformat() if getattr(order, 'delivered_at', None) else None,
+        }
+        
+        # Add shipping address if available
+        if hasattr(order, 'shipping_address') and order.shipping_address:
+            context.update({
+                'shipping_full_name': getattr(order.shipping_address, 'full_name', ''),
+                'shipping_address': getattr(order.shipping_address, 'full_address', ''),
+                'shipping_phone': getattr(order.shipping_address, 'phone', ''),
+                'shipping_email': getattr(order.shipping_address, 'email', ''),
+            })
+        
+        # Merge additional context
+        if additional_context:
+            context.update(additional_context)
+        
+        success = EmailService.send_user_email(email_type, order.user, context)
+        if success:
+            return f"Order status email sent: {email_type} for order {order_id}"
+        else:
+            raise Exception(f"Failed to send order status email: {email_type}")
+            
+    except Exception as e:
+        logger.error(f"Order status email task failed: {email_type} for order {order_id}: {str(e)}")
+        if self.request.retries < 3:
+            raise self.retry(countdown=60 * (self.request.retries + 1))
         raise e

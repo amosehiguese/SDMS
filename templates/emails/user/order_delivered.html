@@ -1,14 +1,14 @@
 {% extends "emails/base/user_base.html" %}
 
-{% block email_title %}Order Delivered - {{ order.order_number }}{% endblock %}
+{% block email_title %}Order Delivered - {{ order_number }}{% endblock %}
 
 {% block main_content %}
 <h2 style="color: #333; margin-bottom: 20px;">✅ Order Delivered!</h2>
 
-<p>Your order <strong>{{ order.order_number }}</strong> has been successfully delivered!</p>
+<p>Your order <strong>{{ order_number }}</strong> has been successfully delivered!</p>
 
 <div class="info-box">
-    <p style="margin-bottom: 10px;"><strong>Delivered on:</strong> {{ order.delivered_at|date:"F d, Y at g:i A" }}</p>
+    <p style="margin-bottom: 10px;"><strong>Delivered on:</strong> {{ delivered_at|date:"F d, Y at g:i A" }}</p>
     <p>We hope you're happy with your purchase. If you have any issues with your order, please don't hesitate to contact us.</p>
 </div>
 
@@ -17,6 +17,6 @@
 
 {% block action_button %}
 <div style="text-align: center;">
-    <a href="{{ site_url }}/orders/{{ order.id }}/" class="button">Leave a Review</a>
+    <a href="{{ site_url }}/orders/{{ order_id }}/" class="button">Leave a Review</a>
 </div>
 {% endblock %}

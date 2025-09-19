@@ -99,7 +99,7 @@ WSGI_APPLICATION = 'sdms.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-if DEBUG:
+if not DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -256,6 +256,7 @@ LOGIN_REDIRECT_URL = '/'
 
 # Site settings
 SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
+SITE_NAME = 'Success Direct MarketStore'
 
 # Paystack settings
 PAYSTACK_SECRET_KEY = os.getenv('PAYSTACK_SECRET_KEY')
@@ -287,11 +288,3 @@ UNFOLD = {
 
 ACCOUNT_ADAPTER = "core.adapters.NoMessageAccountAdapter"
 
-if not DEBUG:
-    # Production
-    SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'localhost.com')
-    SITE_NAME = os.getenv('SITE_NAME', 'Success Direct MarketStore')
-else:
-    # Development
-    SITE_DOMAIN = 'localhost:8000'
-    SITE_NAME = 'Success Direct MarketStore'

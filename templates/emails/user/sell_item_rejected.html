@@ -12,23 +12,23 @@
     <table style="width: 100%; border-collapse: collapse;">
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Item Title:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ submission.title }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ title|default:item_name }}</td>
         </tr>
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Submitted Price:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">₦{{ submission.price|floatformat:0 }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">₦{{ price|default:asking_price|floatformat:0 }}</td>
         </tr>
         <tr>
             <td style="padding: 8px 0;"><strong>Reviewed:</strong></td>
-            <td style="padding: 8px 0;">{{ submission.reviewed_at|date:"F d, Y at g:i A" }}</td>
+            <td style="padding: 8px 0;">{{ reviewed_at|date:"F d, Y at g:i A" }}</td>
         </tr>
     </table>
 </div>
 
-{% if submission.admin_notes %}
+{% if admin_notes %}
 <div style="background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0;">
     <h4 style="color: #721c24; margin-bottom: 10px;">Reason for Rejection:</h4>
-    <p style="color: #721c24; margin: 0;">{{ submission.admin_notes }}</p>
+    <p style="color: #721c24; margin: 0;">{{ admin_notes|default:rejection_reason }}</p>
 </div>
 {% endif %}
 

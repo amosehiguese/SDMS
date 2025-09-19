@@ -12,27 +12,27 @@
     <table style="width: 100%; border-collapse: collapse;">
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Item Title:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ submission.title }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ title|default:item_name }}</td>
         </tr>
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Selling Price:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">₦{{ submission.price|floatformat:0 }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">₦{{ price|default:asking_price|floatformat:0 }}</td>
         </tr>
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Quantity:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ submission.stock_quantity }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ stock_quantity }}</td>
         </tr>
         <tr>
             <td style="padding: 8px 0;"><strong>Approved:</strong></td>
-            <td style="padding: 8px 0;">{{ submission.reviewed_at|date:"F d, Y at g:i A" }}</td>
+            <td style="padding: 8px 0;">{{ reviewed_at|date:"F d, Y at g:i A" }}</td>
         </tr>
     </table>
 </div>
 
-{% if submission.admin_notes %}
+{% if admin_notes %}
 <div style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
     <h4 style="color: #155724; margin-bottom: 10px;">Admin Notes:</h4>
-    <p style="color: #155724; margin: 0;">{{ submission.admin_notes }}</p>
+    <p style="color: #155724; margin: 0;">{{ admin_notes }}</p>
 </div>
 {% endif %}
 

@@ -12,20 +12,20 @@
     <table style="width: 100%; border-collapse: collapse;">
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Item Title:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ submission.title }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ title|default:item_name }}</td>
         </tr>
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Asking Price:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">₦{{ submission.price|floatformat:0 }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">₦{{ price|default:asking_price|floatformat:0 }}</td>
         </tr>
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Quantity:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ submission.stock_quantity }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ stock_quantity }}</td>
         </tr>
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Source:</strong></td>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;">
-                {% if submission.source == 'held_asset' %}
+                {% if source == 'held_asset' %}
                     Held Asset
                 {% else %}
                     Own Item
@@ -34,7 +34,7 @@
         </tr>
         <tr>
             <td style="padding: 8px 0;"><strong>Submitted:</strong></td>
-            <td style="padding: 8px 0;">{{ submission.created_at|date:"F d, Y at g:i A" }}</td>
+            <td style="padding: 8px 0;">{{ submitted_at|date:"F d, Y at g:i A" }}</td>
         </tr>
     </table>
 </div>

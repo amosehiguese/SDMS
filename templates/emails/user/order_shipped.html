@@ -1,37 +1,49 @@
 {% extends "emails/base/user_base.html" %}
 
-{% block email_title %}Order Shipped - {{ order.order_number }}{% endblock %}
+{% block email_title %}Order Shipped - {{ order_number }}{% endblock %}
 
 {% block main_content %}
 <h2 style="color: #333; margin-bottom: 20px;">📦 Your Order is on the Way!</h2>
 
-<p>Great news! Your order <strong>{{ order.order_number }}</strong> has been shipped and is on its way to you.</p>
+<p>Great news! Your order <strong>{{ order_number }}</strong> has been shipped and is on its way to you.</p>
 
 <div class="info-box">
     <h3 style="margin-bottom: 15px; color: #333;">Shipping Details</h3>
     <table style="width: 100%; border-collapse: collapse;">
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Order Number:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ order.order_number }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ order_number }}</td>
         </tr>
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Shipped Date:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ order.shipped_at|date:"F d, Y" }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ shipped_at|date:"F d, Y" }}</td>
         </tr>
-        {% if order.tracking_number %}
+        {% if tracking_number %}
         <tr>
             <td style="padding: 8px 0;"><strong>Tracking Number:</strong></td>
-            <td style="padding: 8px 0;"><strong>{{ order.tracking_number }}</strong></td>
+            <td style="padding: 8px 0;"><strong>{{ tracking_number }}</strong></td>
         </tr>
         {% endif %}
     </table>
 </div>
+
+{% if shipping_full_name %}
+<div class="info-box">
+    <h3 style="margin-bottom: 15px; color: #333;">Delivery Address</h3>
+    <p style="margin: 0;">
+        <strong>{{ shipping_full_name }}</strong><br>
+        {{ shipping_address }}<br>
+        {% if shipping_phone %}Phone: {{ shipping_phone }}<br>{% endif %}
+        {% if shipping_email %}Email: {{ shipping_email }}{% endif %}
+    </p>
+</div>
+{% endif %}
 
 <p>Your package should arrive within 2-5 business days. We'll send you another email once it's delivered.</p>
 {% endblock %}
 
 {% block action_button %}
 <div style="text-align: center;">
-    <a href="{{ site_url }}/orders/{{ order.id }}/" class="button">Track Package</a>
+    <a href="{{ site_url }}/orders/{{ order_id }}/" class="button">Track Package</a>
 </div>
 {% endblock %}

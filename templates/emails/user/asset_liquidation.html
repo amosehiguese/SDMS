@@ -12,30 +12,34 @@
     <table style="width: 100%; border-collapse: collapse;">
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Original Order:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ order.order_number }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ order_number }}</td>
         </tr>
         <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Request Date:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ order.updated_at|date:"F d, Y at g:i A" }}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ updated_at|date:"F d, Y at g:i A" }}</td>
         </tr>
         <tr>
             <td style="padding: 8px 0;"><strong>Total Value:</strong></td>
-            <td style="padding: 8px 0;"><strong>₦{{ order.total|floatformat:0 }}</strong></td>
+            <td style="padding: 8px 0;"><strong>₦{{ total_amount|floatformat:0 }}</strong></td>
         </tr>
     </table>
 </div>
 
 <h3 style="color: #333; margin: 25px 0 15px 0;">Items to be Shipped:</h3>
-{% for item in order.items.all %}
-<div style="border: 1px solid #eee; padding: 15px; margin: 10px 0; border-radius: 5px;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <strong>{{ item.product.title }}</strong><br>
-            <small style="color: #666;">Quantity: {{ item.quantity }}</small>
+{% if order_items %}
+    {% for item in order_items %}
+    <div style="border: 1px solid #eee; padding: 15px; margin: 10px 0; border-radius: 5px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong>{{ item.product_title }}</strong><br>
+                <small style="color: #666;">Quantity: {{ item.quantity }}</small>
+            </div>
         </div>
     </div>
-</div>
-{% endfor %}
+    {% endfor %}
+{% else %}
+    <p style="color: #666;">Item details will be updated shortly.</p>
+{% endif %}
 
 <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
     <h3 style="color: #856404; margin-bottom: 10px;">📦 What happens next?</h3>
@@ -52,6 +56,6 @@
 
 {% block action_button %}
 <div style="text-align: center;">
-    <a href="{{ site_url }}/orders/{{ order.id }}/" class="button">Track Liquidation</a>
+    <a href="{{ site_url }}/orders/{{ order_id }}/" class="button">Track Liquidation</a>
 </div>
 {% endblock %}
