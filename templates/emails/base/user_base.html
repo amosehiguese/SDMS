@@ -28,16 +28,20 @@
         
         /* Header */
         .email-header {
-            background-color: #000000;
-            color: #ffffff;
+            background-color: #ffffff;
+            color: #374151;
             padding: 40px 30px;
             text-align: center;
+            border-bottom: 1px solid #e5e7eb;
         }
         
         .logo {
-            max-width: 180px;
-            max-height: 50px;
-            margin-bottom: 12px;
+            max-width: 280px;
+            max-height: 120px;
+            width: auto;
+            height: auto;
+            display: block;
+            margin: 0 auto 20px auto;
         }
         
         .site-name {
@@ -213,7 +217,17 @@
         /* Responsive */
         @media (max-width: 640px) {
             .email-header {
-                padding: 30px 20px;
+                padding: 15px 20px 30px 20px;
+            }
+            
+            .logo-container {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .logo {
+                max-width: 240px;
+                max-height: 100px;
             }
             
             .email-body {
@@ -255,9 +269,12 @@
         <!-- Header -->
         <div class="email-header">
             {% if site_logo %}
-                <img src="{{ site_url }}{{ site_logo.url }}" alt="{{ site_name }}" class="logo">
-            {% endif %}
+                <div class="logo-container">
+                    <img src="{{ site_logo }}" alt="{{ site_name }}" class="logo">
+                </div>
+            {% else %}
             <div class="site-name">{{ site_name }}</div>
+            {% endif %}
         </div>
         
         <!-- Body -->

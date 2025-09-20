@@ -9,16 +9,67 @@ from datetime import datetime
 from django.utils.timezone import is_naive, make_aware, get_current_timezone
 
 
-
 def serialize_for_task(value):
     """Ensure values are JSON-serializable for Celery tasks"""
+    import uuid
+    from datetime import datetime, date, time
+    from decimal import Decimal
+    from django.utils.timezone import is_naive, make_aware, get_current_timezone
+    from django.db import models
+    
+    # Handle None values
+    if value is None:
+        return None
+        
+    # Handle UUID objects
     if isinstance(value, uuid.UUID):
         return str(value)
+        
+    # Handle datetime objects
     if isinstance(value, datetime):
         if is_naive(value):
             value = make_aware(value, timezone=get_current_timezone())
         return value.isoformat()
-    return value
+        
+    # Handle date objects
+    if isinstance(value, date):
+        return value.isoformat()
+        
+    # Handle time objects
+    if isinstance(value, time):
+        return value.isoformat()
+        
+    # Handle Decimal objects
+    if isinstance(value, Decimal):
+        return str(value)
+        
+    # Handle Django model instances
+    if isinstance(value, models.Model):
+        # Return the primary key for model instances
+        return str(value.pk) if value.pk is not None else None
+        
+    # Handle iterables (lists, tuples, sets)
+    if isinstance(value, (list, tuple, set)):
+        return [serialize_for_task(item) for item in value]
+        
+    # Handle dictionaries
+    if isinstance(value, dict):
+        return {key: serialize_for_task(val) for key, val in value.items()}
+        
+    # Handle file fields
+    if hasattr(value, 'url'):
+        try:
+            return value.url
+        except (ValueError, AttributeError):
+            return None
+            
+    # For any other non-serializable objects, convert to string
+    try:
+        import json
+        json.dumps(value)
+        return value
+    except (TypeError, ValueError):
+        return str(value)
 
 def send_test_email(email_type, recipient_email, context=None):
     """

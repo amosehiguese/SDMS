@@ -10,24 +10,32 @@ logger = logging.getLogger(__name__)
 def get_base_context():
     """
     Get base context variables for email templates (reusable across the project)
+    Returns only serializable data for Celery tasks
     """
     from django.conf import settings
     from core.models import SiteConfiguration
+    from .utils import serialize_for_task
     
     try:
         site_config = SiteConfiguration.get_config()
     except:
         site_config = None
     
-    return {
+    context = {
         'site_name': getattr(site_config, 'site_name', 'Success Direct Marketstore') if site_config else 'Success Direct Marketstore',
         'site_url': getattr(settings, 'SITE_URL', 'http://localhost:8000'),
-        'contact_email': getattr(settings, 'DEFAULT_FROM_EMAIL', 'support@successdirectmarketstores.com'),
-        'site_logo': getattr(site_config, 'logo', None) if site_config else None,
-        'site_config': site_config,
+        'contact_email': getattr(site_config, 'contact_email', 'support@successdirectmarketstores.com'),
+        'site_logo': 'https://sdmsstore.s3.us-east-1.amazonaws.com/static/img/sdms-logo-w.png',
         'year': timezone.now().year,
         'phone_number': getattr(site_config, 'phone_number', None) if site_config else None,
     }
+    
+    # Clean context to ensure all values are serializable
+    cleaned_context = {}
+    for key, value in context.items():
+        cleaned_context[key] = serialize_for_task(value)
+    
+    return cleaned_context
 
 @shared_task(bind=True, max_retries=3)
 def send_email_task(self, email_type, recipient_email, context=None):
@@ -64,11 +72,18 @@ def send_admin_email_task(self, email_type, context=None):
         context: Dictionary of context variables (all serializable)
     """
     try:
+        from .utils import serialize_for_task
+        
         if context is None:
             context = {}
         
+        # Clean the incoming context to ensure serialization
+        cleaned_context = {}
+        for key, value in context.items():
+            cleaned_context[key] = serialize_for_task(value)
+        
         base_context = get_base_context()
-        merged_context = {**base_context, **context}
+        merged_context = {**base_context, **cleaned_context}
 
         success = EmailService.send_admin_email(email_type, merged_context)
         if not success:
@@ -79,6 +94,7 @@ def send_admin_email_task(self, email_type, context=None):
         if self.request.retries < 3:
             raise self.retry(countdown=60 * (self.request.retries + 1))
         raise e
+
 
 @shared_task(bind=True, max_retries=3)
 def send_user_email_task(self, email_type, user_id, context=None):
@@ -91,6 +107,8 @@ def send_user_email_task(self, email_type, user_id, context=None):
         context: Dictionary of context variables (all serializable)
     """
     try:
+        from .utils import serialize_for_task
+        
         # Retrieve user object from ID
         try:
             user = User.objects.get(id=user_id)
@@ -110,8 +128,25 @@ def send_user_email_task(self, email_type, user_id, context=None):
             context['user_first_name'] = user.first_name or ''
         if 'user_last_name' not in context:
             context['user_last_name'] = user.last_name or ''
+        
+        # Create user_data dictionary with properly serialized values
+        user_data = {
+            'user_id': serialize_for_task(user.id),
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name or '',
+            'last_name': user.last_name or '',
+            'is_active': user.is_active,
+            'date_joined': serialize_for_task(user.date_joined) if user.date_joined else None,
+        }
 
-        merged_context = {**base_context, **user, **context}
+        # Clean the incoming context to ensure serialization
+        cleaned_context = {}
+        for key, value in context.items():
+            cleaned_context[key] = serialize_for_task(value)
+
+        # Merge contexts properly
+        merged_context = {**base_context, **user_data, **cleaned_context}
         
         success = EmailService.send_user_email(email_type, user, merged_context)
         if not success:
