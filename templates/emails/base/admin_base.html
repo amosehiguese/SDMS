@@ -14,300 +14,250 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
-            color: #2d3748;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px 0;
+            color: #374151;
+            background-color: #f9fafb;
+            -webkit-font-smoothing: antialiased;
         }
         
         .email-container {
             max-width: 650px;
             margin: 0 auto;
             background-color: #ffffff;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
         }
         
+        /* Header */
         .email-header {
-            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
-            color: white;
+            background-color: #000000;
+            color: #ffffff;
             padding: 40px 30px;
+            text-align: center;
             position: relative;
-            overflow: hidden;
-        }
-        
-        .email-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100px;
-            height: 100px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            transform: translate(30px, -30px);
-        }
-        
-        .email-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 50%;
-            transform: translate(-20px, 20px);
         }
         
         .header-content {
             position: relative;
             z-index: 2;
-            text-align: center;
         }
         
         .logo {
-            max-width: 200px;
-            max-height: 60px;
-            margin-bottom: 15px;
-            filter: brightness(0) invert(1);
+            max-width: 180px;
+            max-height: 50px;
+            margin-bottom: 12px;
         }
         
         .site-name {
             font-size: 28px;
             font-weight: 700;
-            margin-bottom: 8px;
-            color: white;
+            margin-bottom: 12px;
+            color: #f59e0b;
             letter-spacing: -0.025em;
         }
         
         .admin-badge {
             display: inline-flex;
             align-items: center;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 25px;
-            font-size: 13px;
+            background-color: #f59e0b;
+            color: #000000;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            box-shadow: 0 4px 15px 0 rgba(240, 147, 251, 0.3);
         }
         
-        .admin-badge::before {
-            content: '🔧';
-            margin-right: 6px;
-        }
-        
+        /* Body */
         .email-body {
-            padding: 45px 35px;
+            padding: 40px 30px;
             background: #ffffff;
         }
         
         .alert-header {
-            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-            color: white;
-            padding: 20px 25px;
-            border-radius: 12px;
-            margin-bottom: 30px;
+            background-color: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            color: #92400e;
+            padding: 16px 20px;
+            border-radius: 0 6px 6px 0;
+            margin-bottom: 24px;
             font-weight: 600;
-            font-size: 18px;
-            box-shadow: 0 4px 15px 0 rgba(66, 153, 225, 0.2);
-            display: flex;
-            align-items: center;
-        }
-        
-        .alert-header::before {
-            content: '⚡';
-            margin-right: 10px;
-            font-size: 22px;
+            font-size: 16px;
         }
         
         .content {
-            margin-bottom: 35px;
+            margin-bottom: 32px;
             line-height: 1.7;
             font-size: 16px;
-            color: #4a5568;
+            color: #374151;
         }
         
+        .content p {
+            margin-bottom: 16px;
+        }
+        
+        /* Data Table */
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 25px 0;
+            margin: 24px 0;
             background-color: #ffffff;
-            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
             overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        
-        .data-table th,
-        .data-table td {
-            padding: 16px 20px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
         }
         
         .data-table th {
-            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
-            color: white;
+            background-color: #f9fafb;
+            padding: 12px 16px;
+            text-align: left;
             font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
             font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
         }
         
-        .data-table tbody tr:hover {
-            background-color: #f7fafc;
-            transition: background-color 0.2s ease;
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #6b7280;
         }
         
         .data-table tbody tr:last-child td {
             border-bottom: none;
         }
         
+        .data-table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+        
+        /* Button */
         .button {
-            display: inline-flex;
-            align-items: center;
+            display: inline-block;
             padding: 14px 28px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background-color: #f59e0b;
+            color: #000000;
             text-decoration: none;
-            border-radius: 10px;
+            border-radius: 6px;
             font-weight: 600;
             font-size: 16px;
-            margin: 25px 0;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px 0 rgba(102, 126, 234, 0.4);
+            margin: 24px 0;
+            transition: background-color 0.2s ease;
         }
         
         .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px 0 rgba(102, 126, 234, 0.5);
+            background-color: #d97706;
         }
         
-        .button::after {
-            content: '→';
-            margin-left: 8px;
-            transition: transform 0.2s ease;
-        }
-        
-        .button:hover::after {
-            transform: translateX(3px);
-        }
-        
+        /* Priority Boxes */
         .priority-high {
-            border-left: 5px solid #f56565;
-            background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
-            color: #742a2a;
-            padding: 20px 25px;
+            border-left: 4px solid #dc2626;
+            background-color: #fef2f2;
+            color: #991b1b;
+            padding: 16px 20px;
             margin: 20px 0;
-            border-radius: 0 12px 12px 0;
-            position: relative;
-        }
-        
-        .priority-high::before {
-            content: '🚨';
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 20px;
+            border-radius: 0 6px 6px 0;
         }
         
         .priority-medium {
-            border-left: 5px solid #ed8936;
-            background: linear-gradient(135deg, #feebc8 0%, #fbd38d 100%);
-            color: #7b341e;
-            padding: 20px 25px;
+            border-left: 4px solid #f59e0b;
+            background-color: #fffbeb;
+            color: #92400e;
+            padding: 16px 20px;
             margin: 20px 0;
-            border-radius: 0 12px 12px 0;
-            position: relative;
-        }
-        
-        .priority-medium::before {
-            content: '⚠️';
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 20px;
+            border-radius: 0 6px 6px 0;
         }
         
         .priority-low {
-            border-left: 5px solid #48bb78;
-            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
-            color: #22543d;
-            padding: 20px 25px;
+            border-left: 4px solid #059669;
+            background-color: #ecfdf5;
+            color: #065f46;
+            padding: 16px 20px;
             margin: 20px 0;
-            border-radius: 0 12px 12px 0;
-            position: relative;
+            border-radius: 0 6px 6px 0;
         }
         
-        .priority-low::before {
-            content: 'ℹ️';
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 20px;
+        .priority-title {
+            font-weight: 600;
+            margin-bottom: 8px;
         }
         
+        /* Footer */
         .email-footer {
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-            padding: 40px 35px;
+            background-color: #f9fafb;
+            padding: 40px 30px;
             text-align: center;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid #e5e7eb;
         }
         
         .footer-links {
-            margin-bottom: 25px;
+            margin-bottom: 24px;
             display: flex;
             justify-content: center;
-            gap: 30px;
+            gap: 20px;
             flex-wrap: wrap;
         }
         
         .footer-links a {
-            color: #4a5568;
+            color: #6b7280;
             text-decoration: none;
             font-weight: 500;
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: color 0.2s ease;
             font-size: 14px;
         }
         
         .footer-links a:hover {
-            background-color: #667eea;
-            color: white;
-            transform: translateY(-1px);
+            color: #f59e0b;
         }
         
         .footer-disclaimer {
             font-size: 13px;
-            color: #718096;
-            margin-top: 20px;
-            padding: 15px;
+            color: #9ca3af;
+            margin-top: 16px;
+            padding: 12px;
             background-color: #ffffff;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
         }
         
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            
-            .email-container {
-                margin: 0;
-                border-radius: 12px;
-            }
-            
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-active {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-inactive {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        /* Divider */
+        .divider {
+            height: 1px;
+            background-color: #e5e7eb;
+            margin: 32px 0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 640px) {
             .email-header {
                 padding: 30px 20px;
-            }
-            
-            .site-name {
-                font-size: 24px;
             }
             
             .email-body {
@@ -318,75 +268,32 @@
                 padding: 30px 20px;
             }
             
+            .site-name {
+                font-size: 24px;
+            }
+            
             .data-table {
                 font-size: 14px;
             }
             
             .data-table th,
             .data-table td {
-                padding: 12px 15px;
+                padding: 8px 12px;
             }
             
             .footer-links {
                 flex-direction: column;
-                gap: 10px;
+                gap: 8px;
+            }
+            
+            .footer-links a {
+                display: block;
             }
             
             .button {
                 width: 100%;
-                justify-content: center;
+                text-align: center;
             }
-        }
-        
-        /* Status badges */
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        .status-active {
-            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
-            color: #22543d;
-        }
-        
-        .status-inactive {
-            background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
-            color: #742a2a;
-        }
-        
-        .status-pending {
-            background: linear-gradient(135deg, #feebc8 0%, #fbd38d 100%);
-            color: #7b341e;
-        }
-        
-        /* Animated elements */
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .email-container {
-            animation: slideIn 0.6s ease-out;
-        }
-        
-        .alert-header {
-            animation: slideIn 0.6s ease-out 0.2s both;
-        }
-        
-        .content {
-            animation: slideIn 0.6s ease-out 0.4s both;
         }
     </style>
 </head>
@@ -417,7 +324,15 @@
             </div>
             
             {% block action_button %}
-            <!-- action button -->
+            <!-- Action button block -->
+            {% endblock %}
+            
+            {% block data_table %}
+            <!-- Data table block -->
+            {% endblock %}
+            
+            {% block additional_content %}
+            <!-- Additional content block -->
             {% endblock %}
             {% endblock %}
         </div>
@@ -425,16 +340,20 @@
         <!-- Footer -->
         <div class="email-footer">
             <div class="footer-links">
-                <a href="{{ site_url }}/admin/">📊 Admin Panel</a>
-                <a href="{{ site_url }}">🌐 View Site</a>
-                <a href="{{ site_url }}/admin/orders/">📦 Orders</a>
-                <a href="{{ site_url }}/admin/auth/user/">👥 Users</a>
+                <a href="{{ site_url }}/admin/">Admin Panel</a>
+                <a href="{{ site_url }}">View Site</a>
+                <a href="{{ site_url }}/admin/orders/">Orders</a>
+                <a href="{{ site_url }}/admin/auth/user/">Users</a>
             </div>
             
             <div class="footer-disclaimer">
-                🤖 This is an automated admin notification from {{ site_name }}<br>
+                This is an automated admin notification from {{ site_name }}<br>
                 Generated on {{ "now"|date:"F d, Y \a\\t g:i A" }}
             </div>
+            
+            {% block footer_content %}
+            <!-- Additional footer content -->
+            {% endblock %}
         </div>
     </div>
 </body>

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Server Error - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 flex items-center justify-center px-4 py-8">
+    <div class="text-center max-w-md mx-auto">
+        <!-- Error Icon -->
+        <div class="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-6 sm:mb-8 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center shadow-lg">
+            <i class="fas fa-exclamation-triangle text-white text-3xl sm:text-4xl"></i>
+        </div>
+        
+        <!-- Error Code -->
+        <h1 class="text-6xl sm:text-8xl font-bold text-orange-600 mb-4">500</h1>
+        
+        <!-- Error Message -->
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Server Error</h2>
+        <p class="text-gray-600 mb-8 text-sm sm:text-base leading-relaxed">
+            Something went wrong on our end. We're working to fix this issue. Please try again in a few minutes.
+        </p>
+        
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <button onclick="location.reload()" 
+                    class="inline-flex items-center justify-center bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-700 transition-colors text-sm sm:text-base">
+                <i class="fas fa-redo mr-2"></i>
+                Try Again
+            </button>
+            <a href="{% url 'store:home' %}" 
+               class="inline-flex items-center justify-center bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors text-sm sm:text-base">
+                <i class="fas fa-home mr-2"></i>
+                Go Home
+            </a>
+        </div>
+        
+        <!-- Contact Support -->
+        <div class="mt-6">
+            <p class="text-gray-500 text-xs sm:text-sm mb-2">Still having issues?</p>
+            <a href="mailto:support@{{ site_config.site_domain|default:'example.com' }}" 
+               class="text-orange-700 hover:text-orange-800 font-medium text-sm sm:text-base transition-colors">
+                <i class="fas fa-envelope mr-1"></i>
+                Contact Support
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

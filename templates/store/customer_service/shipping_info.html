@@ -2,54 +2,62 @@
 {% block title %}Shipping Information - {{ site_config.site_name|default:'Store' }}{% endblock %}
 {% block content %}
 <!-- Hero Section -->
-<div class="bg-gradient-to-br from-blue-50 to-indigo-50 py-16">
+<div class="bg-gradient-to-br from-blue-50 to-indigo-50 py-8 sm:py-16">
     <div class="container mx-auto px-4">
         <div class="text-center max-w-3xl mx-auto">
-            <div class="mb-6">
-                <i class="fas fa-truck text-6xl text-blue-700"></i>
+            <div class="mb-4 sm:mb-6">
+                <i class="fas fa-truck text-4xl sm:text-6xl text-blue-700"></i>
             </div>
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Shipping Information</h1>
-            <p class="text-xl text-gray-600">Everything you need to know about delivery and shipping</p>
+            <h1 class="text-2xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-3 sm:mb-4">
+                Shipping Information
+            </h1>
+            <p class="text-base sm:text-xl text-gray-600 px-4">
+                Everything you need to know about delivery and shipping
+            </p>
         </div>
     </div>
 </div>
 
 <!-- Main Content -->
-<div class="py-16 bg-white">
+<div class="py-8 sm:py-16 bg-white">
     <div class="container mx-auto px-4">
         <div class="max-w-4xl mx-auto">
             <!-- Shipping Overview -->
-            <div class="text-center mb-12">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Fast & Reliable Delivery</h2>
-                <p class="text-gray-600 text-lg">
+            <div class="text-center mb-8 sm:mb-12">
+                <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-3 sm:mb-4">
+                    Fast & Reliable Delivery
+                </h2>
+                <p class="text-gray-600 text-base sm:text-lg px-4">
                     We work with trusted delivery partners to ensure your orders reach you safely and on time.
                 </p>
             </div>
 
             <!-- Shipping Information Grid -->
-            <div class="grid md:grid-cols-2 gap-8 mb-16">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 mb-8 sm:mb-16">
                 <!-- Delivery Times -->
-                <div class="bg-white border border-gray-200 rounded-lg p-8 text-center hover:shadow-lg transition-shadow duration-300">
-                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-clock text-2xl text-blue-700"></i>
+                <div class="bg-white border border-gray-200 rounded-lg p-4 sm:p-8 text-center hover:shadow-lg transition-shadow duration-300">
+                    <div class="bg-blue-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                        <i class="fas fa-clock text-lg sm:text-2xl text-blue-700"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">Delivery Times</h3>
-                    <div class="space-y-3 text-gray-600">
-                        <div class="flex justify-between">
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">
+                        Delivery Times
+                    </h3>
+                    <div class="space-y-2 sm:space-y-3 text-sm sm:text-base text-gray-600">
+                        <div class="flex justify-between items-center">
                             <span>Processing:</span>
                             <span class="font-semibold">1-2 business days</span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between items-center">
                             <span>Standard delivery:</span>
                             <span class="font-semibold">3-7 business days</span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between items-center">
                             <span>Express delivery:</span>
                             <span class="font-semibold">1-3 business days</span>
                         </div>
                     </div>
-                    <div class="mt-4 p-3 bg-blue-50 rounded-lg">
-                        <p class="text-sm text-blue-700">
+                    <div class="mt-3 sm:mt-4 p-2 sm:p-3 bg-blue-50 rounded-lg">
+                        <p class="text-xs sm:text-sm text-blue-700">
                             <i class="fas fa-info-circle mr-1"></i>
                             Times may vary by location
                         </p>
@@ -57,73 +65,83 @@
                 </div>
 
                 <!-- Shipping Fees -->
-                <div class="bg-white border border-gray-200 rounded-lg p-8 text-center hover:shadow-lg transition-shadow duration-300">
-                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-dollar-sign text-2xl text-green-700"></i>
+                <div class="bg-white border border-gray-200 rounded-lg p-4 sm:p-8 text-center hover:shadow-lg transition-shadow duration-300">
+                    <div class="bg-green-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                        <i class="fas fa-dollar-sign text-lg sm:text-2xl text-green-700"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">Shipping Fees</h3>
-                    <div class="space-y-3 text-gray-600">
-                        <div class="flex justify-between">
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">
+                        Shipping Fees
+                    </h3>
+                    <div class="space-y-2 sm:space-y-3 text-sm sm:text-base text-gray-600">
+                        <div class="flex justify-between items-center">
                             <span>Standard:</span>
                             <span class="font-semibold">₦2,500</span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between items-center">
                             <span>Express:</span>
                             <span class="font-semibold">₦5,000</span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between items-center">
                             <span>Free shipping:</span>
                             <span class="font-semibold">₦{{ site_config.free_shipping_threshold|floatformat:0|default:'50000' }}+</span>
                         </div>
                     </div>
-                    <div class="mt-4 p-3 bg-green-50 rounded-lg">
-                        <p class="text-sm text-green-700">
+                    <div class="mt-3 sm:mt-4 p-2 sm:p-3 bg-green-50 rounded-lg">
+                        <p class="text-xs sm:text-sm text-green-700">
                             <i class="fas fa-gift mr-1"></i>
                             Free shipping on qualifying orders
                         </p>
                     </div>
                 </div>
-
-                
             </div>
 
             <!-- Detailed Information -->
-            <div class="space-y-12">
+            <div class="space-y-8 sm:space-y-12">
                 <!-- Processing Information -->
-                <div class="bg-gray-50 rounded-lg p-8">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+                <div class="bg-gray-50 rounded-lg p-4 sm:p-8">
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 text-center">
                         <i class="fas fa-cog mr-2 text-gray-600"></i>
                         Order Processing
                     </h3>
                     <div class="max-w-3xl mx-auto">
-                        <div class="grid md:grid-cols-2 gap-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                             <div>
-                                <h4 class="font-semibold text-gray-800 mb-3">What happens after you order?</h4>
-                                <ul class="space-y-2 text-gray-600">
+                                <h4 class="font-semibold text-gray-800 mb-3 text-sm sm:text-base">
+                                    What happens after you order?
+                                </h4>
+                                <ul class="space-y-2 text-sm sm:text-base text-gray-600">
                                     <li class="flex items-start">
-                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
-                                        Order confirmation sent via email
+                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1 flex-shrink-0"></i>
+                                        <span>Order confirmation sent via email</span>
                                     </li>
                                     <li class="flex items-start">
-                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
-                                        Payment verification and processing
+                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1 flex-shrink-0"></i>
+                                        <span>Payment verification and processing</span>
                                     </li>
                                     <li class="flex items-start">
-                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
-                                        Items picked and packed with care
+                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1 flex-shrink-0"></i>
+                                        <span>Items picked and packed with care</span>
                                     </li>
                                     <li class="flex items-start">
-                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
-                                        Shipped with tracking information
+                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1 flex-shrink-0"></i>
+                                        <span>Shipped with tracking information</span>
                                     </li>
                                 </ul>
                             </div>
                             <div>
-                                <h4 class="font-semibold text-gray-800 mb-3">Business Hours</h4>
-                                <div class="text-gray-600 space-y-2">
-                                    <p><strong>Order Processing:</strong> Monday - Friday, 9 AM - 6 PM</p>
-                                    <p><strong>Customer Support:</strong> {{ site_config.business_hours }} </p>
-                                    <p class="text-sm text-gray-500 mt-3">
+                                <h4 class="font-semibold text-gray-800 mb-3 text-sm sm:text-base">
+                                    Business Hours
+                                </h4>
+                                <div class="text-sm sm:text-base text-gray-600 space-y-2">
+                                    <div>
+                                        <strong>Order Processing:</strong> 
+                                        <span class="block sm:inline">Monday - Friday, 9 AM - 6 PM</span>
+                                    </div>
+                                    <div>
+                                        <strong>Customer Support:</strong> 
+                                        <span class="block sm:inline">{{ site_config.business_hours|default:"24/7 Online Support" }}</span>
+                                    </div>
+                                    <p class="text-xs sm:text-sm text-gray-500 mt-3">
                                         Orders placed on weekends will be processed on the next business day.
                                     </p>
                                 </div>
@@ -134,24 +152,41 @@
 
                 <!-- Delivery Areas -->
                 <div class="text-center">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">
                         <i class="fas fa-map-marker-alt mr-2 text-gray-600"></i>
                         Delivery Coverage
                     </h3>
                     <div class="max-w-2xl mx-auto">
-                        <p class="text-gray-600 mb-6">
+                        <p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 px-4">
                             We currently deliver to all major cities and towns across Nigeria. 
                             Remote locations may have extended delivery times.
                         </p>
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                            <h4 class="font-semibold text-blue-800 mb-2">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 mx-4 sm:mx-0">
+                            <h4 class="font-semibold text-blue-800 mb-2 text-sm sm:text-base">
                                 <i class="fas fa-info-circle mr-1"></i>
                                 Important Note
                             </h4>
-                            <p class="text-blue-700 text-sm">
+                            <p class="text-blue-700 text-xs sm:text-sm leading-relaxed">
                                 Delivery times may be affected by weather conditions, public holidays, 
                                 or unforeseen circumstances. We'll keep you updated on any delays.
                             </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Section (Mobile-specific) -->
+                <div class="sm:hidden bg-amber-50 border border-amber-200 rounded-lg p-4 mx-4">
+                    <h4 class="font-semibold text-amber-800 mb-3 text-center">
+                        <i class="fas fa-phone mr-1"></i>
+                        Need Help?
+                    </h4>
+                    <div class="text-center space-y-2">
+                        <p class="text-amber-700 text-sm">
+                            Contact our support team for shipping inquiries
+                        </p>
+                        <div class="space-y-1 text-xs text-amber-600">
+                            <div>📧 {{ site_config.contact_email|default:"support@store.com" }}</div>
+                            <div>📞 {{ site_config.phone_number|default:"+234 XXX XXX XXXX" }}</div>
                         </div>
                     </div>
                 </div>
@@ -159,4 +194,50 @@
         </div>
     </div>
 </div>
+
+<style>
+/* Additional mobile-specific styles */
+@media (max-width: 640px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    /* Ensure text doesn't get too cramped */
+    h1, h2, h3, h4 {
+        line-height: 1.3;
+    }
+    
+    /* Better spacing for lists on mobile */
+    li {
+        padding-right: 0.5rem;
+    }
+    
+    /* Responsive flex layouts */
+    .flex.justify-between {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+    
+    /* Touch-friendly elements */
+    .hover\:shadow-lg {
+        transition: box-shadow 0.2s ease;
+    }
+    
+    /* Better readability on small screens */
+    .text-xs {
+        line-height: 1.4;
+    }
+}
+
+/* Smooth transitions for all interactive elements */
+.transition-shadow {
+    transition: box-shadow 0.3s ease;
+}
+
+/* Improve icon alignment */
+.fas {
+    vertical-align: middle;
+}
+</style>
 {% endblock %}

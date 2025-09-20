@@ -4,28 +4,119 @@
 {% block title %}{% trans "My Sell Items" %} - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-6xl mx-auto">
-        <div class="mb-8 flex justify-between items-center">
+        <div class="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
                     <i class="fas fa-store mr-2"></i>
                     {% trans "My Sell Items" %}
                 </h1>
-                <p class="mt-2 text-gray-600">
+                <p class="mt-2 text-sm sm:text-base text-gray-600">
                     {% trans "Manage your item submissions and track their status." %}
                 </p>
             </div>
             
             <a href="{% url 'sell_items:submit_sell_item' %}" 
-               class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-md font-medium transition-colors">
+               class="bg-amber-600 hover:bg-amber-700 text-white px-4 sm:px-6 py-3 rounded-md font-medium transition-colors text-center">
                 <i class="fas fa-plus mr-2"></i>
                 {% trans "Sell an Item" %}
             </a>
         </div>
         
         {% if submissions %}
-            <div class="bg-white rounded-lg shadow overflow-hidden">
+            <!-- Mobile Cards View (Hidden on larger screens) -->
+            <div class="lg:hidden space-y-4">
+                {% for submission in submissions %}
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                        <!-- Item Header -->
+                        <div class="flex items-start space-x-3 mb-3">
+                            {% if submission.images.exists %}
+                                <img src="{{ submission.images.first.image.url }}" 
+                                     alt="{{ submission.title }}" 
+                                     class="w-16 h-16 object-cover rounded-lg flex-shrink-0">
+                            {% else %}
+                                <div class="w-16 h-16 bg-gray-200 flex items-center justify-center rounded-lg flex-shrink-0">
+                                    <i class="fas fa-image text-gray-400 text-lg"></i>
+                                </div>
+                            {% endif %}
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-sm font-medium text-gray-900 truncate">{{ submission.title }}</h3>
+                                {% if submission.category %}
+                                    <p class="text-xs text-gray-500 mt-1">{{ submission.category.name }}</p>
+                                {% endif %}
+                                <p class="text-lg font-semibold text-gray-900 mt-1">₦{{ submission.price|floatformat:2 }}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Status Badges Row -->
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <!-- Type Badge -->
+                            <span class="px-2 py-1 text-xs rounded-full 
+                                {% if submission.source == 'own_item' %}bg-blue-100 text-blue-800
+                                {% else %}bg-purple-100 text-purple-800{% endif %}">
+                                {% if submission.source == 'own_item' %}
+                                    {% trans "Own Item" %}
+                                {% else %}
+                                    {% trans "Held Asset" %}
+                                {% endif %}
+                            </span>
+                            
+                            <!-- Status Badge -->
+                            <span class="px-2 py-1 text-xs rounded-full 
+                                {% if submission.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                {% elif submission.status == 'accepted' %}bg-green-100 text-green-800
+                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ submission.get_status_display }}
+                            </span>
+                            
+                            <!-- Bank Details Badge -->
+                            {% if submission.has_complete_bank_details %}
+                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                                    <i class="fas fa-check mr-1"></i>
+                                    {% trans "Bank Complete" %}
+                                </span>
+                            {% else %}
+                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    {% trans "Bank Missing" %}
+                                </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Details Grid -->
+                        <div class="grid grid-cols-2 gap-3 text-xs text-gray-600 mb-4">
+                            <div>
+                                <span class="block font-medium text-gray-700">{% trans "Quantity" %}</span>
+                                {{ submission.stock_quantity }} {% if submission.stock_quantity == 1 %}{% trans "item" %}{% else %}{% trans "items" %}{% endif %}
+                            </div>
+                            <div>
+                                <span class="block font-medium text-gray-700">{% trans "Date" %}</span>
+                                {{ submission.created_at|date:"M j, Y" }}
+                            </div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <a href="{% url 'sell_items:sell_submission_detail' submission.id %}" 
+                               class="flex-1 bg-amber-600 hover:bg-amber-700 text-white text-center px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                                <i class="fas fa-eye mr-1"></i>
+                                {% trans "View Details" %}
+                            </a>
+                            {% if not submission.has_complete_bank_details %}
+                                <a href="{% url 'sell_items:update_bank_details' submission.id %}" 
+                                   class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                                    <i class="fas fa-university mr-1"></i>
+                                    {% trans "Add Bank" %}
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Desktop Table View (Hidden on mobile) -->
+            <div class="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
@@ -144,14 +235,15 @@
                 </div>
             </div>
         {% else %}
+            <!-- Empty State -->
             <div class="text-center py-12">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100 mb-4">
-                    <i class="fas fa-store text-gray-400 text-xl"></i>
+                <div class="mx-auto flex items-center justify-center h-16 w-16 sm:h-12 sm:w-12 rounded-full bg-gray-100 mb-4">
+                    <i class="fas fa-store text-gray-400 text-xl sm:text-xl"></i>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">
+                <h3 class="text-lg sm:text-lg font-medium text-gray-900 mb-2">
                     {% trans "No Items Submitted Yet" %}
                 </h3>
-                <p class="text-gray-600 mb-6">
+                <p class="text-gray-600 mb-6 text-sm sm:text-base px-4">
                     {% trans "Start selling your items or held assets back to the platform." %}
                 </p>
                 <a href="{% url 'sell_items:submit_sell_item' %}" 

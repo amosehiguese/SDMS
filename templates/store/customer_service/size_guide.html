@@ -2,118 +2,124 @@
 {% block title %}Size Guide - {{ site_config.site_name|default:'Store' }}{% endblock %}
 {% block content %}
 <!-- Hero Section -->
-<div class="bg-gradient-to-br from-purple-50 to-pink-50 py-16">
+<div class="bg-gradient-to-br from-purple-50 to-pink-50 py-8 sm:py-16">
     <div class="container mx-auto px-4">
         <div class="text-center max-w-3xl mx-auto">
-            <div class="mb-6">
-                <i class="fas fa-ruler text-6xl text-purple-700"></i>
+            <div class="mb-4 sm:mb-6">
+                <i class="fas fa-ruler text-4xl sm:text-6xl text-purple-700"></i>
             </div>
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Size Guide</h1>
-            <p class="text-xl text-gray-600">Find your perfect fit with our comprehensive sizing information</p>
+            <h1 class="text-2xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-3 sm:mb-4">
+                Size Guide
+            </h1>
+            <p class="text-base sm:text-xl text-gray-600 px-4">
+                Find your perfect fit with our comprehensive sizing information
+            </p>
         </div>
     </div>
 </div>
 
 <!-- Main Content -->
-<div class="py-16 bg-white">
+<div class="py-8 sm:py-16 bg-white">
     <div class="container mx-auto px-4">
         <div class="max-w-4xl mx-auto">
             <!-- Introduction -->
-            <div class="text-center mb-12">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-4">How to Measure Yourself</h2>
-                <p class="text-gray-600 text-lg mb-8">
+            <div class="text-center mb-8 sm:mb-12">
+                <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-3 sm:mb-4">
+                    How to Measure Yourself
+                </h2>
+                <p class="text-sm sm:text-lg text-gray-600 mb-6 sm:mb-8 px-4">
                     Use our size guide to find your perfect fit. All measurements are in centimeters and should be taken while wearing well-fitted undergarments.
                 </p>
                 
                 <!-- Measurement Instructions -->
-                <div class="grid md:grid-cols-3 gap-6 mb-12">
-                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-6">
-                        <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-arrows-alt-h text-2xl text-purple-700"></i>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 sm:p-6">
+                        <div class="bg-purple-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                            <i class="fas fa-arrows-alt-h text-lg sm:text-2xl text-purple-700"></i>
                         </div>
-                        <h3 class="font-semibold text-gray-800 mb-2">Bust/Chest</h3>
-                        <p class="text-sm text-gray-600">Measure around the fullest part of your bust/chest, keeping the tape level</p>
+                        <h3 class="font-semibold text-gray-800 mb-2 text-sm sm:text-base">Bust/Chest</h3>
+                        <p class="text-xs sm:text-sm text-gray-600">Measure around the fullest part of your bust/chest, keeping the tape level</p>
                     </div>
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                        <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-arrows-alt-h text-2xl text-blue-700"></i>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6">
+                        <div class="bg-blue-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                            <i class="fas fa-arrows-alt-h text-lg sm:text-2xl text-blue-700"></i>
                         </div>
-                        <h3 class="font-semibold text-gray-800 mb-2">Waist</h3>
-                        <p class="text-sm text-gray-600">Measure around your natural waistline, at the narrowest part of your torso</p>
+                        <h3 class="font-semibold text-gray-800 mb-2 text-sm sm:text-base">Waist</h3>
+                        <p class="text-xs sm:text-sm text-gray-600">Measure around your natural waistline, at the narrowest part of your torso</p>
                     </div>
-                    <div class="bg-pink-50 border border-pink-200 rounded-lg p-6">
-                        <div class="bg-pink-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-arrows-alt-h text-2xl text-pink-700"></i>
+                    <div class="bg-pink-50 border border-pink-200 rounded-lg p-4 sm:p-6">
+                        <div class="bg-pink-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                            <i class="fas fa-arrows-alt-h text-lg sm:text-2xl text-pink-700"></i>
                         </div>
-                        <h3 class="font-semibold text-gray-800 mb-2">Hips</h3>
-                        <p class="text-sm text-gray-600">Measure around the fullest part of your hips, keeping the tape level</p>
+                        <h3 class="font-semibold text-gray-800 mb-2 text-sm sm:text-base">Hips</h3>
+                        <p class="text-xs sm:text-sm text-gray-600">Measure around the fullest part of your hips, keeping the tape level</p>
                     </div>
                 </div>
             </div>
 
             <!-- Size Charts -->
-            <div class="space-y-12">
+            <div class="space-y-8 sm:space-y-12">
                 <!-- Women's Clothing -->
                 <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                    <div class="bg-purple-700 text-white p-6">
-                        <h3 class="text-2xl font-bold text-center">
+                    <div class="bg-purple-700 text-white p-4 sm:p-6">
+                        <h3 class="text-lg sm:text-2xl font-bold text-center">
                             <i class="fas fa-female mr-2"></i>
                             Women's Clothing Size Chart
                         </h3>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full">
+                        <table class="w-full min-w-full">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-4 text-left font-semibold text-gray-800">Size</th>
-                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">Bust (cm)</th>
-                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">Waist (cm)</th>
-                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">Hips (cm)</th>
-                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">UK Size</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-left font-semibold text-gray-800 text-xs sm:text-sm">Size</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-center font-semibold text-gray-800 text-xs sm:text-sm">Bust (cm)</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-center font-semibold text-gray-800 text-xs sm:text-sm">Waist (cm)</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-center font-semibold text-gray-800 text-xs sm:text-sm">Hips (cm)</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-center font-semibold text-gray-800 text-xs sm:text-sm">UK Size</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-semibold text-purple-700">XS</td>
-                                    <td class="px-6 py-4 text-center">80-84</td>
-                                    <td class="px-6 py-4 text-center">60-64</td>
-                                    <td class="px-6 py-4 text-center">84-88</td>
-                                    <td class="px-6 py-4 text-center">6-8</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-purple-700 text-xs sm:text-sm">XS</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">80-84</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">60-64</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">84-88</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">6-8</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-semibold text-purple-700">S</td>
-                                    <td class="px-6 py-4 text-center">84-88</td>
-                                    <td class="px-6 py-4 text-center">64-68</td>
-                                    <td class="px-6 py-4 text-center">88-92</td>
-                                    <td class="px-6 py-4 text-center">8-10</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-purple-700 text-xs sm:text-sm">S</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">84-88</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">64-68</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">88-92</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">8-10</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-semibold text-purple-700">M</td>
-                                    <td class="px-6 py-4 text-center">88-92</td>
-                                    <td class="px-6 py-4 text-center">68-72</td>
-                                    <td class="px-6 py-4 text-center">92-96</td>
-                                    <td class="px-6 py-4 text-center">10-12</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-purple-700 text-xs sm:text-sm">M</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">88-92</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">68-72</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">92-96</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">10-12</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-semibold text-purple-700">L</td>
-                                    <td class="px-6 py-4 text-center">92-96</td>
-                                    <td class="px-6 py-4 text-center">72-76</td>
-                                    <td class="px-6 py-4 text-center">96-100</td>
-                                    <td class="px-6 py-4 text-center">12-14</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-purple-700 text-xs sm:text-sm">L</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">92-96</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">72-76</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">96-100</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">12-14</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-semibold text-purple-700">XL</td>
-                                    <td class="px-6 py-4 text-center">96-100</td>
-                                    <td class="px-6 py-4 text-center">76-80</td>
-                                    <td class="px-6 py-4 text-center">100-104</td>
-                                    <td class="px-6 py-4 text-center">14-16</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-purple-700 text-xs sm:text-sm">XL</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">96-100</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">76-80</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">100-104</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">14-16</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-semibold text-purple-700">XXL</td>
-                                    <td class="px-6 py-4 text-center">100-104</td>
-                                    <td class="px-6 py-4 text-center">80-84</td>
-                                    <td class="px-6 py-4 text-center">104-108</td>
-                                    <td class="px-6 py-4 text-center">16-18</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-purple-700 text-xs sm:text-sm">XXL</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">100-104</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">80-84</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">104-108</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">16-18</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -122,58 +128,58 @@
 
                 <!-- Men's Clothing -->
                 <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                    <div class="bg-blue-700 text-white p-6">
-                        <h3 class="text-2xl font-bold text-center">
+                    <div class="bg-blue-700 text-white p-4 sm:p-6">
+                        <h3 class="text-lg sm:text-2xl font-bold text-center">
                             <i class="fas fa-male mr-2"></i>
                             Men's Clothing Size Chart
                         </h3>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full">
+                        <table class="w-full min-w-full">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-4 text-left font-semibold text-gray-800">Size</th>
-                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">Chest (cm)</th>
-                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">Waist (cm)</th>
-                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">Neck (cm)</th>
-                                    <th class="px-6 py-4 text-center font-semibold text-gray-800">UK Size</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-left font-semibold text-gray-800 text-xs sm:text-sm">Size</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-center font-semibold text-gray-800 text-xs sm:text-sm">Chest (cm)</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-center font-semibold text-gray-800 text-xs sm:text-sm">Waist (cm)</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-center font-semibold text-gray-800 text-xs sm:text-sm">Neck (cm)</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-center font-semibold text-gray-800 text-xs sm:text-sm">UK Size</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-semibold text-blue-700">S</td>
-                                    <td class="px-6 py-4 text-center">88-92</td>
-                                    <td class="px-6 py-4 text-center">76-80</td>
-                                    <td class="px-6 py-4 text-center">36-37</td>
-                                    <td class="px-6 py-4 text-center">34-36</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-blue-700 text-xs sm:text-sm">S</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">88-92</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">76-80</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">36-37</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">34-36</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-semibold text-blue-700">M</td>
-                                    <td class="px-6 py-4 text-center">92-96</td>
-                                    <td class="px-6 py-4 text-center">80-84</td>
-                                    <td class="px-6 py-4 text-center">37-38</td>
-                                    <td class="px-6 py-4 text-center">36-38</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-blue-700 text-xs sm:text-sm">M</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">92-96</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">80-84</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">37-38</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">36-38</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-semibold text-blue-700">L</td>
-                                    <td class="px-6 py-4 text-center">96-100</td>
-                                    <td class="px-6 py-4 text-center">84-88</td>
-                                    <td class="px-6 py-4 text-center">38-39</td>
-                                    <td class="px-6 py-4 text-center">38-40</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-blue-700 text-xs sm:text-sm">L</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">96-100</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">84-88</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">38-39</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">38-40</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-semibold text-blue-700">XL</td>
-                                    <td class="px-6 py-4 text-center">100-104</td>
-                                    <td class="px-6 py-4 text-center">88-92</td>
-                                    <td class="px-6 py-4 text-center">39-40</td>
-                                    <td class="px-6 py-4 text-center">40-42</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-blue-700 text-xs sm:text-sm">XL</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">100-104</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">88-92</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">39-40</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">40-42</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-semibold text-blue-700">XXL</td>
-                                    <td class="px-6 py-4 text-center">104-108</td>
-                                    <td class="px-6 py-4 text-center">92-96</td>
-                                    <td class="px-6 py-4 text-center">40-41</td>
-                                    <td class="px-6 py-4 text-center">42-44</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-blue-700 text-xs sm:text-sm">XXL</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">104-108</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">92-96</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">40-41</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm">42-44</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -182,52 +188,52 @@
 
                 <!-- Shoe Sizes -->
                 <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                    <div class="bg-green-700 text-white p-6">
-                        <h3 class="text-2xl font-bold text-center">
+                    <div class="bg-green-700 text-white p-4 sm:p-6">
+                        <h3 class="text-lg sm:text-2xl font-bold text-center">
                             <i class="fas fa-shoe-prints mr-2"></i>
                             Shoe Size Chart
                         </h3>
                     </div>
-                    <div class="grid md:grid-cols-2 gap-0">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
                         <!-- Women's Shoes -->
-                        <div class="overflow-x-auto border-r border-gray-200">
-                            <h4 class="bg-pink-100 text-pink-800 font-semibold p-4 text-center">Women's Shoes</h4>
+                        <div class="overflow-x-auto border-b md:border-b-0 md:border-r border-gray-200">
+                            <h4 class="bg-pink-100 text-pink-800 font-semibold p-3 sm:p-4 text-center text-sm sm:text-base">Women's Shoes</h4>
                             <table class="w-full">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-4 py-3 text-center font-semibold text-gray-800">UK</th>
-                                        <th class="px-4 py-3 text-center font-semibold text-gray-800">US</th>
-                                        <th class="px-4 py-3 text-center font-semibold text-gray-800">EU</th>
-                                        <th class="px-4 py-3 text-center font-semibold text-gray-800">CM</th>
+                                        <th class="px-2 sm:px-4 py-2 sm:py-3 text-center font-semibold text-gray-800 text-xs sm:text-sm">UK</th>
+                                        <th class="px-2 sm:px-4 py-2 sm:py-3 text-center font-semibold text-gray-800 text-xs sm:text-sm">US</th>
+                                        <th class="px-2 sm:px-4 py-2 sm:py-3 text-center font-semibold text-gray-800 text-xs sm:text-sm">EU</th>
+                                        <th class="px-2 sm:px-4 py-2 sm:py-3 text-center font-semibold text-gray-800 text-xs sm:text-sm">CM</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
-                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">3</td><td class="px-4 py-2 text-center">5</td><td class="px-4 py-2 text-center">36</td><td class="px-4 py-2 text-center">22.5</td></tr>
-                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">4</td><td class="px-4 py-2 text-center">6</td><td class="px-4 py-2 text-center">37</td><td class="px-4 py-2 text-center">23</td></tr>
-                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">5</td><td class="px-4 py-2 text-center">7</td><td class="px-4 py-2 text-center">38</td><td class="px-4 py-2 text-center">24</td></tr>
-                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">6</td><td class="px-4 py-2 text-center">8</td><td class="px-4 py-2 text-center">39</td><td class="px-4 py-2 text-center">25</td></tr>
-                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">7</td><td class="px-4 py-2 text-center">9</td><td class="px-4 py-2 text-center">40</td><td class="px-4 py-2 text-center">25.5</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">3</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">5</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">36</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">22.5</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">4</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">6</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">37</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">23</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">5</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">7</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">38</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">24</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">6</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">8</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">39</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">25</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">7</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">9</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">40</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">25.5</td></tr>
                                 </tbody>
                             </table>
                         </div>
                         <!-- Men's Shoes -->
                         <div class="overflow-x-auto">
-                            <h4 class="bg-blue-100 text-blue-800 font-semibold p-4 text-center">Men's Shoes</h4>
+                            <h4 class="bg-blue-100 text-blue-800 font-semibold p-3 sm:p-4 text-center text-sm sm:text-base">Men's Shoes</h4>
                             <table class="w-full">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-4 py-3 text-center font-semibold text-gray-800">UK</th>
-                                        <th class="px-4 py-3 text-center font-semibold text-gray-800">US</th>
-                                        <th class="px-4 py-3 text-center font-semibold text-gray-800">EU</th>
-                                        <th class="px-4 py-3 text-center font-semibold text-gray-800">CM</th>
+                                        <th class="px-2 sm:px-4 py-2 sm:py-3 text-center font-semibold text-gray-800 text-xs sm:text-sm">UK</th>
+                                        <th class="px-2 sm:px-4 py-2 sm:py-3 text-center font-semibold text-gray-800 text-xs sm:text-sm">US</th>
+                                        <th class="px-2 sm:px-4 py-2 sm:py-3 text-center font-semibold text-gray-800 text-xs sm:text-sm">EU</th>
+                                        <th class="px-2 sm:px-4 py-2 sm:py-3 text-center font-semibold text-gray-800 text-xs sm:text-sm">CM</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
-                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">6</td><td class="px-4 py-2 text-center">7</td><td class="px-4 py-2 text-center">40</td><td class="px-4 py-2 text-center">25</td></tr>
-                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">7</td><td class="px-4 py-2 text-center">8</td><td class="px-4 py-2 text-center">41</td><td class="px-4 py-2 text-center">26</td></tr>
-                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">8</td><td class="px-4 py-2 text-center">9</td><td class="px-4 py-2 text-center">42</td><td class="px-4 py-2 text-center">27</td></tr>
-                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">9</td><td class="px-4 py-2 text-center">10</td><td class="px-4 py-2 text-center">43</td><td class="px-4 py-2 text-center">28</td></tr>
-                                    <tr class="hover:bg-gray-50"><td class="px-4 py-2 text-center">10</td><td class="px-4 py-2 text-center">11</td><td class="px-4 py-2 text-center">44</td><td class="px-4 py-2 text-center">28.5</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">6</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">7</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">40</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">25</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">7</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">8</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">41</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">26</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">8</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">9</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">42</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">27</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">9</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">10</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">43</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">28</td></tr>
+                                    <tr class="hover:bg-gray-50"><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">10</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">11</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">44</td><td class="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">28.5</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -236,41 +242,61 @@
             </div>
 
             <!-- Sizing Tips -->
-            <div class="mt-16 space-y-8">
-                <div class="bg-amber-50 border border-amber-200 rounded-lg p-8">
-                    <h3 class="text-xl font-bold text-amber-800 mb-4">
+            <div class="mt-8 sm:mt-16 space-y-6 sm:space-y-8">
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 sm:p-8">
+                    <h3 class="text-lg sm:text-xl font-bold text-amber-800 mb-3 sm:mb-4">
                         <i class="fas fa-lightbulb mr-2"></i>
                         Sizing Tips & Recommendations
                     </h3>
-                    <div class="grid md:grid-cols-2 gap-6 text-amber-700">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 text-amber-700">
                         <ul class="space-y-2">
-                            <li class="flex items-start"><i class="fas fa-arrow-right mr-2 mt-1"></i>If you're between sizes, we recommend sizing up for comfort</li>
-                            <li class="flex items-start"><i class="fas fa-arrow-right mr-2 mt-1"></i>Check individual product descriptions for specific fit notes</li>
-                            <li class="flex items-start"><i class="fas fa-arrow-right mr-2 mt-1"></i>Measure yourself without heavy clothing</li>
+                            <li class="flex items-start text-xs sm:text-sm">
+                                <i class="fas fa-arrow-right mr-2 mt-1 flex-shrink-0"></i>
+                                <span>If you're between sizes, we recommend sizing up for comfort</span>
+                            </li>
+                            <li class="flex items-start text-xs sm:text-sm">
+                                <i class="fas fa-arrow-right mr-2 mt-1 flex-shrink-0"></i>
+                                <span>Check individual product descriptions for specific fit notes</span>
+                            </li>
+                            <li class="flex items-start text-xs sm:text-sm">
+                                <i class="fas fa-arrow-right mr-2 mt-1 flex-shrink-0"></i>
+                                <span>Measure yourself without heavy clothing</span>
+                            </li>
                         </ul>
                         <ul class="space-y-2">
-                            <li class="flex items-start"><i class="fas fa-arrow-right mr-2 mt-1"></i>For shoes, measure feet in the evening when they're slightly swollen</li>
-                            <li class="flex items-start"><i class="fas fa-arrow-right mr-2 mt-1"></i>Consider your preferred fit - loose or fitted</li>
-                            <li class="flex items-start"><i class="fas fa-arrow-right mr-2 mt-1"></i>When in doubt, contact our customer service for help</li>
+                            <li class="flex items-start text-xs sm:text-sm">
+                                <i class="fas fa-arrow-right mr-2 mt-1 flex-shrink-0"></i>
+                                <span>For shoes, measure feet in the evening when they're slightly swollen</span>
+                            </li>
+                            <li class="flex items-start text-xs sm:text-sm">
+                                <i class="fas fa-arrow-right mr-2 mt-1 flex-shrink-0"></i>
+                                <span>Consider your preferred fit - loose or fitted</span>
+                            </li>
+                            <li class="flex items-start text-xs sm:text-sm">
+                                <i class="fas fa-arrow-right mr-2 mt-1 flex-shrink-0"></i>
+                                <span>When in doubt, contact our customer service for help</span>
+                            </li>
                         </ul>
                     </div>
                 </div>
 
                 <!-- Still Need Help -->
-                <div class="bg-gray-50 rounded-lg p-8 text-center">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Still Unsure About Sizing?</h3>
-                    <p class="text-gray-600 mb-6">
+                <div class="bg-gray-50 rounded-lg p-4 sm:p-8 text-center">
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">
+                        Still Unsure About Sizing?
+                    </h3>
+                    <p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 px-4">
                         Our customer service team is here to help you find the perfect fit. 
                         Don't hesitate to reach out with any sizing questions.
                     </p>
-                    <div class="flex flex-col md:flex-row gap-4 justify-center">
+                    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md mx-auto">
                         <a href="mailto:{{ site_config.contact_email|default:'support@example.com' }}" 
-                           class="bg-purple-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-800 transition-colors inline-flex items-center justify-center">
+                           class="bg-purple-700 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:bg-purple-800 transition-colors inline-flex items-center justify-center text-sm sm:text-base">
                             <i class="fas fa-envelope mr-2"></i>
                             Ask for Help
                         </a>
                         <a href="{% url 'store:returns_refunds' %}" 
-                           class="bg-white border border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors inline-flex items-center justify-center">
+                           class="bg-white border border-gray-300 text-gray-700 px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors inline-flex items-center justify-center text-sm sm:text-base">
                             <i class="fas fa-undo mr-2"></i>
                             Return Policy
                         </a>
@@ -280,4 +306,5 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+
+{% endblock %}

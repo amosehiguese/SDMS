@@ -21,6 +21,7 @@ class EmailTemplate(BaseModel):
         ('sell_item_review_admin', 'Sell Item Review Required (Admin)'),
         ('low_stock_admin', 'Low Stock Alert (Admin)'),
         ('payment_failed_admin', 'Payment Failed (Admin)'),
+        ('admin_message', 'Admin Message to Users'), 
     ]
     
     RECIPIENT_TYPES = [

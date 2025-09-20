@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+
+{% block title %}Send Email - Admin - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-amber-500 to-yellow-600 px-6 py-4">
+            <h1 class="text-2xl font-bold text-white flex items-center">
+                <i class="fas fa-envelope mr-3"></i>
+                Send Email to Users
+            </h1>
+            <p class="text-amber-100 mt-1">Send messages to users or staff members</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="p-6 bg-gray-50 border-b">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-gray-900">{{ total_users }}</div>
+                    <div class="text-sm text-gray-600">Total Users</div>
+                </div>
+                <div class="bg-white rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-amber-600">{{ staff_users }}</div>
+                    <div class="text-sm text-gray-600">Staff Members</div>
+                </div>
+                <div class="bg-white rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-green-600">Active</div>
+                    <div class="text-sm text-gray-600">All Listed Users</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Form -->
+        <form method="post" class="p-6">
+            {% csrf_token %}
+            
+            <!-- Subject -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Subject <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       name="subject" 
+                       required
+                       placeholder="Enter email subject"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+            </div>
+
+            <!-- Message -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Message <span class="text-red-500">*</span>
+                </label>
+                <textarea name="message" 
+                          rows="8" 
+                          required
+                          placeholder="Enter your message here..."
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"></textarea>
+                <p class="text-sm text-gray-500 mt-1">HTML is supported. The message will be formatted in a professional email template.</p>
+            </div>
+
+            <!-- Recipients -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-3">
+                    Recipients <span class="text-red-500">*</span>
+                </label>
+                
+                <div class="space-y-3">
+                    <!-- All Users -->
+                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="radio" name="recipient_type" value="all" class="mr-3 text-amber-600">
+                        <div>
+                            <div class="font-medium">All Users</div>
+                            <div class="text-sm text-gray-500">Send to all {{ total_users }} active users</div>
+                        </div>
+                    </label>
+
+                    <!-- Staff Only -->
+                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="radio" name="recipient_type" value="staff" class="mr-3 text-amber-600">
+                        <div>
+                            <div class="font-medium">Staff Members Only</div>
+                            <div class="text-sm text-gray-500">Send to {{ staff_users }} staff members</div>
+                        </div>
+                    </label>
+
+                    <!-- Single User -->
+                    <label class="flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="radio" name="recipient_type" value="single" class="mr-3 mt-1 text-amber-600" id="single-radio">
+                        <div class="flex-1">
+                            <div class="font-medium">Single User</div>
+                            <div class="text-sm text-gray-500 mb-2">Send to a specific user by email</div>
+                            <input type="email" 
+                                   name="single_email" 
+                                   placeholder="user@example.com"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                   onclick="document.getElementById('single-radio').checked = true">
+                        </div>
+                    </label>
+
+                    <!-- Selected Users -->
+                    <label class="flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input type="radio" name="recipient_type" value="selected" class="mr-3 mt-1 text-amber-600" id="selected-radio">
+                        <div class="flex-1">
+                            <div class="font-medium">Selected Users</div>
+                            <div class="text-sm text-gray-500 mb-2">Choose specific users</div>
+                            
+                            <!-- User Search -->
+                            <div class="mb-3">
+                                <input type="text" 
+                                       id="user-search" 
+                                       placeholder="Search users by name or email..."
+                                       class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                       onclick="document.getElementById('selected-radio').checked = true">
+                                <div id="search-results" class="mt-2 hidden"></div>
+                            </div>
+                            
+                            <!-- Selected Users Display -->
+                            <div id="selected-users" class="space-y-2 max-h-40 overflow-y-auto">
+                                <!-- Selected users will appear here -->
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-end space-x-4">
+                <a href="{% url 'core:profile' %}" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 flex items-center">
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Send Email
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    let selectedUsers = [];
+    
+    // User search functionality
+    $('#user-search').on('input', function() {
+        const query = $(this).val().trim();
+        
+        if (query.length < 2) {
+            $('#search-results').addClass('hidden');
+            return;
+        }
+        
+        $.get('{% url "emails:search_users" %}', { q: query })
+            .done(function(data) {
+                const results = $('#search-results');
+                results.empty();
+                
+                if (data.users.length === 0) {
+                    results.html('<div class="p-2 text-gray-500">No users found</div>');
+                } else {
+                    data.users.forEach(user => {
+                        const isSelected = selectedUsers.some(u => u.id === user.id);
+                        const staffBadge = user.is_staff ? '<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full ml-2">Staff</span>' : '';
+                        
+                        const userHtml = `
+                            <div class="p-2 hover:bg-gray-50 cursor-pointer border-b user-result ${isSelected ? 'bg-amber-50' : ''}" 
+                                 data-user-id="${user.id}"
+                                 data-user-email="${user.email}"
+                                 data-user-name="${user.display_name}"
+                                 data-user-staff="${user.is_staff}">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <div class="font-medium">${user.display_name}</div>
+                                        <div class="text-sm text-gray-500">${user.email}</div>
+                                    </div>
+                                    <div>${staffBadge} ${isSelected ? '<i class="fas fa-check text-green-500"></i>' : ''}</div>
+                                </div>
+                            </div>
+                        `;
+                        results.append(userHtml);
+                    });
+                }
+                
+                results.removeClass('hidden');
+            });
+    });
+    
+    // Handle user selection
+    $(document).on('click', '.user-result', function() {
+        const userId = $(this).data('user-id');
+        const userEmail = $(this).data('user-email');
+        const userName = $(this).data('user-name');
+        const isStaff = $(this).data('user-staff');
+        
+        // Check if user is already selected
+        const existingIndex = selectedUsers.findIndex(u => u.id === userId);
+        
+        if (existingIndex === -1) {
+            // Add user
+            selectedUsers.push({
+                id: userId,
+                email: userEmail,
+                name: userName,
+                is_staff: isStaff
+            });
+        } else {
+            // Remove user
+            selectedUsers.splice(existingIndex, 1);
+        }
+        
+        updateSelectedUsersDisplay();
+        $('#user-search').val('');
+        $('#search-results').addClass('hidden');
+    });
+    
+    function updateSelectedUsersDisplay() {
+        const container = $('#selected-users');
+        container.empty();
+        
+        if (selectedUsers.length === 0) {
+            container.html('<div class="text-gray-500 text-sm">No users selected</div>');
+            return;
+        }
+        
+        selectedUsers.forEach((user, index) => {
+            const staffBadge = user.is_staff ? '<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full ml-2">Staff</span>' : '';
+            
+            const userHtml = `
+                <div class="flex items-center justify-between p-2 bg-amber-50 rounded border">
+                    <div>
+                        <div class="font-medium text-sm">${user.name}</div>
+                        <div class="text-xs text-gray-600">${user.email}</div>
+                    </div>
+                    <div class="flex items-center">
+                        ${staffBadge}
+                        <button type="button" class="ml-2 text-red-500 hover:text-red-700 remove-user" data-index="${index}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <input type="hidden" name="selected_users" value="${user.id}">
+                </div>
+            `;
+            container.append(userHtml);
+        });
+    }
+    
+    // Remove selected user
+    $(document).on('click', '.remove-user', function() {
+        const index = $(this).data('index');
+        selectedUsers.splice(index, 1);
+        updateSelectedUsersDisplay();
+    });
+    
+    // Hide search results when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#user-search, #search-results').length) {
+            $('#search-results').addClass('hidden');
+        }
+    });
+});
+</script>
+{% endblock %}

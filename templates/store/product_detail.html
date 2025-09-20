@@ -12,6 +12,13 @@
         overflow: hidden;
     }
     
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
     .prose {
         line-height: 1.6;
     }
@@ -20,24 +27,26 @@
         margin-bottom: 1rem;
     }
     
-    /* Ensure quantity buttons don't duplicate */
+    /* Quantity controls for mobile */
     .quantity-controls {
         display: flex;
         align-items: center;
         border: 1px solid #d1d5db;
         border-radius: 0.375rem;
         overflow: hidden;
+        width: fit-content;
     }
     
     .quantity-btn {
         background: none;
         border: none;
-        padding: 0.5rem 0.75rem;
+        padding: 0.75rem 1rem;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
         transition: background-color 0.15s ease-in-out;
+        min-width: 2.5rem;
     }
     
     .quantity-btn:hover {
@@ -49,104 +58,351 @@
         outline: none;
         text-align: center;
         width: 4rem;
-        padding: 0.5rem;
+        padding: 0.75rem 0.5rem;
         background: none;
+    }
+
+    /* Mobile image gallery */
+    .mobile-image-gallery {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        height: 300px;
+        background: #f3f4f6;
+    }
+
+    .image-slider {
+        display: flex;
+        transition: transform 0.3s ease;
+        height: 100%;
+        width: 100%;
+    }
+
+    .image-slide {
+        min-width: 100%;
+        width: 100%;
+        flex-shrink: 0;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .image-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    /* Mobile tabs */
+    .mobile-tab-nav {
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .mobile-tab-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .mobile-tab-button {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* Sticky mobile action bar */
+    .mobile-action-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 40;
+        padding: 0.75rem 1rem;
+        background: white;
+        border-top: 1px solid #e5e7eb;
+        box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .mobile-action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        width: 100%;
+    }
+
+    .mobile-quantity-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 60px;
+    }
+
+    .mobile-quantity-label {
+        font-size: 0.625rem;
+        color: #6b7280;
+        margin-bottom: 0.25rem;
+    }
+
+    .mobile-quantity-controls {
+        display: flex;
+        align-items: center;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        overflow: hidden;
+        background: white;
+    }
+
+    .mobile-quantity-btn {
+        background: none;
+        border: none;
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.15s ease-in-out;
+        color: #374151;
+    }
+
+    .mobile-quantity-btn:hover {
+        background-color: #f3f4f6;
+    }
+
+    .mobile-quantity-input {
+        border: none;
+        outline: none;
+        text-align: center;
+        width: 2.5rem;
+        padding: 0.5rem 0.25rem;
+        background: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .mobile-action-btn {
+        padding: 0.875rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.15s ease-in-out;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+    }
+
+    .mobile-add-to-cart {
+        background-color: #b45309;
+        color: white;
+        flex: 0 0 auto;
+        width: 60px;
+    }
+
+    .mobile-add-to-cart:hover {
+        background-color: #92400e;
+    }
+
+    .mobile-buy-now {
+        background-color: #000000;
+        color: white;
+        flex: 1;
+        gap: 0.5rem;
+    }
+
+    .mobile-buy-now:hover {
+        background-color: #374151;
+    }
+
+    .mobile-action-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Add bottom padding to content to account for fixed action bar */
+    .mobile-content-padding {
+        padding-bottom: 120px;
+    }
+
+    /* Mobile modal for images */
+    .image-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 50;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Flash sale countdown mobile styling */
+    .countdown-mobile {
+        font-size: 0.75rem;
+        text-align: center;
+    }
+
+    @media (min-width: 768px) {
+        .mobile-action-bar {
+            display: none;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Breadcrumb -->
-<div class="bg-gray-100 py-4">
+<!-- Breadcrumb - Hidden on very small screens -->
+<div class="bg-gray-100 py-2 md:py-4 hidden sm:block">
     <div class="container mx-auto px-4">
-        <nav class="text-sm">
+        <nav class="text-xs md:text-sm">
             <a href="{% url 'store:home' %}" class="text-amber-700 hover:text-yellow-700">Home</a>
-            <span class="mx-2">/</span>
+            <span class="mx-1 md:mx-2">/</span>
             <a href="{% url 'store:product_list' %}" class="text-amber-700 hover:text-yellow-700">Products</a>
             {% if product.category %}
-                <span class="mx-2">/</span>
+                <span class="mx-1 md:mx-2">/</span>
                 <a href="{% url 'store:category_products' product.category.slug %}" class="text-amber-700 hover:text-yellow-700">{{ product.category.name }}</a>
             {% endif %}
-            <span class="mx-2">/</span>
-            <span class="text-gray-600">{{ product.title|truncatewords:5 }}</span>
+            <span class="mx-1 md:mx-2">/</span>
+            <span class="text-gray-600">{{ product.title|truncatewords:3 }}</span>
         </nav>
     </div>
 </div>
 
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-2 sm:px-4 py-4 md:py-8 mobile-content-padding">
     <!-- Product Details -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 lg:gap-12 mb-8 md:mb-12">
+        
         <!-- Product Images -->
-        <div class="space-y-4">
-            <!-- Main Image -->
-            <div class="relative">
-                {% if product.images.exists %}
-                    <img id="main-image" src="{{ product.images.first.image.url }}" alt="{{ product.title }}" class="w-full h-96 object-cover rounded-lg">
-                {% else %}
-                    <div class="w-full h-96 bg-gray-200 flex items-center justify-center rounded-lg">
-                        <i class="fas fa-image text-gray-400 text-6xl"></i>
-                    </div>
-                {% endif %}
-                
-                <!-- Flash Sale Badge -->
-                {% if product.has_active_flash_sale %}
-                <div class="absolute top-4 left-4 bg-red-600 text-white px-3 py-2 rounded font-bold">
-                    <i class="fas fa-bolt"></i> {{ product.get_savings_percentage }}% OFF
-                    {% if product.flash_sale_end_time %}
-                        <div class="text-xs mt-1" data-end-time="{{ product.flash_sale_end_time|date:'c' }}">
-                            <div class="countdown-timer">--:--:--</div>
+        <div class="space-y-2 md:space-y-4">
+            <!-- Mobile Image Gallery -->
+            <div class="md:hidden">
+                <div class="mobile-image-gallery bg-gray-100 rounded-lg overflow-hidden">
+                    {% if product.images.exists %}
+                        <div class="image-slider" id="mobile-image-slider">
+                            {% for image in product.images.all %}
+                            <div class="image-slide">
+                                <img src="{{ image.image.url }}" alt="{{ product.title }}" 
+                                     onclick="openImageModal('{{ image.image.url }}')">
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Image indicators -->
+                        {% if product.images.count > 1 %}
+                        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                            {% for image in product.images.all %}
+                            <div class="w-2 h-2 rounded-full bg-white opacity-50 image-indicator" data-index="{{ forloop.counter0 }}"></div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Navigation arrows -->
+                        <button class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full" onclick="previousImage()">
+                            <i class="fas fa-chevron-left text-sm"></i>
+                        </button>
+                        <button class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full" onclick="nextImage()">
+                            <i class="fas fa-chevron-right text-sm"></i>
+                        </button>
+                        {% endif %}
+                    {% else %}
+                        <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                            <i class="fas fa-image text-gray-400 text-4xl"></i>
                         </div>
                     {% endif %}
+                    
+                    <!-- Flash Sale Badge -->
+                    {% if product.has_active_flash_sale %}
+                    <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">
+                        <i class="fas fa-bolt"></i> {{ product.get_savings_percentage }}% OFF
+                        {% if product.flash_sale_end_time %}
+                            <div class="countdown-mobile mt-1" data-end-time="{{ product.flash_sale_end_time|date:'c' }}">
+                                <div class="countdown-timer">--:--:--</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Desktop Image Gallery -->
+            <div class="hidden md:block">
+                <div class="relative">
+                    {% if product.images.exists %}
+                        <img id="main-image" src="{{ product.images.first.image.url }}" alt="{{ product.title }}" 
+                             class="w-full h-96 object-cover rounded-lg cursor-zoom-in" 
+                             onclick="openImageModal('{{ product.images.first.image.url }}')">
+                    {% else %}
+                        <div class="w-full h-96 bg-gray-200 flex items-center justify-center rounded-lg">
+                            <i class="fas fa-image text-gray-400 text-6xl"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Flash Sale Badge -->
+                    {% if product.has_active_flash_sale %}
+                    <div class="absolute top-4 left-4 bg-red-600 text-white px-3 py-2 rounded font-bold">
+                        <i class="fas fa-bolt"></i> {{ product.get_savings_percentage }}% OFF
+                        {% if product.flash_sale_end_time %}
+                            <div class="text-xs mt-1" data-end-time="{{ product.flash_sale_end_time|date:'c' }}">
+                                <div class="countdown-timer">--:--:--</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Thumbnail Images -->
+                {% if product.images.count > 1 %}
+                <div class="flex space-x-2 overflow-x-auto mt-4">
+                    {% for image in product.images.all %}
+                    <img src="{{ image.image.url }}" alt="{{ product.title }}" 
+                         class="w-16 h-16 md:w-20 md:h-20 object-cover rounded cursor-pointer border-2 border-transparent hover:border-amber-700 transition thumbnail-image flex-shrink-0"
+                         onclick="changeMainImage('{{ image.image.url }}')">
+                    {% endfor %}
                 </div>
                 {% endif %}
             </div>
-            
-            <!-- Thumbnail Images -->
-            {% if product.images.count > 1 %}
-            <div class="flex space-x-2 overflow-x-auto">
-                {% for image in product.images.all %}
-                <img src="{{ image.image.url }}" alt="{{ product.title }}" 
-                     class="w-20 h-20 object-cover rounded cursor-pointer border-2 border-transparent hover:border-amber-700 transition thumbnail-image"
-                     onclick="changeMainImage('{{ image.image.url }}')">
-                {% endfor %}
-            </div>
-            {% endif %}
         </div>
         
         <!-- Product Info -->
-        <div class="space-y-6">
+        <div class="space-y-4 md:space-y-6">
             <div>
-                <h1 class="text-3xl font-bold mb-2">{{ product.title }}</h1>
+                <h1 class="text-xl md:text-2xl lg:text-3xl font-bold mb-2">{{ product.title }}</h1>
                 {% if product.category %}
-                    <p class="text-gray-600 mb-4">
+                    <p class="text-gray-600 mb-2 md:mb-4 text-sm md:text-base">
                         <a href="{% url 'store:category_products' product.category.slug %}" class="hover:text-amber-700">{{ product.category.name }}</a>
                     </p>
                 {% endif %}
                 
                 <!-- Rating and Reviews -->
-                <div class="flex items-center space-x-4 mb-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0 mb-4 text-sm">
                     <div class="flex items-center">
                         {% for i in "12345" %}
                             {% if forloop.counter <= avg_rating %}
-                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400 text-sm"></i>
                             {% else %}
-                                <i class="far fa-star text-gray-300"></i>
+                                <i class="far fa-star text-gray-300 text-sm"></i>
                             {% endif %}
                         {% endfor %}
-                        <span class="ml-2 text-gray-600">({{ total_reviews }} review{{ total_reviews|pluralize }})</span>
+                        <span class="ml-2 text-gray-600">({{ total_reviews }})</span>
                     </div>
-                    <span class="text-gray-400">|</span>
+                    <span class="text-gray-400 hidden sm:inline">|</span>
                     <span class="text-gray-600">SKU: {{ product.sku|default:"N/A" }}</span>
                 </div>
             </div>
             
             <!-- Price -->
-            <div class="border-t border-b py-6">
-                <div class="flex items-center space-x-4 mb-4">
-                    <span class="text-3xl font-bold text-amber-700">₦{{ product.get_display_price|floatformat:0 }}</span>
+            <div class="border-t border-b py-4 md:py-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0 mb-4">
+                    <span class="text-2xl md:text-3xl font-bold text-amber-700">₦{{ product.get_display_price|floatformat:0 }}</span>
                     {% if product.sale_price %}
-                        <span class="text-xl text-gray-500 line-through">₦{{ product.price|floatformat:0 }}</span>
-                        <span class="bg-red-100 text-red-600 px-2 py-1 rounded text-sm font-semibold">
+                        <span class="text-lg md:text-xl text-gray-500 line-through">₦{{ product.price|floatformat:0 }}</span>
+                        <span class="bg-red-100 text-red-600 px-2 py-1 rounded text-xs md:text-sm font-semibold w-fit">
                             Save ₦{{ product.price|sub:product.sale_price|floatformat:0 }}
                         </span>
                     {% endif %}
@@ -156,44 +412,46 @@
                 <div class="mb-4">
                     {% if product.is_in_stock %}
                         {% if product.track_stock and product.stock_quantity <= 10 %}
-                            <p class="text-orange-600 font-semibold">
+                            <p class="text-orange-600 font-semibold text-sm">
                                 <i class="fas fa-exclamation-triangle"></i> Only {{ product.stock_quantity }} left in stock!
                             </p>
                         {% else %}
-                            <p class="text-green-600 font-semibold">
+                            <p class="text-green-600 font-semibold text-sm">
                                 <i class="fas fa-check-circle"></i> In Stock
                             </p>
                         {% endif %}
                     {% else %}
-                        <p class="text-red-600 font-semibold">
+                        <p class="text-red-600 font-semibold text-sm">
                             <i class="fas fa-times-circle"></i> Out of Stock
                         </p>
                     {% endif %}
                 </div>
             </div>
             
-            <!-- Quantity and Add to Cart -->
-            <div class="space-y-4">
+            <!-- Quantity and Add to Cart - Desktop -->
+            <div class="space-y-4 hidden md:block">
                 <div class="flex items-center space-x-4">
-                    <label class="font-semibold">Quantity:</label>
+                    <label class="font-semibold text-sm md:text-base">Quantity:</label>
                     <div class="quantity-controls">
                         <button type="button" class="quantity-btn" onclick="changeQuantity(-1)">
-                            <i class="fas fa-minus"></i>
+                            <i class="fas fa-minus text-sm"></i>
                         </button>
                         <input type="number" id="quantity" value="1" min="1" max="{{ product.stock_quantity|default:99 }}" 
                                class="quantity-input" readonly>
                         <button type="button" class="quantity-btn" onclick="changeQuantity(1)">
-                            <i class="fas fa-plus"></i>
+                            <i class="fas fa-plus text-sm"></i>
                         </button>
                     </div>
                 </div>
                 
-                <div class="flex space-x-4">
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                     {% if product.is_in_stock %}
-                        <button id="add-to-cart-btn" onclick="addToCart()" class="flex-1 bg-amber-700 text-white py-3 px-6 rounded-lg font-semibold hover:bg-amber-800 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        <button id="add-to-cart-btn" onclick="addToCart()" 
+                                class="flex-1 bg-amber-700 text-white py-3 px-6 rounded-lg font-semibold hover:bg-amber-800 transition disabled:opacity-50 disabled:cursor-not-allowed">
                             <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
                         </button>
-                        <button id="buy-now-btn" onclick="buyNow()" class="bg-black text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        <button id="buy-now-btn" onclick="buyNow()" 
+                                class="bg-black text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed">
                             Buy Now
                         </button>
                     {% else %}
@@ -205,9 +463,9 @@
             </div>
             
             <!-- Shipping Info -->
-            <div class="bg-gray-50 p-4 rounded-lg">
-                <h4 class="font-semibold mb-3">Shipping Information</h4>
-                <div class="space-y-2 text-sm">
+            <div class="bg-gray-50 p-3 md:p-4 rounded-lg">
+                <h4 class="font-semibold mb-2 md:mb-3 text-sm md:text-base">Shipping Information</h4>
+                <div class="space-y-1 md:space-y-2 text-xs md:text-sm">
                     <p><i class="fas fa-truck text-yellow-500 mr-2"></i> Free shipping on orders over ₦{{ site_config.free_shipping_threshold|floatformat:0|default:"50000" }}</p>
                     <p><i class="fas fa-clock text-yellow-500 mr-2"></i> Estimated delivery: 2-5 business days</p>
                     <p><i class="fas fa-undo text-yellow-500 mr-2"></i> 30-day return policy</p>
@@ -217,8 +475,24 @@
     </div>
     
     <!-- Product Description and Details -->
-    <div class="mb-12">
-        <div class="border-b border-gray-200">
+    <div class="mb-8 md:mb-12">
+        <!-- Mobile Tabs -->
+        <div class="md:hidden">
+            <div class="mobile-tab-nav border-b border-gray-200 pb-2">
+                <button class="mobile-tab-button tab-button py-2 px-4 border-b-2 border-amber-700 text-amber-700 font-semibold text-sm mr-4" data-tab="description">
+                    Description
+                </button>
+                <button class="mobile-tab-button tab-button py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 text-sm mr-4" data-tab="reviews">
+                    Reviews ({{ total_reviews }})
+                </button>
+                <button class="mobile-tab-button tab-button py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 text-sm" data-tab="shipping">
+                    Shipping
+                </button>
+            </div>
+        </div>
+
+        <!-- Desktop Tabs -->
+        <div class="hidden md:block border-b border-gray-200">
             <nav class="flex space-x-8">
                 <button class="tab-button py-4 px-2 border-b-2 border-amber-700 text-amber-700 font-semibold" data-tab="description">
                     Description
@@ -233,18 +507,18 @@
         </div>
         
         <!-- Tab Content -->
-        <div class="py-8">
+        <div class="py-4 md:py-8">
             <!-- Description Tab -->
             <div id="description-tab" class="tab-content">
-                <div class="prose max-w-none">
+                <div class="prose max-w-none text-sm md:text-base">
                     {{ product.description|linebreaks }}
                 </div>
                 
                 {% if product.weight %}
-                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="mt-4 md:mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
-                        <h4 class="font-semibold mb-3">Product Specifications</h4>
-                        <table class="w-full text-sm">
+                        <h4 class="font-semibold mb-2 md:mb-3 text-sm md:text-base">Product Specifications</h4>
+                        <table class="w-full text-xs md:text-sm">
                             <tr class="border-b">
                                 <td class="py-2 font-medium">Weight</td>
                                 <td class="py-2">{{ product.weight }} kg</td>
@@ -271,14 +545,14 @@
             <div id="reviews-tab" class="tab-content hidden">
                 {% if user.is_authenticated %}
                     <!-- Add Review Form -->
-                    <div class="bg-gray-50 p-6 rounded-lg mb-8">
-                        <h3 class="text-lg font-semibold mb-4">Write a Review</h3>
+                    <div class="bg-gray-50 p-4 md:p-6 rounded-lg mb-6 md:mb-8">
+                        <h3 class="text-base md:text-lg font-semibold mb-4">Write a Review</h3>
                         <form id="review-form" class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium mb-2">Rating</label>
                                 <div class="flex space-x-1" id="rating-stars">
                                     {% for i in "12345" %}
-                                    <button type="button" class="rating-star text-2xl text-gray-300 hover:text-yellow-400" data-rating="{{ forloop.counter }}">
+                                    <button type="button" class="rating-star text-xl md:text-2xl text-gray-300 hover:text-yellow-400" data-rating="{{ forloop.counter }}">
                                         <i class="far fa-star"></i>
                                     </button>
                                     {% endfor %}
@@ -287,58 +561,58 @@
                             </div>
                             <div>
                                 <label for="review-title" class="block text-sm font-medium mb-2">Review Title</label>
-                                <input type="text" id="review-title" name="title" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700" required>
+                                <input type="text" id="review-title" name="title" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700 text-sm" required>
                             </div>
                             <div>
                                 <label for="review-comment" class="block text-sm font-medium mb-2">Your Review</label>
-                                <textarea id="review-comment" name="comment" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700" required></textarea>
+                                <textarea id="review-comment" name="comment" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700 text-sm" required></textarea>
                             </div>
-                            <button type="submit" class="bg-amber-700 text-white px-6 py-2 rounded hover:bg-amber-800 transition">
+                            <button type="submit" class="bg-amber-700 text-white px-4 md:px-6 py-2 rounded hover:bg-amber-800 transition text-sm">
                                 Submit Review
                             </button>
                         </form>
                     </div>
                 {% else %}
-                    <div class="bg-gray-50 p-6 rounded-lg mb-8 text-center">
-                        <p class="text-gray-600 mb-4">Please <a href="#" onclick="showLoginModal()" class="text-amber-700 hover:text-yellow-700">login</a> to write a review.</p>
+                    <div class="bg-gray-50 p-4 md:p-6 rounded-lg mb-6 md:mb-8 text-center">
+                        <p class="text-gray-600 mb-4 text-sm">Please <a href="#" onclick="showLoginModal()" class="text-amber-700 hover:text-yellow-700">login</a> to write a review.</p>
                     </div>
                 {% endif %}
                 
                 <!-- Reviews List -->
                 <div id="reviews-list">
                     {% for review in reviews %}
-                    <div class="border-b border-gray-200 pb-6 mb-6">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center space-x-4">
+                    <div class="border-b border-gray-200 pb-4 md:pb-6 mb-4 md:mb-6">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-3 space-y-2 md:space-y-0">
+                            <div class="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-2 md:space-y-0">
                                 <div class="flex">
                                     {% for i in "12345" %}
                                         {% if forloop.counter <= review.rating %}
-                                            <i class="fas fa-star text-yellow-400"></i>
+                                            <i class="fas fa-star text-yellow-400 text-sm"></i>
                                         {% else %}
-                                            <i class="far fa-star text-gray-300"></i>
+                                            <i class="far fa-star text-gray-300 text-sm"></i>
                                         {% endif %}
                                     {% endfor %}
                                 </div>
-                                <span class="font-semibold">{{ review.title }}</span>
+                                <span class="font-semibold text-sm md:text-base">{{ review.title }}</span>
                                 {% if review.is_verified_purchase %}
-                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Verified Purchase</span>
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded w-fit">Verified Purchase</span>
                                 {% endif %}
                             </div>
-                            <span class="text-sm text-gray-500">{{ review.created_at|date:"M d, Y" }}</span>
+                            <span class="text-xs md:text-sm text-gray-500">{{ review.created_at|date:"M d, Y" }}</span>
                         </div>
-                        <p class="text-gray-700 mb-2">{{ review.comment }}</p>
-                        <p class="text-sm text-gray-500">by {{ review.user.email|truncatewords:1 }}</p>
+                        <p class="text-gray-700 mb-2 text-sm md:text-base">{{ review.comment }}</p>
+                        <p class="text-xs md:text-sm text-gray-500">by {{ review.user.email|truncatewords:1 }}</p>
                     </div>
                     {% empty %}
                     <div class="text-center py-8">
-                        <i class="fas fa-comments text-4xl text-gray-300 mb-4"></i>
-                        <p class="text-gray-600">No reviews yet. Be the first to review this product!</p>
+                        <i class="fas fa-comments text-3xl md:text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-600 text-sm md:text-base">No reviews yet. Be the first to review this product!</p>
                     </div>
                     {% endfor %}
                     
                     {% if reviews %}
                     <div class="text-center">
-                        <button onclick="loadMoreReviews()" id="load-more-reviews" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition">
+                        <button onclick="loadMoreReviews()" id="load-more-reviews" class="bg-gray-500 text-white px-4 md:px-6 py-2 rounded hover:bg-gray-600 transition text-sm">
                             Load More Reviews
                         </button>
                     </div>
@@ -348,10 +622,10 @@
             
             <!-- Shipping Tab -->
             <div id="shipping-tab" class="tab-content hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                     <div>
-                        <h3 class="text-lg font-semibold mb-4">Shipping Information</h3>
-                        <div class="space-y-3 text-sm">
+                        <h3 class="text-base md:text-lg font-semibold mb-3 md:mb-4">Shipping Information</h3>
+                        <div class="space-y-2 md:space-y-3 text-xs md:text-sm">
                             <p><strong>Free Shipping:</strong> On orders over ₦{{ site_config.free_shipping_threshold|floatformat:0|default:"50000" }}</p>
                             <p><strong>Standard Delivery:</strong> 2-5 business days</p>
                             <p><strong>Express Delivery:</strong> 1-2 business days (additional fee applies)</p>
@@ -359,8 +633,8 @@
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold mb-4">Returns & Exchanges</h3>
-                        <div class="space-y-3 text-sm">
+                        <h3 class="text-base md:text-lg font-semibold mb-3 md:mb-4">Returns & Exchanges</h3>
+                        <div class="space-y-2 md:space-y-3 text-xs md:text-sm">
                             <p><strong>Return Policy:</strong> 30-day return window</p>
                             <p><strong>Condition:</strong> Items must be unused and in original packaging</p>
                             <p><strong>Return Shipping:</strong> Free for defective items</p>
@@ -374,49 +648,99 @@
     
     <!-- Related Products -->
     {% if related_products %}
-    <div class="mb-12">
-        <h2 class="text-2xl font-bold mb-8">Related Products</h2>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div class="mb-8 md:mb-12">
+        <h2 class="text-xl md:text-2xl font-bold mb-4 md:mb-8">Related Products</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
             {% for product in related_products %}
             <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow group">
                 <div class="relative">
                     {% if product.images.exists %}
-                        <img src="{{ product.images.first.image.url }}" alt="{{ product.title }}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform">
+                        <img src="{{ product.images.first.image.url }}" alt="{{ product.title }}" class="w-full h-32 md:h-48 object-cover group-hover:scale-105 transition-transform">
                     {% else %}
-                        <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
-                            <i class="fas fa-image text-gray-400 text-3xl"></i>
+                        <div class="w-full h-32 md:h-48 bg-gray-200 flex items-center justify-center">
+                            <i class="fas fa-image text-gray-400 text-xl md:text-3xl"></i>
                         </div>
                     {% endif %}
                 </div>
                 
-                <div class="p-4">
+                <div class="p-3 md:p-4">
                     <a href="{% url 'store:product_detail' product.slug %}" class="block">
-                        <h3 class="font-semibold mb-2 hover:text-amber-700 transition-colors line-clamp-2">{{ product.title }}</h3>
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-lg font-bold text-amber-700">₦{{ product.get_display_price|floatformat:0 }}</span>
+                        <h3 class="font-semibold mb-2 hover:text-amber-700 transition-colors line-clamp-2 text-sm md:text-base">{{ product.title }}</h3>
+                        <div class="flex items-center justify-between mb-2 md:mb-3">
+                            <span class="text-sm md:text-lg font-bold text-amber-700">₦{{ product.get_display_price|floatformat:0 }}</span>
                         </div>
                     </a>
                     {% if product.is_in_stock %}
-                        <button onclick="addToCartRelated('{{ product.id }}')" class="w-full bg-amber-700 text-white py-2 rounded hover:bg-amber-800 transition">
+                        <button onclick="addToCartRelated('{{ product.id }}')" class="w-full bg-amber-700 text-white py-1.5 md:py-2 rounded hover:bg-amber-800 transition text-xs md:text-sm">
                             Add to Cart
                         </button>
                     {% else %}
-                        <button class="w-full bg-gray-400 text-white py-2 rounded cursor-not-allowed">
+                        <button class="w-full bg-gray-400 text-white py-1.5 md:py-2 rounded cursor-not-allowed text-xs md:text-sm">
                             Out of Stock
                         </button>
                     {% endif %}
-            </div>
+                </div>
             </div>
             {% endfor %}
         </div>
     </div>
     {% endif %}
 </div>
+
+<!-- Mobile Action Bar -->
+{% if product.is_in_stock %}
+<div class="mobile-action-bar md:hidden">
+    <div class="flex items-center space-x-3">
+        <!-- Quantity Controls -->
+        <div class="quantity-controls">
+            <button type="button" class="quantity-btn" onclick="changeQuantity(-1)">
+                <i class="fas fa-minus text-sm"></i>
+            </button>
+            <input type="number" id="mobile-quantity" value="1" min="1" max="{{ product.stock_quantity|default:99 }}" 
+                   class="quantity-input" readonly>
+            <button type="button" class="quantity-btn" onclick="changeQuantity(1)">
+                <i class="fas fa-plus text-sm"></i>
+            </button>
+        </div>
+        
+        <!-- Add to Cart Button -->
+        <button id="mobile-add-to-cart-btn" onclick="addToCart()" 
+                class="flex-1 bg-amber-700 text-white py-3 px-4 rounded-lg font-semibold hover:bg-amber-800 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+            <i class="fas fa-shopping-cart mr-2"></i>
+        </button>
+        
+        <!-- Buy Now Button -->
+        <button id="mobile-buy-now-btn" onclick="buyNow()" 
+                class="bg-black text-white py-3 px-4 rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+            Buy Now
+        </button>
+    </div>
+</div>
+{% else %}
+<div class="mobile-action-bar md:hidden">
+    <button class="w-full bg-gray-400 text-white py-3 px-4 rounded-lg font-semibold cursor-not-allowed text-sm">
+        <i class="fas fa-times mr-2"></i> Out of Stock
+    </button>
+</div>
+{% endif %}
+
+<!-- Image Modal -->
+<div class="image-modal" id="image-modal" onclick="closeImageModal()">
+    <div class="relative max-w-full max-h-full p-4">
+        <img id="modal-image" src="" alt="Product Image" class="max-w-full max-h-full object-contain">
+        <button class="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded-full" onclick="closeImageModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
 let reviewsOffset = {{ reviews|length }};
+let currentImageIndex = 0;
+const totalImages = {{ product.images.count }};
 
 $(document).ready(function() {
     // Initialize tabs
@@ -428,9 +752,104 @@ $(document).ready(function() {
     // Initialize countdown timer
     initializeCountdownTimer();
     
-    // Initialize purchase option selection
-    initializePurchaseOptions();
+    // Initialize mobile image gallery
+    initializeMobileImageGallery();
+    
+    // Sync quantity inputs
+    syncQuantityInputs();
 });
+
+// Sync quantity inputs between desktop and mobile
+function syncQuantityInputs() {
+    $('#quantity, #mobile-quantity').on('input', function() {
+        const value = $(this).val();
+        $('#quantity, #mobile-quantity').val(value);
+    });
+}
+
+// Initialize Mobile Image Gallery
+function initializeMobileImageGallery() {
+    if (totalImages > 0) {
+        updateImageIndicators();
+        
+        // Touch/swipe support for mobile
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        
+        const slider = document.getElementById('mobile-image-slider');
+        if (slider) {
+            slider.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                isDragging = true;
+            });
+            
+            slider.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                currentX = e.touches[0].clientX;
+                const diff = startX - currentX;
+                
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0 && currentImageIndex < totalImages - 1) {
+                        nextImage();
+                    } else if (diff < 0 && currentImageIndex > 0) {
+                        previousImage();
+                    }
+                    isDragging = false;
+                }
+            });
+            
+            slider.addEventListener('touchend', () => {
+                isDragging = false;
+            });
+        }
+    }
+}
+
+// Navigate to previous image
+function previousImage() {
+    if (currentImageIndex > 0) {
+        currentImageIndex--;
+        updateMobileImageSlider();
+    }
+}
+
+// Navigate to next image
+function nextImage() {
+    if (currentImageIndex < totalImages - 1) {
+        currentImageIndex++;
+        updateMobileImageSlider();
+    }
+}
+
+// Update mobile image slider position
+function updateMobileImageSlider() {
+    const slider = document.getElementById('mobile-image-slider');
+    if (slider) {
+        const translateX = -currentImageIndex * 100;
+        slider.style.transform = `translateX(${translateX}%)`;
+        updateImageIndicators();
+    }
+}
+
+// Update image indicators
+function updateImageIndicators() {
+    $('.image-indicator').removeClass('opacity-100 bg-white').addClass('opacity-50');
+    $(`.image-indicator[data-index="${currentImageIndex}"]`).removeClass('opacity-50').addClass('opacity-100 bg-white');
+}
+
+// Open image modal
+function openImageModal(imageUrl) {
+    $('#modal-image').attr('src', imageUrl);
+    $('#image-modal').css('display', 'flex').hide().fadeIn(300);
+    $('body').addClass('overflow-hidden');
+}
+
+// Close image modal
+function closeImageModal() {
+    $('#image-modal').fadeOut(300);
+    $('body').removeClass('overflow-hidden');
+}
 
 // Initialize Tabs
 function initializeTabs() {
@@ -445,18 +864,6 @@ function initializeTabs() {
         $('.tab-content').addClass('hidden');
         $(`#${tabName}-tab`).removeClass('hidden');
     });
-}
-
-// Initialize Purchase Options
-function initializePurchaseOptions() {
-    $('.purchase-option').click(function() {
-        $('.purchase-option').removeClass('border-amber-700 bg-amber-50');
-        $(this).addClass('border-amber-700 bg-amber-50');
-        $(this).find('input[type="radio"]').prop('checked', true);
-    });
-    
-    // Set initial state
-    $('.purchase-option:first').addClass('border-amber-700 bg-amber-50');
 }
 
 // Initialize Rating Stars
@@ -518,7 +925,7 @@ function initializeCountdownTimer() {
     }
 }
 
-// Change Main Image
+// Change Main Image (Desktop)
 function changeMainImage(imageUrl) {
     $('#main-image').attr('src', imageUrl);
     
@@ -529,34 +936,51 @@ function changeMainImage(imageUrl) {
 
 // Change Quantity
 function changeQuantity(delta) {
-    const quantityInput = $('#quantity');
-    const currentValue = parseInt(quantityInput.val()) || 1;
-    const maxValue = parseInt(quantityInput.attr('max')) || 99;
+    const quantityInputs = $('#quantity, #mobile-quantity');
+    const currentValue = parseInt(quantityInputs.first().val()) || 1;
+    const maxValue = parseInt(quantityInputs.first().attr('max')) || 99;
     const newValue = Math.max(1, Math.min(currentValue + delta, maxValue));
-    quantityInput.val(newValue);
+    quantityInputs.val(newValue);
 }
 
 // Set button loading state
-function setButtonLoading(buttonId, loading) {
-    const button = $(buttonId);
+function setButtonLoading(buttonSelectors, loading) {
+    const buttons = $(buttonSelectors);
     if (loading) {
-        button.prop('disabled', true);
-        button.addClass('opacity-50 cursor-not-allowed');
-        const originalText = button.html();
-        button.data('original-text', originalText);
-        button.html('<i class="fas fa-spinner fa-spin mr-2"></i>Processing...');
+        buttons.prop('disabled', true);
+        buttons.addClass('opacity-50 cursor-not-allowed');
+        buttons.each(function() {
+            const originalContent = $(this).html();
+            $(this).data('original-content', originalContent);
+            
+            // Different loading states for mobile vs desktop
+            if ($(this).hasClass('mobile-action-btn')) {
+                if ($(this).hasClass('mobile-add-to-cart')) {
+                    $(this).html('<i class="fas fa-spinner fa-spin text-lg"></i>');
+                } else {
+                    $(this).html('<i class="fas fa-spinner fa-spin"></i><span>Processing...</span>');
+                }
+            } else {
+                $(this).html('<i class="fas fa-spinner fa-spin mr-2"></i>Processing...');
+            }
+        });
     } else {
-        button.prop('disabled', false);
-        button.removeClass('opacity-50 cursor-not-allowed');
-        button.html(button.data('original-text') || button.html());
+        buttons.prop('disabled', false);
+        buttons.removeClass('opacity-50 cursor-not-allowed');
+        buttons.each(function() {
+            const originalContent = $(this).data('original-content');
+            if (originalContent) {
+                $(this).html(originalContent);
+            }
+        });
     }
 }
 
 // Add to Cart
 function addToCart() {
-    const quantity = parseInt($('#quantity').val()) || 1;
+    const quantity = parseInt($('#quantity, #mobile-quantity').first().val()) || 1;
     
-    setButtonLoading('#add-to-cart-btn', true);
+    setButtonLoading('#add-to-cart-btn, #mobile-add-to-cart-btn', true);
     
     $.post('{% url "orders:add_to_cart" %}', {
         product_id: '{{ product.id }}',
@@ -564,7 +988,7 @@ function addToCart() {
         csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
     })
     .done(function(response) {
-        setButtonLoading('#add-to-cart-btn', false);
+        setButtonLoading('#add-to-cart-btn, #mobile-add-to-cart-btn', false);
         if (response.success) {
             // Use the global function to update cart count
             if (typeof window.updateCartCount === 'function') {
@@ -576,7 +1000,7 @@ function addToCart() {
         }
     })
     .fail(function(xhr, status, error) {
-        setButtonLoading('#add-to-cart-btn', false);
+        setButtonLoading('#add-to-cart-btn, #mobile-add-to-cart-btn', false);
         console.error('Add to cart error:', error);
         showNotification('Error adding to cart. Please try again.', 'error');
     });
@@ -613,9 +1037,9 @@ function addToCartRelated(productId) {
 
 // Buy Now
 function buyNow() {
-    const quantity = parseInt($('#quantity').val()) || 1;
+    const quantity = parseInt($('#quantity, #mobile-quantity').first().val()) || 1;
     
-    setButtonLoading('#buy-now-btn', true);
+    setButtonLoading('#buy-now-btn, #mobile-buy-now-btn', true);
     
     $.post('{% url "orders:add_to_cart" %}', {
         product_id: '{{ product.id }}',
@@ -624,7 +1048,7 @@ function buyNow() {
         csrfmiddlewaretoken: $('meta[name=csrf-token]').attr('content')
     })
     .done(function(response) {
-        setButtonLoading('#buy-now-btn', false);
+        setButtonLoading('#buy-now-btn, #mobile-buy-now-btn', false);
         if (response.success) {
             if (response.redirect_url) {
                 window.location.href = response.redirect_url;
@@ -636,7 +1060,7 @@ function buyNow() {
         }
     })
     .fail(function(xhr, status, error) {
-        setButtonLoading('#buy-now-btn', false);
+        setButtonLoading('#buy-now-btn, #mobile-buy-now-btn', false);
         console.error('Buy now error:', error);
         showNotification('Error processing request. Please try again.', 'error');
     });
@@ -686,23 +1110,23 @@ $('#review-form').submit(function(e) {
 // Add Review to List
 function addReviewToList(review) {
     const reviewHtml = `
-        <div class="border-b border-gray-200 pb-6 mb-6">
-            <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center space-x-4">
+        <div class="border-b border-gray-200 pb-4 md:pb-6 mb-4 md:mb-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-3 space-y-2 md:space-y-0">
+                <div class="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-2 md:space-y-0">
                     <div class="flex">
                         ${Array.from({length: 5}, (_, i) => 
                             i < review.rating 
-                                ? '<i class="fas fa-star text-yellow-400"></i>'
-                                : '<i class="far fa-star text-gray-300"></i>'
+                                ? '<i class="fas fa-star text-yellow-400 text-sm"></i>'
+                                : '<i class="far fa-star text-gray-300 text-sm"></i>'
                         ).join('')}
                     </div>
-                    <span class="font-semibold">${review.title}</span>
-                    ${review.is_verified_purchase ? '<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Verified Purchase</span>' : ''}
+                    <span class="font-semibold text-sm md:text-base">${review.title}</span>
+                    ${review.is_verified_purchase ? '<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded w-fit">Verified Purchase</span>' : ''}
                 </div>
-                <span class="text-sm text-gray-500">${review.created_at}</span>
+                <span class="text-xs md:text-sm text-gray-500">${review.created_at}</span>
             </div>
-            <p class="text-gray-700 mb-2">${review.comment}</p>
-            <p class="text-sm text-gray-500">by ${review.user_email}</p>
+            <p class="text-gray-700 mb-2 text-sm md:text-base">${review.comment}</p>
+            <p class="text-xs md:text-sm text-gray-500">by ${review.user_email}</p>
         </div>
     `;
     
@@ -742,7 +1166,7 @@ function loadMoreReviews() {
     });
 }
 
-// Show Notification
+// Show Notification (Mobile Optimized)
 function showNotification(message, type = 'info') {
     const colors = {
         success: 'bg-green-500',
@@ -759,10 +1183,10 @@ function showNotification(message, type = 'info') {
     };
     
     const notification = $(`
-        <div class="fixed top-20 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform max-w-sm">
+        <div class="fixed top-4 left-4 right-4 md:top-20 md:right-4 md:left-auto md:max-w-sm ${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg z-50 transform -translate-y-full md:translate-y-0 md:translate-x-full transition-transform">
             <div class="flex items-center">
-                <i class="${icons[type]} mr-3"></i>
-                <span>${message}</span>
+                <i class="${icons[type]} mr-3 flex-shrink-0"></i>
+                <span class="text-sm">${message}</span>
             </div>
         </div>
     `);
@@ -771,17 +1195,29 @@ function showNotification(message, type = 'info') {
     
     // Slide in
     setTimeout(() => {
-        notification.removeClass('translate-x-full');
+        notification.removeClass('-translate-y-full md:translate-x-full');
     }, 100);
     
     // Slide out and remove
     setTimeout(() => {
-        notification.addClass('translate-x-full');
+        notification.addClass('-translate-y-full md:translate-x-full');
         setTimeout(() => {
             notification.remove();
         }, 300);
     }, 4000);
 }
+
+// Prevent modal close when clicking on image
+$('#modal-image').click(function(e) {
+    e.stopPropagation();
+});
+
+// Handle escape key for modal
+$(document).keydown(function(e) {
+    if (e.key === 'Escape') {
+        closeImageModal();
+    }
+});
 </script>
 
 {% endblock %}

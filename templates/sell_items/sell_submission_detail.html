@@ -4,96 +4,177 @@
 {% block title %}{% trans "Submission Details" %} - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto">
-        <div class="mb-8 flex justify-between items-center">
+        <!-- Header Section -->
+        <div class="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-4 sm:space-y-0">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
                     <i class="fas fa-file-alt mr-2"></i>
                     {% trans "Submission Details" %}
                 </h1>
-                <p class="mt-2 text-gray-600">
+                <p class="mt-2 text-sm sm:text-base text-gray-600">
                     {% trans "View your item submission status and details." %}
                 </p>
             </div>
             
             <a href="{% url 'sell_items:sell_item_list' %}" 
-               class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+               class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-center sm:text-left">
                 <i class="fas fa-arrow-left mr-2"></i>
                 {% trans "Back to List" %}
             </a>
         </div>
         
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Mobile-First Layout -->
+        <div class="space-y-6 lg:grid lg:grid-cols-3 lg:gap-8 lg:space-y-0">
+            <!-- Status Card - Priority on Mobile -->
+            <div class="lg:order-2 lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-flag mr-2"></i>
+                        {% trans "Status" %}
+                    </h3>
+                    
+                    <div class="text-center">
+                        <span class="inline-flex px-3 sm:px-4 py-2 text-sm font-medium rounded-full 
+                            {% if submission.status == 'pending' %}bg-yellow-100 text-yellow-800
+                            {% elif submission.status == 'accepted' %}bg-green-100 text-green-800
+                            {% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ submission.get_status_display }}
+                        </span>
+                        
+                        <div class="mt-4 text-sm text-gray-600 space-y-2">
+                            <div>
+                                <p class="font-medium">{% trans "Submitted:" %}</p>
+                                <p>{{ submission.created_at|date:"M j, Y H:i" }}</p>
+                            </div>
+                            
+                            {% if submission.reviewed_at %}
+                                <div>
+                                    <p class="font-medium">{% trans "Reviewed:" %}</p>
+                                    <p>{{ submission.reviewed_at|date:"M j, Y H:i" }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions - Mobile Priority -->
+                <div class="mt-6 bg-white rounded-lg shadow-md p-4 sm:p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-cogs mr-2"></i>
+                        {% trans "Quick Actions" %}
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
+                        {% if not submission.has_complete_bank_details %}
+                            <a href="{% url 'sell_items:update_bank_details' submission.id %}" 
+                               class="bg-red-600 text-white py-3 px-4 rounded-md text-sm font-medium text-center block hover:bg-red-700 transition-colors">
+                                <i class="fas fa-university mr-2"></i>
+                                {% trans "Add Bank Details" %}
+                            </a>
+                        {% else %}
+                            <a href="{% url 'sell_items:update_bank_details' submission.id %}" 
+                               class="bg-blue-600 text-white py-3 px-4 rounded-md text-sm font-medium text-center block hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-edit mr-2"></i>
+                                {% trans "Edit Bank Details" %}
+                            </a>
+                        {% endif %}
+
+                        {% if submission.status in 'pending,rejected' %}
+                            <a href="{% url 'sell_items:edit_sell_submission' submission.id %}" 
+                               class="bg-amber-600 text-white py-3 px-4 rounded-md text-sm font-medium text-center block hover:bg-amber-700 transition-colors">
+                                <i class="fas fa-edit mr-2"></i>
+                                {% trans "Edit Submission" %}
+                            </a>
+                        {% endif %}
+                        
+                        {% if submission.source == 'held_asset' and submission.held_asset_order %}
+                            <a href="{% url 'orders:order_detail' submission.held_asset_order.id %}" 
+                               class="bg-blue-100 text-blue-700 py-3 px-4 rounded-md text-sm font-medium text-center block hover:bg-blue-200 transition-colors">
+                                <i class="fas fa-eye mr-2"></i>
+                                {% trans "View Original Order" %}
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Secondary Actions - Collapsed on Mobile -->
+                <div class="mt-6 bg-white rounded-lg shadow-md p-4 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-4">
+                        <i class="fas fa-list mr-2"></i>
+                        {% trans "More Actions" %}
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        <a href="{% url 'sell_items:sell_item_list' %}" 
+                           class="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-md text-sm font-medium text-center block hover:bg-gray-200 transition-colors">
+                            <i class="fas fa-list mr-2"></i>
+                            {% trans "All Submissions" %}
+                        </a>
+                        
+                        <a href="{% url 'sell_items:submit_sell_item' %}" 
+                           class="w-full bg-amber-100 text-amber-700 py-2 px-4 rounded-md text-sm font-medium text-center block hover:bg-amber-200 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>
+                            {% trans "Submit New Item" %}
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Status Guide - Hidden on Mobile by default -->
+                <div class="mt-6 bg-white rounded-lg shadow-md p-4 sm:p-6 hidden sm:block">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        {% trans "Status Guide" %}
+                    </h3>
+                    
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-start">
+                            <span class="w-3 h-3 rounded-full bg-yellow-400 mr-3 mt-1 flex-shrink-0"></span>
+                            <div>
+                                <p class="font-medium">{% trans "Pending" %}</p>
+                                <p class="text-gray-600">{% trans "Under review by admin" %}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <span class="w-3 h-3 rounded-full bg-green-400 mr-3 mt-1 flex-shrink-0"></span>
+                            <div>
+                                <p class="font-medium">{% trans "Accepted" %}</p>
+                                <p class="text-gray-600">{% trans "Approved for listing" %}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <span class="w-3 h-3 rounded-full bg-red-400 mr-3 mt-1 flex-shrink-0"></span>
+                            <div>
+                                <p class="font-medium">{% trans "Rejected" %}</p>
+                                <p class="text-gray-600">{% trans "Not approved for listing" %}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Main Content -->
-            <div class="lg:col-span-2">
+            <div class="lg:order-1 lg:col-span-2 space-y-6">
                 <!-- Item Details -->
-                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-6">
+                <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                    <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
                         <i class="fas fa-tag mr-2"></i>
                         {% trans "Item Details" %}
                     </h2>
                     
-                    <!-- Images -->
-                    {% if submission.images.exists %}
-                        <div class="mb-6">
-                            <h3 class="text-sm font-medium text-gray-700 mb-3">{% trans "Images" %}</h3>
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {% for image in submission.images.all %}
-                                    <div class="relative">
-                                        <img src="{{ image.image.url }}" 
-                                             alt="{{ submission.title }}" 
-                                             class="w-full h-32 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
-                                             onclick="openImageModal('{{ image.image.url }}')">
-                                        {% if image.is_primary %}
-                                            <span class="absolute top-2 left-2 bg-amber-500 text-white text-xs px-2 py-1 rounded">
-                                                {% trans "Primary" %}
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endif %}
-                    
-                    <!-- Basic Info -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="text-sm font-medium text-gray-500">{% trans "Title" %}</label>
-                            <p class="text-lg font-semibold text-gray-900">{{ submission.title }}</p>
+                    <!-- Price and Type - Prominent on Mobile -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                        <div class="text-center sm:text-left">
+                            <label class="text-sm font-medium text-gray-500 block">{% trans "Your Price" %}</label>
+                            <p class="text-2xl sm:text-xl font-bold text-amber-600">₦{{ submission.price|floatformat:2 }}</p>
                         </div>
                         
-                        <div>
-                            <label class="text-sm font-medium text-gray-500">{% trans "Category" %}</label>
-                            <p class="text-gray-900">
-                                {% if submission.category %}{{ submission.category.name }}{% else %}{% trans "Not specified" %}{% endif %}
-                            </p>
-                        </div>
-                        
-                        <div>
-                            <label class="text-sm font-medium text-gray-500">{% trans "Your Price" %}</label>
-                            <p class="text-xl font-bold text-amber-600">₦{{ submission.price|floatformat:2 }}</p>
-                        </div>
-                        
-                        <div>
-                            <label class="text-sm font-medium text-gray-500">{% trans "Stock Quantity" %}</label>
-                            <p class="text-gray-900">
-                                {{ submission.stock_quantity }} {% if submission.stock_quantity == 1 %}{% trans "item" %}{% else %}{% trans "items" %}{% endif %}
-                                {% if submission.source == 'held_asset' and submission.held_asset_order %}
-                                    {% with order_item=submission.held_asset_order.items.first %}
-                                        {% if order_item %}
-                                            <span class="text-sm text-gray-500">
-                                                ({% trans "out of" %} {{ order_item.quantity }} {% trans "originally purchased" %})
-                                            </span>
-                                        {% endif %}
-                                    {% endwith %}
-                                {% endif %}
-                            </p>
-                        </div>
-                        
-                        <div>
-                            <label class="text-sm font-medium text-gray-500">{% trans "Type" %}</label>
-                            <span class="inline-flex px-2 py-1 text-xs rounded-full 
+                        <div class="text-center sm:text-left">
+                            <label class="text-sm font-medium text-gray-500 block mb-2">{% trans "Type" %}</label>
+                            <span class="inline-flex px-3 py-1 text-sm rounded-full 
                                 {% if submission.source == 'own_item' %}bg-blue-100 text-blue-800
                                 {% else %}bg-purple-100 text-purple-800{% endif %}">
                                 {% if submission.source == 'own_item' %}
@@ -103,41 +184,100 @@
                                 {% endif %}
                             </span>
                         </div>
+                    </div>
+                    
+                    <!-- Images - Mobile Optimized -->
+                    {% if submission.images.exists %}
+                        <div class="mb-6">
+                            <h3 class="text-sm font-medium text-gray-700 mb-3">{% trans "Images" %}</h3>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                                {% for image in submission.images.all %}
+                                    <div class="relative">
+                                        <img src="{{ image.image.url }}" 
+                                             alt="{{ submission.title }}" 
+                                             class="w-full h-24 sm:h-32 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
+                                             onclick="openImageModal('{{ image.image.url }}')">
+                                        {% if image.is_primary %}
+                                            <span class="absolute top-1 left-1 bg-amber-500 text-white text-xs px-2 py-1 rounded">
+                                                {% trans "Primary" %}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Basic Info Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 block">{% trans "Title" %}</label>
+                            <p class="text-base sm:text-lg font-semibold text-gray-900 mt-1">{{ submission.title }}</p>
+                        </div>
+                        
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 block">{% trans "Category" %}</label>
+                            <p class="text-gray-900 mt-1">
+                                {% if submission.category %}{{ submission.category.name }}{% else %}{% trans "Not specified" %}{% endif %}
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 block">{% trans "Stock Quantity" %}</label>
+                            <p class="text-gray-900 mt-1">
+                                {{ submission.stock_quantity }} {% if submission.stock_quantity == 1 %}{% trans "item" %}{% else %}{% trans "items" %}{% endif %}
+                                {% if submission.source == 'held_asset' and submission.held_asset_order %}
+                                    {% with order_item=submission.held_asset_order.items.first %}
+                                        {% if order_item %}
+                                            <span class="block text-sm text-gray-500 mt-1">
+                                                ({% trans "out of" %} {{ order_item.quantity }} {% trans "originally purchased" %})
+                                            </span>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endif %}
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <!-- Placeholder for grid alignment -->
+                        </div>
                         
                         {% if submission.weight %}
                         <div>
-                            <label class="text-sm font-medium text-gray-500">{% trans "Weight" %}</label>
-                            <p class="text-gray-900">{{ submission.weight }} kg</p>
+                            <label class="text-sm font-medium text-gray-500 block">{% trans "Weight" %}</label>
+                            <p class="text-gray-900 mt-1">{{ submission.weight }} kg</p>
                         </div>
                         {% endif %}
                         
                         {% if submission.dimensions %}
                         <div>
-                            <label class="text-sm font-medium text-gray-500">{% trans "Dimensions" %}</label>
-                            <p class="text-gray-900">{{ submission.dimensions }}</p>
+                            <label class="text-sm font-medium text-gray-500 block">{% trans "Dimensions" %}</label>
+                            <p class="text-gray-900 mt-1">{{ submission.dimensions }}</p>
                         </div>
                         {% endif %}
                     </div>
                     
                     <!-- Description -->
                     <div class="mt-6">
-                        <label class="text-sm font-medium text-gray-500">{% trans "Description" %}</label>
-                        <p class="text-gray-900 mt-2 whitespace-pre-wrap">{{ submission.description }}</p>
+                        <label class="text-sm font-medium text-gray-500 block">{% trans "Description" %}</label>
+                        <div class="mt-2 p-4 bg-gray-50 rounded-lg">
+                            <p class="text-gray-900 whitespace-pre-wrap text-sm sm:text-base">{{ submission.description }}</p>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Admin Feedback -->
                 {% if submission.admin_notes %}
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                        <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
                             <i class="fas fa-comment mr-2"></i>
                             {% trans "Admin Feedback" %}
                         </h2>
                         
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <p class="text-gray-900 whitespace-pre-wrap">{{ submission.admin_notes }}</p>
+                        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                            <p class="text-gray-900 whitespace-pre-wrap text-sm sm:text-base">{{ submission.admin_notes }}</p>
                             {% if submission.reviewed_by %}
-                                <div class="mt-3 pt-3 border-t border-gray-200 text-sm text-gray-500">
+                                <div class="mt-3 pt-3 border-t border-amber-200 text-sm text-gray-600">
                                     {% trans "Reviewed by" %} {{ submission.reviewed_by.get_full_name|default:submission.reviewed_by.email }}
                                     {% trans "on" %} {{ submission.reviewed_at|date:"M j, Y H:i" }}
                                 </div>
@@ -145,115 +285,33 @@
                         </div>
                     </div>
                 {% endif %}
-            </div>
-            
-            <!-- Sidebar -->
-            <div class="space-y-6">
-                <!-- Status Card -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                        <i class="fas fa-flag mr-2"></i>
-                        {% trans "Status" %}
-                    </h3>
-                    
-                    <div class="text-center">
-                        <span class="inline-flex px-4 py-2 text-sm font-medium rounded-full 
-                            {% if submission.status == 'pending' %}bg-yellow-100 text-yellow-800
-                            {% elif submission.status == 'accepted' %}bg-green-100 text-green-800
-                            {% else %}bg-red-100 text-red-800{% endif %}">
-                            {{ submission.get_status_display }}
-                        </span>
-                        
-                        <div class="mt-4 text-sm text-gray-600">
-                            <p><strong>{% trans "Submitted:" %}</strong></p>
-                            <p>{{ submission.created_at|date:"M j, Y H:i" }}</p>
-                            
-                            {% if submission.reviewed_at %}
-                                <p class="mt-2"><strong>{% trans "Reviewed:" %}</strong></p>
-                                <p>{{ submission.reviewed_at|date:"M j, Y H:i" }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Actions Card -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                        <i class="fas fa-cogs mr-2"></i>
-                        {% trans "Actions" %}
-                    </h3>
-                    
-                    <div class="space-y-3">
-                        {% if submission.source == 'held_asset' and submission.held_asset_order %}
-                            <a href="{% url 'orders:order_detail' submission.held_asset_order.id %}" 
-                               class="w-full bg-blue-100 text-blue-700 py-2 px-4 rounded-md text-sm font-medium text-center block hover:bg-blue-200 transition-colors">
-                                <i class="fas fa-eye mr-2"></i>
-                                {% trans "View Original Order" %}
-                            </a>
-                        {% endif %}
 
-                        {% if submission.status in 'pending,rejected' %}
-                            <a href="{% url 'sell_items:edit_sell_submission' submission.id %}" 
-                            class="w-full bg-amber-100 text-amber-700 py-2 px-4 rounded-md text-sm font-medium text-center block hover:bg-amber-200 transition-colors">
-                                <i class="fas fa-edit mr-2"></i>
-                                {% trans "Edit Submission" %}
-                            </a>
-                        {% endif %}
-                        
-                        {% if not submission.has_complete_bank_details %}
-                            <a href="{% url 'sell_items:update_bank_details' submission.id %}" 
-                               class="w-full bg-red-100 text-red-700 py-2 px-4 rounded-md text-sm font-medium text-center block hover:bg-red-200 transition-colors">
-                                <i class="fas fa-university mr-2"></i>
-                                {% trans "Add Bank Details" %}
-                            </a>
-                        {% else %}
-                            <a href="{% url 'sell_items:update_bank_details' submission.id %}" 
-                               class="w-full bg-blue-100 text-blue-700 py-2 px-4 rounded-md text-sm font-medium text-center block hover:bg-blue-200 transition-colors">
-                                <i class="fas fa-edit mr-2"></i>
-                                {% trans "Edit Bank Details" %}
-                            </a>
-                        {% endif %}
-                        
-                        <a href="{% url 'sell_items:sell_item_list' %}" 
-                           class="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-md text-sm font-medium text-center block hover:bg-gray-200 transition-colors">
-                            <i class="fas fa-list mr-2"></i>
-                            {% trans "View All Submissions" %}
-                        </a>
-                        
-                        <a href="{% url 'sell_items:submit_sell_item' %}" 
-                           class="w-full bg-amber-600 text-white py-2 px-4 rounded-md text-sm font-medium text-center block hover:bg-amber-700 transition-colors">
-                            <i class="fas fa-plus mr-2"></i>
-                            {% trans "Submit New Item" %}
-                        </a>
-                    </div>
-                </div>
-                
-                <!-- Status Guide -->
-                <div class="bg-white rounded-lg shadow-md p-6">
+                <!-- Mobile Status Guide -->
+                <div class="bg-white rounded-lg shadow-md p-4 sm:hidden">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">
                         <i class="fas fa-info-circle mr-2"></i>
                         {% trans "Status Guide" %}
                     </h3>
                     
                     <div class="space-y-3 text-sm">
-                        <div class="flex items-center">
-                            <span class="w-3 h-3 rounded-full bg-yellow-400 mr-2"></span>
+                        <div class="flex items-start">
+                            <span class="w-3 h-3 rounded-full bg-yellow-400 mr-3 mt-1 flex-shrink-0"></span>
                             <div>
                                 <p class="font-medium">{% trans "Pending" %}</p>
                                 <p class="text-gray-600">{% trans "Under review by admin" %}</p>
                             </div>
                         </div>
                         
-                        <div class="flex items-center">
-                            <span class="w-3 h-3 rounded-full bg-green-400 mr-2"></span>
+                        <div class="flex items-start">
+                            <span class="w-3 h-3 rounded-full bg-green-400 mr-3 mt-1 flex-shrink-0"></span>
                             <div>
                                 <p class="font-medium">{% trans "Accepted" %}</p>
                                 <p class="text-gray-600">{% trans "Approved for listing" %}</p>
                             </div>
                         </div>
                         
-                        <div class="flex items-center">
-                            <span class="w-3 h-3 rounded-full bg-red-400 mr-2"></span>
+                        <div class="flex items-start">
+                            <span class="w-3 h-3 rounded-full bg-red-400 mr-3 mt-1 flex-shrink-0"></span>
                             <div>
                                 <p class="font-medium">{% trans "Rejected" %}</p>
                                 <p class="text-gray-600">{% trans "Not approved for listing" %}</p>
@@ -268,10 +326,10 @@
 
 <!-- Image Modal -->
 <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex items-center justify-center p-4">
-    <div class="max-w-4xl max-h-full">
+    <div class="relative max-w-full max-h-full">
         <img id="modal-image" src="" alt="" class="max-w-full max-h-full object-contain">
         <button onclick="closeImageModal()" 
-                class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300">
+                class="absolute top-2 right-2 sm:top-4 sm:right-4 text-white text-xl sm:text-2xl hover:text-gray-300 bg-black bg-opacity-50 rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
             <i class="fas fa-times"></i>
         </button>
     </div>
@@ -281,16 +339,27 @@
 function openImageModal(imageUrl) {
     document.getElementById('modal-image').src = imageUrl;
     document.getElementById('image-modal').classList.remove('hidden');
+    // Prevent body scroll when modal is open
+    document.body.style.overflow = 'hidden';
 }
 
 function closeImageModal() {
     document.getElementById('image-modal').classList.add('hidden');
     document.getElementById('modal-image').src = '';
+    // Restore body scroll
+    document.body.style.overflow = 'auto';
 }
 
 // Close modal when clicking outside the image
 document.getElementById('image-modal').addEventListener('click', function(e) {
     if (e.target === this) {
+        closeImageModal();
+    }
+});
+
+// Close modal with escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !document.getElementById('image-modal').classList.contains('hidden')) {
         closeImageModal();
     }
 });

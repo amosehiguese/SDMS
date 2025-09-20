@@ -1,9 +1,33 @@
 from celery import shared_task
 from django.contrib.auth.models import User
+
+from django.utils import timezone
 from .services import EmailService
 import logging
 
 logger = logging.getLogger(__name__)
+
+def get_base_context():
+    """
+    Get base context variables for email templates (reusable across the project)
+    """
+    from django.conf import settings
+    from core.models import SiteConfiguration
+    
+    try:
+        site_config = SiteConfiguration.get_config()
+    except:
+        site_config = None
+    
+    return {
+        'site_name': getattr(site_config, 'site_name', 'Success Direct Marketstore') if site_config else 'Success Direct Marketstore',
+        'site_url': getattr(settings, 'SITE_URL', 'http://localhost:8000'),
+        'contact_email': getattr(settings, 'DEFAULT_FROM_EMAIL', 'support@successdirectmarketstores.com'),
+        'site_logo': getattr(site_config, 'logo', None) if site_config else None,
+        'site_config': site_config,
+        'year': timezone.now().year,
+        'phone_number': getattr(site_config, 'phone_number', None) if site_config else None,
+    }
 
 @shared_task(bind=True, max_retries=3)
 def send_email_task(self, email_type, recipient_email, context=None):
@@ -42,8 +66,11 @@ def send_admin_email_task(self, email_type, context=None):
     try:
         if context is None:
             context = {}
-            
-        success = EmailService.send_admin_email(email_type, context)
+        
+        base_context = get_base_context()
+        merged_context = {**base_context, **context}
+
+        success = EmailService.send_admin_email(email_type, merged_context)
         if not success:
             raise Exception(f"Failed to send admin email type: {email_type}")
         return f"Admin email sent successfully: {email_type}"
@@ -73,6 +100,8 @@ def send_user_email_task(self, email_type, user_id, context=None):
         
         if context is None:
             context = {}
+
+        base_context = get_base_context()
         
         # Add user info to context if not already present
         if 'user_email' not in context:
@@ -81,8 +110,10 @@ def send_user_email_task(self, email_type, user_id, context=None):
             context['user_first_name'] = user.first_name or ''
         if 'user_last_name' not in context:
             context['user_last_name'] = user.last_name or ''
+
+        merged_context = {**base_context, **user, **context}
         
-        success = EmailService.send_user_email(email_type, user, context)
+        success = EmailService.send_user_email(email_type, user, merged_context)
         if not success:
             raise Exception(f"Failed to send user email type: {email_type}")
         return f"User email sent successfully: {email_type} to {user.email}"

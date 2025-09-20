@@ -13,33 +13,33 @@
 
 {% block content %}
 <!-- Breadcrumb -->
-<div class="bg-gray-50 py-4">
+<div class="bg-gray-50 py-3 md:py-4">
     <div class="container mx-auto px-4">
-        <nav class="text-sm">
+        <nav class="text-xs sm:text-sm overflow-x-auto whitespace-nowrap">
             <a href="{% url 'store:home' %}" class="text-amber-700 hover:text-yellow-700">Home</a>
-            <span class="mx-2">/</span>
+            <span class="mx-1 sm:mx-2">/</span>
             <a href="{% url 'blog:home' %}" class="text-amber-700 hover:text-yellow-700">Blog</a>
             {% if current_category %}
-                <span class="mx-2">/</span>
+                <span class="mx-1 sm:mx-2">/</span>
                 <span class="text-gray-600">{{ current_category.name }}</span>
             {% elif current_tag %}
-                <span class="mx-2">/</span>
+                <span class="mx-1 sm:mx-2">/</span>
                 <span class="text-gray-600">#{{ current_tag.name }}</span>
             {% else %}
-                <span class="mx-2">/</span>
+                <span class="mx-1 sm:mx-2">/</span>
                 <span class="text-gray-600">All Posts</span>
             {% endif %}
         </nav>
     </div>
 </div>
 
-<div class="container mx-auto px-4 py-8">
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+<div class="container mx-auto px-4 py-6 sm:py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
         <!-- Main Content -->
         <div class="lg:col-span-3">
             <!-- Header -->
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900 mb-4">
+            <div class="mb-6 sm:mb-8">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
                     {% if current_category %}
                         {{ current_category.name }}
                     {% elif current_tag %}
@@ -50,16 +50,16 @@
                 </h1>
                 
                 {% if current_category and current_category.description %}
-                    <p class="text-gray-600">{{ current_category.description }}</p>
+                    <p class="text-gray-600 text-sm sm:text-base">{{ current_category.description }}</p>
                 {% endif %}
             </div>
             
             <!-- Filters -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-8">
-                <div class="flex flex-wrap items-center gap-4">
-                    <div class="flex items-center space-x-2">
-                        <label class="text-sm font-medium text-gray-700">Sort by:</label>
-                        <select id="sort-select" class="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 mb-6 sm:mb-8">
+                <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <label class="text-sm font-medium text-gray-700 flex-shrink-0">Sort by:</label>
+                        <select id="sort-select" class="border border-gray-300 rounded px-2 sm:px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 min-w-0">
                             <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option>
                             <option value="oldest" {% if sort_by == 'oldest' %}selected{% endif %}>Oldest</option>
                             <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>Most Popular</option>
@@ -67,9 +67,9 @@
                         </select>
                     </div>
                     
-                    <div class="flex items-center space-x-2">
-                        <label class="text-sm font-medium text-gray-700">Category:</label>
-                        <select id="category-select" class="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <label class="text-sm font-medium text-gray-700 flex-shrink-0">Category:</label>
+                        <select id="category-select" class="border border-gray-300 rounded px-2 sm:px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 min-w-0">
                             <option value="">All Categories</option>
                             {% for category in categories %}
                                 <option value="{{ category.slug }}" {% if current_category and current_category.slug == category.slug %}selected{% endif %}>
@@ -83,25 +83,24 @@
             
             <!-- Posts Grid -->
             {% if page_obj %}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
                     {% for post in page_obj %}
                     <article class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
                         {% if post.featured_image %}
                             <img src="{{ post.featured_image.url }}" 
                                 alt="{{ post.title }}" 
-                                class="h-48 w-full object-cover">
+                                class="h-40 sm:h-44 md:h-48 w-full object-cover">
                         {% else %}
-                            <div class="h-48 bg-gradient-to-br from-amber-100 to-yellow-200 flex items-center justify-center">
-                                <i class="fas fa-newspaper text-4xl text-amber-600"></i>
+                            <div class="h-40 sm:h-44 md:h-48 bg-gradient-to-br from-amber-100 to-yellow-200 flex items-center justify-center">
+                                <i class="fas fa-newspaper text-3xl sm:text-4xl text-amber-600"></i>
                             </div>
                         {% endif %}
                     
-                        
-                        <div class="p-6">
+                        <div class="p-4 sm:p-5 md:p-6">
                             <!-- Category and Tags -->
-                            <div class="flex items-center space-x-2 mb-3">
+                            <div class="flex flex-wrap items-center gap-2 mb-3">
                                 {% if post.category %}
-                                <span class="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                <span class="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-2 sm:px-3 py-1 rounded-full">
                                     {{ post.category.name }}
                                 </span>
                                 {% endif %}
@@ -113,35 +112,35 @@
                             </div>
                             
                             <!-- Title -->
-                            <h2 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-amber-700 transition-colors">
-                                <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+                            <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 group-hover:text-amber-700 transition-colors leading-tight">
+                                <a href="{{ post.get_absolute_url }}" class="line-clamp-2">{{ post.title }}</a>
                             </h2>
                             
                             <!-- Excerpt -->
-                            <p class="text-gray-600 mb-4 line-clamp-3">{{ post.excerpt|default:post.content|truncatewords:25 }}</p>
+                            <p class="text-gray-600 mb-4 text-sm sm:text-base line-clamp-2 sm:line-clamp-3">{{ post.excerpt|default:post.content|truncatewords:25 }}</p>
                             
                             <!-- Meta Info -->
-                            <div class="flex items-center justify-between text-sm text-gray-500">
-                                <div class="flex items-center space-x-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs sm:text-sm text-gray-500 gap-2 sm:gap-0">
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
                                     <span class="flex items-center">
                                         <i class="fas fa-user mr-1"></i>
-                                        {{ post.author.get_full_name|default:post.author.username }}
+                                        <span class="truncate max-w-[120px] sm:max-w-none">{{ post.author.get_full_name|default:post.author.username }}</span>
                                     </span>
                                     <span class="flex items-center">
                                         <i class="fas fa-clock mr-1"></i>
                                         {{ post.reading_time }} min read
                                     </span>
                                 </div>
-                                <span>{{ post.published_at|date:"M d, Y" }}</span>
+                                <span class="text-right sm:text-left">{{ post.published_at|date:"M d, Y" }}</span>
                             </div>
                             
                             <!-- Stats -->
-                            <div class="flex items-center space-x-4 mt-4 pt-4 border-t border-gray-100">
-                                <span class="flex items-center text-sm text-gray-500">
+                            <div class="flex items-center justify-between sm:justify-start sm:space-x-4 mt-4 pt-4 border-t border-gray-100">
+                                <span class="flex items-center text-xs sm:text-sm text-gray-500">
                                     <i class="fas fa-eye mr-1"></i>
                                     {{ post.view_count }} views
                                 </span>
-                                <span class="flex items-center text-sm text-gray-500">
+                                <span class="flex items-center text-xs sm:text-sm text-gray-500">
                                     <i class="fas fa-heart mr-1"></i>
                                     {{ post.like_count }} likes
                                 </span>
@@ -153,23 +152,23 @@
                 
                 <!-- Pagination -->
                 {% if page_obj.has_other_pages %}
-                <div class="mt-12 flex justify-center">
-                    <nav class="flex items-center space-x-2">
+                <div class="mt-8 sm:mt-12 flex justify-center px-4">
+                    <nav class="flex items-center space-x-1 sm:space-x-2 overflow-x-auto">
                         {% if page_obj.has_previous %}
                             <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
-                               class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                               class="px-2 sm:px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 flex-shrink-0">
                                 <i class="fas fa-chevron-left"></i>
                             </a>
                         {% endif %}
                         
                         {% for num in page_obj.paginator.page_range %}
                             {% if page_obj.number == num %}
-                                <span class="px-3 py-2 text-sm font-medium text-white bg-amber-600 border border-amber-600 rounded-md">
+                                <span class="px-2 sm:px-3 py-2 text-sm font-medium text-white bg-amber-600 border border-amber-600 rounded-md flex-shrink-0">
                                     {{ num }}
                                 </span>
                             {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                                 <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
-                                   class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                   class="px-2 sm:px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 flex-shrink-0 hidden sm:inline-block">
                                     {{ num }}
                                 </a>
                             {% endif %}
@@ -177,7 +176,7 @@
                         
                         {% if page_obj.has_next %}
                             <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
-                               class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                               class="px-2 sm:px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 flex-shrink-0">
                                 <i class="fas fa-chevron-right"></i>
                             </a>
                         {% endif %}
@@ -186,12 +185,12 @@
                 {% endif %}
             {% else %}
                 <!-- No Posts -->
-                <div class="text-center py-16">
-                    <div class="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
-                        <i class="fas fa-newspaper text-4xl text-gray-400"></i>
+                <div class="text-center py-12 sm:py-16 px-4">
+                    <div class="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 mx-auto mb-6 sm:mb-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
+                        <i class="fas fa-newspaper text-3xl sm:text-4xl text-gray-400"></i>
                     </div>
-                    <h2 class="text-2xl font-bold text-gray-900 mb-4">No posts found</h2>
-                    <p class="text-gray-600 mb-8">
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">No posts found</h2>
+                    <p class="text-gray-600 mb-6 sm:mb-8 text-sm sm:text-base">
                         {% if current_category %}
                             No posts found in the {{ current_category.name }} category.
                         {% elif current_tag %}
@@ -201,7 +200,7 @@
                         {% endif %}
                     </p>
                     <a href="{% url 'blog:home' %}" 
-                       class="inline-flex items-center bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors">
+                       class="inline-flex items-center bg-amber-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors text-sm sm:text-base">
                         <i class="fas fa-arrow-left mr-2"></i>
                         Back to Blog
                     </a>
@@ -210,18 +209,18 @@
         </div>
         
         <!-- Sidebar -->
-        <div class="lg:col-span-1">
-            <div class="space-y-8">
+        <div class="lg:col-span-1 order-first lg:order-last">
+            <div class="space-y-6 sm:space-y-8">
                 <!-- Categories -->
                 {% if categories %}
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Categories</h3>
-                    <div class="space-y-2">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Categories</h3>
+                    <div class="space-y-1 sm:space-y-2">
                         {% for category in categories %}
                         <a href="{{ category.get_absolute_url }}" 
                            class="flex items-center justify-between p-2 rounded hover:bg-gray-50 transition-colors">
-                            <span class="text-gray-700">{{ category.name }}</span>
-                            <span class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                            <span class="text-gray-700 text-sm sm:text-base truncate mr-2">{{ category.name }}</span>
+                            <span class="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full flex-shrink-0">
                                 {{ category.post_count }}
                             </span>
                         </a>
@@ -232,12 +231,12 @@
                 
                 <!-- Popular Tags -->
                 {% if tags %}
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Popular Tags</h3>
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Popular Tags</h3>
                     <div class="flex flex-wrap gap-2">
                         {% for tag in tags %}
                         <a href="{{ tag.get_absolute_url }}" 
-                           class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-amber-100 hover:text-amber-800 transition-colors">
+                           class="bg-gray-100 text-gray-700 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm hover:bg-amber-100 hover:text-amber-800 transition-colors">
                             #{{ tag.name }}
                         </a>
                         {% endfor %}

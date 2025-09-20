@@ -4,11 +4,13 @@
 
 {% block content %}
 <!-- Hero Section -->
-<div class="bg-gradient-to-br from-slate-50 to-gray-50 py-16">
+<div class="bg-gradient-to-br from-slate-50 to-gray-50 py-8 sm:py-16">
     <div class="container mx-auto px-4">
         <div class="text-center max-w-4xl mx-auto">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-6">About {{ site_config.site_name|default:"Our Store" }}</h1>
-            <p class="text-xl text-gray-600 leading-relaxed">
+            <h1 class="text-2xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-4 sm:mb-6">
+                About {{ site_config.site_name|default:"Our Store" }}
+            </h1>
+            <p class="text-base sm:text-xl text-gray-600 leading-relaxed px-4">
                 {{ site_config.about_description|default:"We're passionate about bringing you quality products and exceptional service. Our mission is to make online shopping simple, reliable, and enjoyable for everyone." }}
             </p>
         </div>
@@ -16,46 +18,46 @@
 </div>
 
 <!-- Main Content -->
-<div class="py-16 bg-white">
+<div class="py-8 sm:py-16 bg-white">
     <div class="container mx-auto px-4">
         <div class="max-w-6xl mx-auto">
             <!-- Our Story -->
-            <div class="mb-20">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Our Story</h2>
-                    <div class="w-24 h-1 bg-amber-700 mx-auto"></div>
+            <div class="mb-12 sm:mb-20">
+                <div class="text-center mb-8 sm:mb-12">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">Our Story</h2>
+                    <div class="w-16 sm:w-24 h-1 bg-amber-700 mx-auto"></div>
                 </div>
-                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
                     <div>
-                        <div class="prose prose-lg text-gray-600">
-                            <p class="mb-6">
+                        <div class="prose prose-sm sm:prose-lg text-gray-600">
+                            <p class="mb-4 sm:mb-6 text-sm sm:text-base">
                                 {{ site_config.story_text|default:"Founded with a vision to revolutionize online shopping in Nigeria, we started as a small team with big dreams. Our journey began when we noticed the gap between what customers wanted and what was available in the local market." }}
                             </p>
-                            <p class="mb-6">
+                            <p class="mb-4 sm:mb-6 text-sm sm:text-base">
                                 {{ site_config.mission_text|default:"We believe that everyone deserves access to quality products at fair prices, delivered with exceptional service. That's why we've built relationships with trusted suppliers and invested in a reliable delivery network across Nigeria." }}
                             </p>
-                            <p>
+                            <p class="text-sm sm:text-base">
                                 {{ site_config.vision_text|default:"Today, we're proud to serve thousands of customers nationwide, offering everything from fashion and electronics to home goods and personal care items. But our story is just beginning – we're constantly growing and improving to serve you better." }}
                             </p>
                         </div>
                     </div>
-                    <div class="text-center">
-                        <div class="bg-gradient-to-br from-amber-100 to-orange-100 rounded-lg p-8">
-                            <div class="mb-6">
-                                <i class="fas fa-store text-6xl text-amber-700"></i>
+                    <div class="text-center order-first lg:order-last">
+                        <div class="bg-gradient-to-br from-amber-100 to-orange-100 rounded-lg p-6 sm:p-8">
+                            <div class="mb-4 sm:mb-6">
+                                <i class="fas fa-store text-4xl sm:text-6xl text-amber-700"></i>
                             </div>
-                            <div class="space-y-4">
+                            <div class="space-y-3 sm:space-y-4">
                                 <div>
-                                    <h3 class="text-2xl font-bold text-gray-800">{{ site_config.years_in_business|default:"5+" }}</h3>
-                                    <p class="text-gray-600">Years in Business</p>
+                                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800">{{ site_config.years_in_business|default:"5+" }}</h3>
+                                    <p class="text-sm sm:text-base text-gray-600">Years in Business</p>
                                 </div>
                                 <div>
-                                    <h3 class="text-2xl font-bold text-gray-800">{{ site_config.happy_customers|default:"10,000+" }}</h3>
-                                    <p class="text-gray-600">Happy Customers</p>
+                                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800">{{ site_config.happy_customers|default:"10,000+" }}</h3>
+                                    <p class="text-sm sm:text-base text-gray-600">Happy Customers</p>
                                 </div>
                                 <div>
-                                    <h3 class="text-2xl font-bold text-gray-800">{{ site_config.products_sold|default:"50,000+" }}</h3>
-                                    <p class="text-gray-600">Products Sold</p>
+                                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800">{{ site_config.products_sold|default:"50,000+" }}</h3>
+                                    <p class="text-sm sm:text-base text-gray-600">Products Sold</p>
                                 </div>
                             </div>
                         </div>
@@ -64,55 +66,55 @@
             </div>
 
             <!-- Our Values -->
-            <div class="mb-20">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Our Values</h2>
-                    <div class="w-24 h-1 bg-amber-700 mx-auto mb-6"></div>
-                    <p class="text-gray-600 max-w-2xl mx-auto">
+            <div class="mb-12 sm:mb-20">
+                <div class="text-center mb-8 sm:mb-12">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">Our Values</h2>
+                    <div class="w-16 sm:w-24 h-1 bg-amber-700 mx-auto mb-4 sm:mb-6"></div>
+                    <p class="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto px-4">
                         These core values guide everything we do and shape how we serve our customers every day.
                     </p>
                 </div>
-                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                     <!-- Quality -->
                     <div class="text-center group">
-                        <div class="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors">
-                            <i class="fas fa-award text-3xl text-blue-700"></i>
+                        <div class="bg-blue-100 w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:bg-blue-200 transition-colors">
+                            <i class="fas fa-award text-2xl sm:text-3xl text-blue-700"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">Quality First</h3>
-                        <p class="text-gray-600">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-3">Quality First</h3>
+                        <p class="text-sm sm:text-base text-gray-600 px-2">
                             We carefully curate our products to ensure you receive only the best quality items that meet our high standards.
                         </p>
                     </div>
 
                     <!-- Trust -->
                     <div class="text-center group">
-                        <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-green-200 transition-colors">
-                            <i class="fas fa-handshake text-3xl text-green-700"></i>
+                        <div class="bg-green-100 w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:bg-green-200 transition-colors">
+                            <i class="fas fa-handshake text-2xl sm:text-3xl text-green-700"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">Trust & Reliability</h3>
-                        <p class="text-gray-600">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-3">Trust & Reliability</h3>
+                        <p class="text-sm sm:text-base text-gray-600 px-2">
                             We build lasting relationships through honest communication, reliable service, and keeping our promises to customers.
                         </p>
                     </div>
 
                     <!-- Innovation -->
                     <div class="text-center group">
-                        <div class="bg-purple-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-200 transition-colors">
-                            <i class="fas fa-lightbulb text-3xl text-purple-700"></i>
+                        <div class="bg-purple-100 w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:bg-purple-200 transition-colors">
+                            <i class="fas fa-lightbulb text-2xl sm:text-3xl text-purple-700"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">Innovation</h3>
-                        <p class="text-gray-600">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-3">Innovation</h3>
+                        <p class="text-sm sm:text-base text-gray-600 px-2">
                             We continuously improve our platform, services, and processes to provide you with the best shopping experience.
                         </p>
                     </div>
 
                     <!-- Customer Focus -->
                     <div class="text-center group">
-                        <div class="bg-red-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-red-200 transition-colors">
-                            <i class="fas fa-users text-3xl text-red-700"></i>
+                        <div class="bg-red-100 w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:bg-red-200 transition-colors">
+                            <i class="fas fa-users text-2xl sm:text-3xl text-red-700"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">Customer Focus</h3>
-                        <p class="text-gray-600">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-3">Customer Focus</h3>
+                        <p class="text-sm sm:text-base text-gray-600 px-2">
                             Our customers are at the heart of everything we do. Your satisfaction and success drive our decisions and actions.
                         </p>
                     </div>
@@ -120,89 +122,90 @@
             </div>
 
             <!-- Why Choose Us -->
-            <div class="mb-20">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Why Choose {{ site_config.site_name|default:"Us" }}?</h2>
-                    <div class="w-24 h-1 bg-amber-700 mx-auto"></div>
+            <div class="mb-12 sm:mb-20">
+                <div class="text-center mb-8 sm:mb-12">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">
+                        Why Choose {{ site_config.site_name|default:"Us" }}?
+                    </h2>
+                    <div class="w-16 sm:w-24 h-1 bg-amber-700 mx-auto"></div>
                 </div>
-                <div class="grid lg:grid-cols-2 gap-12">
-                    <div class="space-y-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12">
+                    <div class="space-y-6 sm:space-y-8">
                         <!-- Fast Delivery -->
-                        <div class="flex items-start space-x-4">
-                            <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-shipping-fast text-blue-700"></i>
+                        <div class="flex items-start space-x-3 sm:space-x-4">
+                            <div class="bg-blue-100 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-shipping-fast text-blue-700 text-sm sm:text-base"></i>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-800 mb-2">Fast & Reliable Delivery</h3>
-                                <p class="text-gray-600">
+                                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-1 sm:mb-2">Fast & Reliable Delivery</h3>
+                                <p class="text-sm sm:text-base text-gray-600">
                                     Quick processing and reliable delivery across Nigeria. Most orders ship within 24 hours.
                                 </p>
                             </div>
                         </div>
 
                         <!-- Secure Shopping -->
-                        <div class="flex items-start space-x-4">
-                            <div class="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-shield-alt text-green-700"></i>
+                        <div class="flex items-start space-x-3 sm:space-x-4">
+                            <div class="bg-green-100 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-shield-alt text-green-700 text-sm sm:text-base"></i>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-800 mb-2">Secure Shopping</h3>
-                                <p class="text-gray-600">
+                                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-1 sm:mb-2">Secure Shopping</h3>
+                                <p class="text-sm sm:text-base text-gray-600">
                                     Your personal and payment information is protected with industry-standard security measures.
                                 </p>
                             </div>
                         </div>
 
-                        <!-- Easy Returns -->
-                        <!-- <div class="flex items-start space-x-4">
-                            <div class="bg-amber-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-undo text-amber-700"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-bold text-gray-800 mb-2">Easy Returns</h3>
-                                <p class="text-gray-600">
-                                    30-day return policy with hassle-free returns and quick refunds for your peace of mind.
-                                </p>
-                            </div>
-                        </div> -->
-
                         <!-- 24/7 Support -->
-                        <div class="flex items-start space-x-4">
-                            <div class="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-headset text-purple-700"></i>
+                        <div class="flex items-start space-x-3 sm:space-x-4">
+                            <div class="bg-purple-100 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-headset text-purple-700 text-sm sm:text-base"></i>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-800 mb-2">Excellent Customer Support</h3>
-                                <p class="text-gray-600">
+                                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-1 sm:mb-2">Excellent Customer Support</h3>
+                                <p class="text-sm sm:text-base text-gray-600">
                                     Friendly and knowledgeable support team ready to help with any questions or concerns.
                                 </p>
                             </div>
                         </div>
                     </div>
-                    <div class="space-y-8">
-                        
+                    <div class="space-y-6 sm:space-y-8">
                         <!-- Best Prices -->
-                        <div class="flex items-start space-x-4">
-                            <div class="bg-red-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-tags text-red-700"></i>
+                        <div class="flex items-start space-x-3 sm:space-x-4">
+                            <div class="bg-red-100 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-tags text-red-700 text-sm sm:text-base"></i>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-800 mb-2">Competitive Prices</h3>
-                                <p class="text-gray-600">
+                                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-1 sm:mb-2">Competitive Prices</h3>
+                                <p class="text-sm sm:text-base text-gray-600">
                                     Great value for money with regular deals, discounts, and special offers for our customers.
                                 </p>
                             </div>
                         </div>
 
                         <!-- Quality Guarantee -->
-                        <div class="flex items-start space-x-4">
-                            <div class="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-certificate text-indigo-700"></i>
+                        <div class="flex items-start space-x-3 sm:space-x-4">
+                            <div class="bg-indigo-100 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-certificate text-indigo-700 text-sm sm:text-base"></i>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-800 mb-2">Quality Guarantee</h3>
-                                <p class="text-gray-600">
+                                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-1 sm:mb-2">Quality Guarantee</h3>
+                                <p class="text-sm sm:text-base text-gray-600">
                                     We stand behind our products with quality guarantees and authentic merchandise only.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Mobile-specific feature -->
+                        <div class="flex items-start space-x-3 sm:space-x-4 sm:hidden">
+                            <div class="bg-amber-100 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-mobile-alt text-amber-700 text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-gray-800 mb-1">Mobile Optimized</h3>
+                                <p class="text-sm text-gray-600">
+                                    Shop easily on any device with our mobile-friendly platform.
                                 </p>
                             </div>
                         </div>
@@ -212,19 +215,19 @@
 
             <!-- Call to Action -->
             <div class="text-center">
-                <div class="bg-gradient-to-r from-amber-700 to-orange-600 rounded-lg p-12 text-white">
-                    <h2 class="text-3xl font-bold mb-4">Ready to Start Shopping?</h2>
-                    <p class="text-xl mb-8 opacity-90">
+                <div class="bg-gradient-to-r from-amber-700 to-orange-600 rounded-lg p-6 sm:p-12 text-white">
+                    <h2 class="text-xl sm:text-3xl font-bold mb-3 sm:mb-4">Ready to Start Shopping?</h2>
+                    <p class="text-base sm:text-xl mb-6 sm:mb-8 opacity-90 px-4">
                         Join thousands of satisfied customers and discover why they choose us for their shopping needs.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md mx-auto">
                         <a href="{% url 'store:product_list' %}" 
-                           class="bg-white text-amber-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center">
+                           class="bg-white text-amber-700 px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center text-sm sm:text-base">
                             <i class="fas fa-shopping-bag mr-2"></i>
                             Start Shopping
                         </a>
                         <a href="{% url 'store:contact' %}" 
-                           class="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-amber-700 transition-colors inline-flex items-center justify-center">
+                           class="bg-transparent border-2 border-white text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:bg-white hover:text-amber-700 transition-colors inline-flex items-center justify-center text-sm sm:text-base">
                             <i class="fas fa-envelope mr-2"></i>
                             Contact Us
                         </a>

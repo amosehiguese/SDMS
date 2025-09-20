@@ -4,36 +4,37 @@
 {% block title %}{% trans "Sell Item Submissions" %} - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">
+        <!-- Header -->
+        <div class="mb-6 sm:mb-8">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
                 <i class="fas fa-clipboard-list mr-2"></i>
                 {% trans "Sell Item Submissions" %}
             </h1>
-            <p class="mt-2 text-gray-600">
+            <p class="mt-2 text-sm sm:text-base text-gray-600">
                 {% trans "Review and manage user submissions for selling items back to the platform." %}
             </p>
         </div>
         
-        <!-- Filter Tabs -->
-        <div class="flex">
+        <!-- Filter Tabs - Mobile Optimized -->
+        <div class="flex overflow-x-auto mb-6 border-b border-gray-200">
             <a href="?status=pending" 
-               class="px-4 py-2 {% if current_status == 'pending' %}border-b-2 border-amber-600 text-amber-600{% else %}text-gray-500{% endif %}">
+               class="flex-shrink-0 px-3 sm:px-4 py-2 text-sm {% if current_status == 'pending' %}border-b-2 border-amber-600 text-amber-600{% else %}text-gray-500{% endif %} whitespace-nowrap">
                 Pending 
                 <span class="bg-gray-200 text-gray-800 text-xs font-semibold ml-2 px-2 py-0.5 rounded-full">
                     {{ status_counts.pending|default:0 }}
                 </span>
             </a>
             <a href="?status=accepted" 
-               class="px-4 py-2 {% if current_status == 'accepted' %}border-b-2 border-amber-600 text-amber-600{% else %}text-gray-500{% endif %}">
+               class="flex-shrink-0 px-3 sm:px-4 py-2 text-sm {% if current_status == 'accepted' %}border-b-2 border-amber-600 text-amber-600{% else %}text-gray-500{% endif %} whitespace-nowrap">
                 Accepted
                 <span class="bg-gray-200 text-gray-800 text-xs font-semibold ml-2 px-2 py-0.5 rounded-full">
                     {{ status_counts.accepted|default:0 }}
                 </span>
             </a>
             <a href="?status=rejected" 
-               class="px-4 py-2 {% if current_status == 'rejected' %}border-b-2 border-amber-600 text-amber-600{% else %}text-gray-500{% endif %}">
+               class="flex-shrink-0 px-3 sm:px-4 py-2 text-sm {% if current_status == 'rejected' %}border-b-2 border-amber-600 text-amber-600{% else %}text-gray-500{% endif %} whitespace-nowrap">
                 Rejected
                 <span class="bg-gray-200 text-gray-800 text-xs font-semibold ml-2 px-2 py-0.5 rounded-full">
                     {{ status_counts.rejected|default:0 }}
@@ -42,7 +43,87 @@
         </div>
         
         {% if submissions %}
-            <div class="bg-white rounded-lg shadow overflow-hidden">
+            <!-- Mobile Cards View (Hidden on larger screens) -->
+            <div class="lg:hidden space-y-4">
+                {% for submission in submissions %}
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <!-- Header with image and title -->
+                        <div class="flex items-start space-x-3 mb-4">
+                            {% if submission.images.exists %}
+                                <img src="{{ submission.images.first.image.url }}" 
+                                     alt="{{ submission.title }}" 
+                                     class="w-16 h-16 object-cover rounded-lg flex-shrink-0">
+                            {% else %}
+                                <div class="w-16 h-16 bg-gray-200 flex items-center justify-center rounded-lg flex-shrink-0">
+                                    <i class="fas fa-image text-gray-400"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-sm font-medium text-gray-900 truncate">{{ submission.title }}</h3>
+                                {% if submission.category %}
+                                    <p class="text-xs text-gray-500 mt-1">{{ submission.category.name }}</p>
+                                {% endif %}
+                                
+                                <!-- Type Badge -->
+                                <span class="inline-flex mt-2 px-2 py-1 text-xs rounded-full 
+                                    {% if submission.source == 'own_item' %}bg-blue-100 text-blue-800
+                                    {% else %}bg-purple-100 text-purple-800{% endif %}">
+                                    {% if submission.source == 'own_item' %}
+                                        {% trans "Own Item" %}
+                                    {% else %}
+                                        {% trans "Held Asset" %}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Details Grid -->
+                        <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+                            <div>
+                                <span class="text-gray-500 block">{% trans "Seller" %}</span>
+                                <span class="font-medium text-gray-900">{{ submission.user.get_full_name|default:submission.user.email|truncatechars:20 }}</span>
+                                <span class="text-xs text-gray-500 block">{{ submission.user.email|truncatechars:25 }}</span>
+                            </div>
+                            
+                            <div>
+                                <span class="text-gray-500 block">{% trans "Price" %}</span>
+                                <span class="font-semibold text-gray-900">₦{{ submission.price|floatformat:2 }}</span>
+                            </div>
+                            
+                            <div>
+                                <span class="text-gray-500 block">{% trans "Quantity" %}</span>
+                                <span class="text-gray-900">{{ submission.stock_quantity }}</span>
+                            </div>
+                            
+                            <div>
+                                <span class="text-gray-500 block">{% trans "Submitted" %}</span>
+                                <span class="text-gray-900">{{ submission.created_at|date:"M j, Y" }}</span>
+                                <span class="text-xs text-gray-500 block">{{ submission.created_at|time:"H:i" }}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <a href="{% url 'sell_items:admin_review_submission' submission.id %}" 
+                               class="flex-1 bg-amber-600 text-white py-2 px-3 rounded text-center text-sm font-medium hover:bg-amber-700 transition">
+                                <i class="fas fa-eye mr-1"></i>
+                                {% trans "Review" %}
+                            </a>
+                            {% if submission.status == 'accepted' %}
+                                <button onclick="createProduct('{{ submission.id }}')"
+                                        class="flex-1 bg-green-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-green-700 transition">
+                                    <i class="fas fa-plus-circle mr-1"></i>
+                                    {% trans "Create Product" %}
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Desktop Table View (Hidden on mobile) -->
+            <div class="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
@@ -141,14 +222,15 @@
                 </div>
             </div>
         {% else %}
-            <div class="text-center py-12">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100 mb-4">
+            <!-- Empty State - Mobile Optimized -->
+            <div class="text-center py-8 sm:py-12">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 sm:h-12 sm:w-12 rounded-full bg-gray-100 mb-4">
                     <i class="fas fa-clipboard-list text-gray-400 text-xl"></i>
                 </div>
                 <h3 class="text-lg font-medium text-gray-900 mb-2">
                     {% trans "No Submissions Found" %}
                 </h3>
-                <p class="text-gray-600">
+                <p class="text-sm sm:text-base text-gray-600 px-4">
                     {% if current_status == 'pending' %}
                         {% trans "No pending submissions at the moment." %}
                     {% elif current_status == 'accepted' %}
@@ -162,10 +244,10 @@
     </div>
 </div>
 
-<!-- Create Product Modal -->
-<div id="create-product-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-lg max-w-md w-full p-6">
+<!-- Create Product Modal - Mobile Optimized -->
+<div id="create-product-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50 p-4 sm:p-0">
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-lg max-w-md w-full p-4 sm:p-6 mx-4 sm:mx-0">
             <h3 class="text-lg font-medium text-gray-900 mb-4">
                 {% trans "Create Product" %}
             </h3>
@@ -174,28 +256,28 @@
                 {% csrf_token %}
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
                             {% trans "Admin Price (₦)" %}
                         </label>
                         <input type="number" 
                                id="admin-price" 
                                min="1" 
                                step="1"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                               class="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-base sm:text-sm"
                                placeholder="Leave empty to use seller's price">
-                        <p class="text-sm text-gray-500 mt-1">
+                        <p class="text-xs sm:text-sm text-gray-500 mt-2">
                             {% trans "Set your own price or leave empty to use seller's price" %}
                         </p>
                     </div>
                 </div>
                 
-                <div class="flex space-x-3 mt-6">
+                <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 mt-6">
                     <button type="button" onclick="closeCreateProductModal()" 
-                            class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            class="flex-1 px-4 py-3 sm:py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium">
                         {% trans "Cancel" %}
                     </button>
                     <button type="submit" 
-                            class="flex-1 px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700">
+                            class="flex-1 px-4 py-3 sm:py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 font-medium">
                         {% trans "Create Product" %}
                     </button>
                 </div>
@@ -234,9 +316,9 @@ function showNotification(message, type = 'info') {
     };
     
     const notification = $(`
-        <div class="fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform max-w-md">
+        <div class="fixed top-4 left-4 right-4 sm:top-4 sm:right-4 sm:left-auto sm:w-auto ${colors[type]} text-white px-4 sm:px-6 py-3 rounded-lg shadow-lg z-50 transform translate-y-[-100%] sm:translate-y-0 sm:translate-x-full transition-transform max-w-md text-sm">
             <div class="flex items-center">
-                <i class="fas ${icons[type]} mr-2"></i>
+                <i class="fas ${icons[type]} mr-2 flex-shrink-0"></i>
                 <span>${message}</span>
             </div>
         </div>
@@ -245,11 +327,11 @@ function showNotification(message, type = 'info') {
     $('body').append(notification);
     
     setTimeout(() => {
-        notification.removeClass('translate-x-full');
+        notification.removeClass('translate-y-[-100%] translate-x-full');
     }, 100);
     
     setTimeout(() => {
-        notification.addClass('translate-x-full');
+        notification.addClass('translate-y-[-100%] sm:translate-y-0 sm:translate-x-full');
         setTimeout(() => {
             notification.remove();
         }, 300);
@@ -262,6 +344,12 @@ document.getElementById('create-product-form').addEventListener('submit', functi
     if (!currentSubmissionId) return;
     
     const adminPrice = document.getElementById('admin-price').value;
+    
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating...';
+    submitBtn.disabled = true;
     
     fetch('{% url "sell_items:create_product_from_submission" %}', {
         method: 'POST',
@@ -279,15 +367,34 @@ document.getElementById('create-product-form').addEventListener('submit', functi
         if (data.success) {
             showNotification("Product created successfully!" , "success")
             closeCreateProductModal();
-            location.reload();
+            setTimeout(() => location.reload(), 1000);
         } else {
             showNotification(data.error || "Error creating product", "error")
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showNotification(data.error || "Error creating product", "error")
+        showNotification("Error creating product", "error")
+    })
+    .finally(() => {
+        // Restore button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     });
+});
+
+// Close modal when clicking outside
+document.getElementById('create-product-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeCreateProductModal();
+    }
+});
+
+// Escape key to close modal
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !document.getElementById('create-product-modal').classList.contains('hidden')) {
+        closeCreateProductModal();
+    }
 });
 </script>
 {% endblock %}

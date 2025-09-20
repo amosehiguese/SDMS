@@ -4,13 +4,13 @@
 
 {% block content %}
 <!-- Breadcrumb -->
-<div class="bg-gray-100 py-4">
+<div class="bg-gray-100 py-2 sm:py-4">
     <div class="container mx-auto px-4">
-        <nav class="text-sm">
+        <nav class="text-xs sm:text-sm">
             <a href="{% url 'store:home' %}" class="text-amber-700 hover:text-yellow-700">Home</a>
-            <span class="mx-2">/</span>
+            <span class="mx-1 sm:mx-2">/</span>
             <a href="{% url 'orders:cart' %}" class="text-amber-700 hover:text-yellow-700">Cart</a>
-            <span class="mx-2">/</span>
+            <span class="mx-1 sm:mx-2">/</span>
             <span class="text-gray-600">Checkout</span>
         </nav>
     </div>
@@ -18,59 +18,135 @@
 
 <!-- Checkout Steps -->
 <div class="bg-white border-b">
-    <div class="container mx-auto px-4 py-4">
-        <div class="flex items-center justify-center space-x-8">
+    <div class="container mx-auto px-4 py-3 sm:py-4">
+        <div class="flex items-center justify-center space-x-2 sm:space-x-8">
             <div class="flex items-center text-amber-700">
-                <div class="w-8 h-8 bg-amber-700 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
-                <span class="ml-2 font-semibold">Shipping</span>
+                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-amber-700 text-white rounded-full flex items-center justify-center text-xs sm:text-sm font-bold">1</div>
+                <span class="ml-1 sm:ml-2 font-semibold text-xs sm:text-base hidden xs:inline">Shipping</span>
             </div>
-            <div class="w-12 h-px bg-gray-300"></div>
+            <div class="w-4 sm:w-12 h-px bg-gray-300"></div>
             <div class="flex items-center text-gray-400">
-                <div class="w-8 h-8 bg-gray-300 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
-                <span class="ml-2">Payment</span>
+                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-gray-300 text-white rounded-full flex items-center justify-center text-xs sm:text-sm font-bold">2</div>
+                <span class="ml-1 sm:ml-2 text-xs sm:text-base hidden xs:inline">Payment</span>
             </div>
-            <div class="w-12 h-px bg-gray-300"></div>
+            <div class="w-4 sm:w-12 h-px bg-gray-300"></div>
             <div class="flex items-center text-gray-400">
-                <div class="w-8 h-8 bg-gray-300 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
-                <span class="ml-2">Review</span>
+                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-gray-300 text-white rounded-full flex items-center justify-center text-xs sm:text-sm font-bold">3</div>
+                <span class="ml-1 sm:ml-2 text-xs sm:text-base hidden xs:inline">Review</span>
             </div>
         </div>
     </div>
 </div>
 
-<div class="container mx-auto px-4 py-8">
-    <form id="checkout-form" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="container mx-auto px-4 py-4 sm:py-8">
+    <form id="checkout-form" class="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-8">
+        <!-- Mobile Order Summary (shows at top on mobile) -->
+        <div class="lg:hidden order-1">
+            <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold">Order Summary</h2>
+                    <button type="button" id="toggle-summary" class="text-amber-700 hover:text-amber-800 lg:hidden">
+                        <span class="toggle-text">Show</span>
+                        <i class="fas fa-chevron-down ml-1 toggle-icon"></i>
+                    </button>
+                </div>
+                
+                <div id="mobile-summary-content" class="hidden">
+                    <!-- Cart Items (Mobile) -->
+                    <div class="space-y-3 mb-4 max-h-48 overflow-y-auto">
+                        {% for item in cart.items.all %}
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 flex-shrink-0">
+                                {% if item.product.images.exists %}
+                                    <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.title }}" class="w-full h-full object-cover rounded">
+                                {% else %}
+                                    <div class="w-full h-full bg-gray-200 flex items-center justify-center rounded">
+                                        <i class="fas fa-image text-gray-400 text-xs"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium truncate">{{ item.product.title }}</p>
+                                <p class="text-xs text-gray-500">
+                                    Qty: {{ item.quantity }} × ₦{{ item.product.get_display_price|floatformat:0 }}
+                                </p>
+                            </div>
+                            <div class="text-sm font-semibold">
+                                ₦{{ item.get_total_price|floatformat:0 }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <hr class="mb-4">
+                    
+                    <!-- Price Breakdown (Mobile) -->
+                    <div class="space-y-2 mb-4 text-sm">
+                        <div class="flex justify-between">
+                            <span>Subtotal</span>
+                            <span>₦{{ cart.get_subtotal|floatformat:0 }}</span>
+                        </div>
+                        
+                        <div class="flex justify-between" id="mobile-shipping-row">
+                            <span>Shipping</span>
+                            <span id="mobile-shipping-amount">
+                                {% if cart.get_subtotal >= site_config.free_shipping_threshold %}
+                                    <span class="text-green-600">Free</span>
+                                {% else %}
+                                    ₦{{ site_config.default_shipping_cost|floatformat:0|default:"2500" }}
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        {% if site_config.tax_rate > 0 %}
+                        <div class="flex justify-between">
+                            <span>Tax</span>
+                            <span>₦{{ cart.get_tax_amount|floatformat:0|default:"0.00" }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <hr class="my-2">
+                        
+                        <div class="flex justify-between text-lg font-bold">
+                            <span>Total</span>
+                            <span class="text-amber-700" id="mobile-total-amount">₦{{ cart.get_total|floatformat:0 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Main Content -->
-        <div class="lg:col-span-2 space-y-8">
+        <div class="lg:col-span-2 space-y-4 sm:space-y-8 order-2">
             <!-- Fulfillment Type -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-bold mb-6 flex items-center">
-                    <i class="fas fa-truck mr-3 text-amber-500"></i>
+            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                <h2 class="text-lg sm:text-xl font-bold mb-4 sm:mb-6 flex items-center">
+                    <i class="fas fa-truck mr-2 sm:mr-3 text-amber-500"></i>
                     Fulfillment Options
                 </h2>
                 
-                <div class="space-y-4">
-                    <label class="flex items-start p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition">
+                <div class="space-y-3 sm:space-y-4">
+                    <label class="flex items-start p-3 sm:p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition touch-manipulation">
                         <input type="radio" name="fulfillment_type" value="deliver" class="mt-1 mr-3" checked>
                         <div class="flex-1">
-                            <div class="font-semibold flex items-center">
+                            <div class="font-semibold flex items-center text-sm sm:text-base">
                                 <i class="fas fa-shipping-fast mr-2 text-amber-500"></i>
                                 Ship to Address
                             </div>
-                            <div class="text-sm text-gray-600 mt-1">
+                            <div class="text-xs sm:text-sm text-gray-600 mt-1">
                                 Have your order delivered to your specified address
                             </div>
                         </div>
                     </label>
                     
-                    <label class="flex items-start p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition">
+                    <label class="flex items-start p-3 sm:p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition touch-manipulation">
                         <input type="radio" name="fulfillment_type" value="hold_asset" class="mt-1 mr-3">
                         <div class="flex-1">
-                            <div class="font-semibold flex items-center">
+                            <div class="font-semibold flex items-center text-sm sm:text-base">
                                 <i class="fas fa-warehouse mr-2 text-amber-500"></i>
                                 Hold as Asset
                             </div>
-                            <div class="text-sm text-gray-600 mt-1">
+                            <div class="text-xs sm:text-sm text-gray-600 mt-1">
                                 Keep your purchase as a held asset that you can liquidate later
                             </div>
                         </div>
@@ -79,29 +155,29 @@
             </div>
             
             <!-- Shipping Information (shown only for delivery) -->
-            <div id="shipping-section" class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-bold mb-6 flex items-center">
-                    <i class="fas fa-shipping-fast mr-3 text-amber-500"></i>
+            <div id="shipping-section" class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                <h2 class="text-lg sm:text-xl font-bold mb-4 sm:mb-6 flex items-center">
+                    <i class="fas fa-shipping-fast mr-2 sm:mr-3 text-amber-500"></i>
                     Shipping Information
                 </h2>
                 
                 <!-- Existing Addresses -->
                 {% if shipping_addresses.exists %}
                 <div class="mb-6">
-                    <h3 class="font-semibold mb-4">Select Shipping Address</h3>
+                    <h3 class="font-semibold mb-4 text-sm sm:text-base">Select Shipping Address</h3>
                     <div class="space-y-3">
                         {% for address in shipping_addresses %}
-                        <label class="flex items-start p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition">
+                        <label class="flex items-start p-3 sm:p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-amber-700 transition touch-manipulation">
                             <input type="radio" name="shipping_address_id" value="{{ address.id }}" class="mt-1 mr-3" {% if forloop.first %}checked{% endif %}>
                             <div class="flex-1">
-                                <div class="font-semibold">{{ address.full_name }}</div>
-                                <div class="text-sm text-gray-600">
+                                <div class="font-semibold text-sm sm:text-base">{{ address.full_name }}</div>
+                                <div class="text-xs sm:text-sm text-gray-600">
                                     {{ address.address_line_1 }}{% if address.address_line_2 %}, {{ address.address_line_2 }}{% endif %}<br>
                                     {{ address.city }}, {{ address.state }} {{ address.postal_code }}<br>
                                     {{ address.country }}
                                 </div>
                                 {% if address.phone %}
-                                    <div class="text-sm text-gray-600">{{ address.phone }}</div>
+                                    <div class="text-xs sm:text-sm text-gray-600">{{ address.phone }}</div>
                                 {% endif %}
                             </div>
                             {% if address.is_default %}
@@ -111,7 +187,7 @@
                         {% endfor %}
                     </div>
                     
-                    <button type="button" onclick="showNewAddressForm()" class="mt-4 text-amber-700 hover:text-amber-800 flex items-center">
+                    <button type="button" onclick="showNewAddressForm()" class="mt-4 text-amber-700 hover:text-amber-800 flex items-center text-sm sm:text-base">
                         <i class="fas fa-plus mr-2"></i>
                         Add New Address
                     </button>
@@ -120,58 +196,58 @@
                 
                 <!-- New Address Form -->
                 <div id="new-address-form" class="{% if shipping_addresses.exists %}hidden{% endif %}">
-                    <h3 class="font-semibold mb-4">{% if not shipping_addresses.exists %}Shipping Address{% else %}New Address{% endif %}</h3>
+                    <h3 class="font-semibold mb-4 text-sm sm:text-base">{% if not shipping_addresses.exists %}Shipping Address{% else %}New Address{% endif %}</h3>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                            <label class="block text-sm font-medium mb-2">First Name *</label>
-                            <input type="text" name="first_name" required class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Last Name *</label>
-                            <input type="text" name="last_name" required class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium mb-2">Street Address *</label>
-                            <input type="text" name="address_line_1" required class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium mb-2">Address Line 2</label>
-                            <input type="text" name="address_line_2" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
+                            <label class="block text-xs sm:text-sm font-medium mb-2">First Name *</label>
+                            <input type="text" name="first_name" required class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700 text-sm sm:text-base">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-2">City *</label>
-                            <input type="text" name="city" required class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
+                            <label class="block text-xs sm:text-sm font-medium mb-2">Last Name *</label>
+                            <input type="text" name="last_name" required class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700 text-sm sm:text-base">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs sm:text-sm font-medium mb-2">Street Address *</label>
+                            <input type="text" name="address_line_1" required class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700 text-sm sm:text-base">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs sm:text-sm font-medium mb-2">Address Line 2</label>
+                            <input type="text" name="address_line_2" class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700 text-sm sm:text-base">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-2">State *</label>
-                            <input type="text" name="state" required class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
+                            <label class="block text-xs sm:text-sm font-medium mb-2">City *</label>
+                            <input type="text" name="city" required class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700 text-sm sm:text-base">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-2">Postal Code</label>
-                            <input type="text" name="postal_code" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
+                            <label class="block text-xs sm:text-sm font-medium mb-2">State *</label>
+                            <input type="text" name="state" required class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700 text-sm sm:text-base">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-2">Country *</label>
-                            <select name="country" required class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
+                            <label class="block text-xs sm:text-sm font-medium mb-2">Postal Code</label>
+                            <input type="text" name="postal_code" class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700 text-sm sm:text-base">
+                        </div>
+                        <div>
+                            <label class="block text-xs sm:text-sm font-medium mb-2">Country *</label>
+                            <select name="country" required class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700 text-sm sm:text-base">
                                 <option value="Nigeria">Nigeria</option>
                                 <option value="Ghana">Ghana</option>
                                 <option value="Kenya">Kenya</option>
                                 <option value="South Africa">South Africa</option>
                             </select>
                         </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium mb-2">Phone Number</label>
-                            <input type="tel" name="phone" placeholder="+2348012345678" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs sm:text-sm font-medium mb-2">Phone Number</label>
+                            <input type="tel" name="phone" placeholder="+2348012345678" class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700 text-sm sm:text-base">
                         </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium mb-2">Email</label>
-                            <input type="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs sm:text-sm font-medium mb-2">Email</label>
+                            <input type="email" name="email" class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700 text-sm sm:text-base">
                         </div>
-                        <div class="md:col-span-2">
-                            <label class="flex items-center">
-                                <input type="checkbox" name="is_default" class="mr-2">
-                                <span class="text-sm">Save this address for future orders</span>
+                        <div class="sm:col-span-2">
+                            <label class="flex items-center touch-manipulation">
+                                <input type="checkbox" name="is_default" class="mr-2 h-4 w-4">
+                                <span class="text-xs sm:text-sm">Save this address for future orders</span>
                             </label>
                         </div>
                     </div>
@@ -179,44 +255,44 @@
             </div>
             
             <!-- Payment Method -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-bold mb-6 flex items-center">
-                    <i class="fas fa-credit-card mr-3 text-amber-500"></i>
+            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                <h2 class="text-lg sm:text-xl font-bold mb-4 sm:mb-6 flex items-center">
+                    <i class="fas fa-credit-card mr-2 sm:mr-3 text-amber-500"></i>
                     Payment Method
                 </h2>
                 
-                <div class="p-4 border border-amber-300 bg-amber-50 rounded-lg">
+                <div class="p-3 sm:p-4 border border-amber-300 bg-amber-50 rounded-lg">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
-                            <i class="fas fa-credit-card text-2xl text-amber-600 mr-4"></i>
+                            <i class="fas fa-credit-card text-xl sm:text-2xl text-amber-600 mr-3 sm:mr-4"></i>
                             <div>
-                                <div class="font-semibold">Secure Card Payment</div>
-                                <div class="text-sm text-gray-600">Payment processed securely via Paystack</div>
+                                <div class="font-semibold text-sm sm:text-base">Secure Card Payment</div>
+                                <div class="text-xs sm:text-sm text-gray-600">Payment processed securely via Paystack</div>
                             </div>
                         </div>
-                        <div class="flex space-x-2">
-                            <i class="fab fa-cc-visa text-2xl text-blue-600"></i>
-                            <i class="fab fa-cc-mastercard text-2xl text-red-600"></i>
-                            <i class="fas fa-shield-alt text-2xl text-green-600"></i>
+                        <div class="flex space-x-1 sm:space-x-2">
+                            <i class="fab fa-cc-visa text-lg sm:text-2xl text-blue-600"></i>
+                            <i class="fab fa-cc-mastercard text-lg sm:text-2xl text-red-600"></i>
+                            <i class="fas fa-shield-alt text-lg sm:text-2xl text-green-600"></i>
                         </div>
                     </div>
                 </div>
             </div>
             
             <!-- Order Notes -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-bold mb-6 flex items-center">
-                    <i class="fas fa-sticky-note mr-3 text-amber-500"></i>
+            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                <h2 class="text-lg sm:text-xl font-bold mb-4 sm:mb-6 flex items-center">
+                    <i class="fas fa-sticky-note mr-2 sm:mr-3 text-amber-500"></i>
                     Order Notes (Optional)
                 </h2>
                 
                 <textarea name="customer_notes" rows="4" placeholder="Any special instructions for your order..." 
-                          class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700"></textarea>
+                          class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-700 text-sm sm:text-base resize-none"></textarea>
             </div>
         </div>
         
-        <!-- Order Summary -->
-        <div class="lg:col-span-1">
+        <!-- Desktop Order Summary -->
+        <div class="lg:col-span-1 order-3 hidden lg:block">
             <div class="bg-white rounded-lg shadow-md p-6 sticky top-24">
                 <h2 class="text-xl font-bold mb-6">Order Summary</h2>
                 
@@ -282,7 +358,7 @@
                 </div>
                 
                 <!-- Place Order Button -->
-                <button type="submit" class="w-full bg-amber-700 text-white py-3 rounded-lg font-semibold hover:bg-amber-800 transition mb-4">
+                <button type="submit" class="w-full bg-amber-700 text-white py-3 rounded-lg font-semibold hover:bg-amber-800 transition mb-4 text-sm sm:text-base">
                     <i class="fas fa-lock mr-2"></i>
                     Place Order
                 </button>
@@ -295,29 +371,120 @@
             </div>
         </div>
     </form>
+
+    <!-- Mobile Sticky Checkout Button -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-10">
+        <button type="submit" form="checkout-form" class="w-full bg-amber-700 text-white py-3 rounded-lg font-semibold hover:bg-amber-800 transition text-sm sm:text-base touch-manipulation">
+            <i class="fas fa-lock mr-2"></i>
+            Place Order - <span id="mobile-footer-total">₦{{ cart.get_total|floatformat:0 }}</span>
+        </button>
+    </div>
+
+    <!-- Add bottom padding to prevent overlap with sticky button on mobile -->
+    <div class="lg:hidden h-20"></div>
 </div>
+
+<!-- Custom CSS for enhanced mobile experience -->
+<style>
+    /* Custom breakpoint for very small screens */
+    @media (min-width: 380px) {
+        .xs\:inline {
+            display: inline !important;
+        }
+    }
+
+    /* Improved touch targets for mobile */
+    .touch-manipulation {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Smooth toggle animations */
+    .toggle-icon {
+        transition: transform 0.2s ease;
+    }
+
+    .toggle-icon.rotated {
+        transform: rotate(180deg);
+    }
+
+    /* Enhanced focus states for accessibility */
+    input:focus, select:focus, textarea:focus {
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+    }
+
+    /* Better scrolling on mobile */
+    .overflow-y-auto {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Prevent zoom on input focus on iOS */
+    @media screen and (max-width: 767px) {
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        select,
+        textarea {
+            font-size: 16px;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 $(document).ready(function() {
     initializeCheckout();
-
+    initializeMobileFeatures();
     updateAddressRequiredFields();
 });
 
+function initializeMobileFeatures() {
+    // Mobile order summary toggle
+    $('#toggle-summary').on('click', function(e) {
+        e.preventDefault();
+        const $content = $('#mobile-summary-content');
+        const $text = $('.toggle-text');
+        const $icon = $('.toggle-icon');
+        
+        if ($content.hasClass('hidden')) {
+            $content.removeClass('hidden').hide().slideDown(300);
+            $text.text('Hide');
+            $icon.addClass('rotated');
+        } else {
+            $content.slideUp(300, function() {
+                $content.addClass('hidden');
+            });
+            $text.text('Show');
+            $icon.removeClass('rotated');
+        }
+    });
+
+    // Smooth scrolling for mobile navigation
+    $('a[href^="#"]').on('click', function(e) {
+        e.preventDefault();
+        const target = $(this.getAttribute('href'));
+        if (target.length) {
+            $('html, body').animate({
+                scrollTop: target.offset().top - 100
+            }, 500);
+        }
+    });
+
+    // Prevent double-tap zoom on buttons
+    $('button, input[type="submit"], input[type="button"]').on('touchend', function(e) {
+        e.preventDefault();
+        this.click();
+    });
+}
+
 function updateAddressRequiredFields() {
-    // Check if an existing address is selected
     const isExistingAddressSelected = $('input[name="shipping_address_id"]:checked').length > 0;
-    
-    // Check if the new address form is meant to be used
     const isNewAddressFormVisible = !$('#new-address-form').hasClass('hidden');
 
     if (isExistingAddressSelected && !isNewAddressFormVisible) {
-        // If an existing address is chosen, the new address fields are NOT required
         $('#new-address-form input[data-required-for-delivery]').removeAttr('required');
     } else if (isNewAddressFormVisible) {
-        // If the new address form is active, its fields ARE required
         $('#new-address-form input[data-required-for-delivery]').each(function() {
             $(this).attr('required', 'required');
         });
@@ -345,7 +512,6 @@ function initializeCheckout() {
     $('input[name="phone"]').on('input', function() {
         let value = $(this).val().replace(/\D/g, '');
         if (value && !value.startsWith('+')) {
-            // Auto-add + prefix
             $(this).val('+' + value);
         }
     });
@@ -355,6 +521,7 @@ function initializeCheckout() {
             $('#new-address-form').addClass('hidden');
             $('#new-address-form input').removeAttr('required');
         }
+        updateAddressRequiredFields();
     });
     
     // Initialize with default selection
@@ -409,10 +576,12 @@ function updateFulfillmentType() {
     const fulfillmentType = $('input[name="fulfillment_type"]:checked').val();
     const shippingSection = $('#shipping-section');
     const shippingRow = $('#shipping-row');
+    const mobileShippingRow = $('#mobile-shipping-row');
     
     if (fulfillmentType === 'deliver') {
         shippingSection.show();
         shippingRow.show();
+        mobileShippingRow.show();
         // Reset required fields for new address form
         $('#new-address-form input[required]').each(function() {
             $(this).attr('data-required-for-delivery', 'true');
@@ -420,11 +589,15 @@ function updateFulfillmentType() {
     } else {
         shippingSection.hide();
         shippingRow.hide();
+        mobileShippingRow.hide();
         // Remove required from address fields when holding asset
         $('#new-address-form input[required]').each(function() {
             $(this).removeAttr('required');
         });
     }
+    
+    // Update mobile footer total when fulfillment type changes
+    updateMobileTotals();
 }
 
 function showNewAddressForm() {
@@ -437,6 +610,17 @@ function showNewAddressForm() {
             $(this).attr('required', 'required');
         });
     }
+    updateAddressRequiredFields();
+}
+
+function updateMobileTotals() {
+    // Sync desktop totals with mobile totals
+    const desktopTotal = $('#total-amount').text();
+    const desktopShipping = $('#shipping-amount').html();
+    
+    $('#mobile-total-amount').text(desktopTotal);
+    $('#mobile-shipping-amount').html(desktopShipping);
+    $('#mobile-footer-total').text(desktopTotal);
 }
 
 function processCheckout() {
@@ -550,6 +734,15 @@ function validateCheckoutForm() {
             
             if (!isValid) {
                 showNotification('Please fill in all required shipping address fields', 'error');
+                // Scroll to first error field on mobile
+                if (window.innerWidth < 1024) {
+                    const firstError = $('.border-red-500').first();
+                    if (firstError.length) {
+                        $('html, body').animate({
+                            scrollTop: firstError.offset().top - 100
+                        }, 500);
+                    }
+                }
                 return false;
             }
         } else if (!hasSelectedAddress) {
@@ -562,11 +755,25 @@ function validateCheckoutForm() {
 }
 
 function showLoading() {
-    $('button[type="submit"]').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Processing...');
+    // Update both desktop and mobile buttons
+    $('button[type="submit"]').prop('disabled', true);
+    
+    // Desktop button
+    $('button[type="submit"]:not([form])').html('<i class="fas fa-spinner fa-spin mr-2"></i>Processing...');
+    
+    // Mobile button
+    $('button[form="checkout-form"]').html('<i class="fas fa-spinner fa-spin mr-2"></i>Processing...');
 }
 
 function hideLoading() {
-    $('button[type="submit"]').prop('disabled', false).html('<i class="fas fa-lock mr-2"></i>Place Order');
+    $('button[type="submit"]').prop('disabled', false);
+    
+    // Desktop button
+    $('button[type="submit"]:not([form])').html('<i class="fas fa-lock mr-2"></i>Place Order');
+    
+    // Mobile button
+    const mobileTotal = $('#mobile-footer-total').text();
+    $('button[form="checkout-form"]').html(`<i class="fas fa-lock mr-2"></i>Place Order - ${mobileTotal}`);
 }
 
 function showNotification(message, type = 'info') {
@@ -578,10 +785,10 @@ function showNotification(message, type = 'info') {
     };
     
     const notification = $(`
-        <div class="fixed top-20 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform">
-            <div class="flex items-center">
-                <span>${message}</span>
-                <button onclick="$(this).closest('.fixed').addClass('translate-x-full')" class="ml-4 text-white hover:text-gray-200">
+        <div class="fixed top-4 left-4 right-4 sm:top-20 sm:right-4 sm:left-auto sm:w-96 ${colors[type]} text-white px-4 sm:px-6 py-3 rounded-lg shadow-lg z-50 transform -translate-y-full sm:translate-y-0 sm:translate-x-full transition-transform">
+            <div class="flex items-center justify-between">
+                <span class="text-sm sm:text-base">${message}</span>
+                <button onclick="$(this).closest('.fixed').addClass('-translate-y-full sm:translate-y-0 sm:translate-x-full')" class="ml-4 text-white hover:text-gray-200">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -591,15 +798,36 @@ function showNotification(message, type = 'info') {
     $('body').append(notification);
     
     setTimeout(() => {
-        notification.removeClass('translate-x-full');
+        notification.removeClass('-translate-y-full sm:translate-y-0 sm:translate-x-full');
     }, 100);
     
     setTimeout(() => {
-        notification.addClass('translate-x-full');
+        notification.addClass('-translate-y-full sm:translate-y-0 sm:translate-x-full');
         setTimeout(() => {
             notification.remove();
         }, 300);
     }, 5000);
 }
+
+// Handle window resize for responsive adjustments
+$(window).on('resize', function() {
+    // Ensure mobile summary is properly handled on orientation change
+    if (window.innerWidth >= 1024) {
+        $('#mobile-summary-content').removeClass('hidden');
+        $('.toggle-text').text('Show');
+        $('.toggle-icon').removeClass('rotated');
+    }
+});
+
+// Initialize page with proper responsive state
+$(document).ready(function() {
+    // Set initial mobile summary state
+    if (window.innerWidth < 1024) {
+        $('#mobile-summary-content').addClass('hidden');
+    }
+    
+    // Update mobile totals on load
+    updateMobileTotals();
+});
 </script>
 {% endblock %}

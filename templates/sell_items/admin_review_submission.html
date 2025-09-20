@@ -4,46 +4,184 @@
 {% block title %}{% trans "Review Submission" %} - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-6xl mx-auto">
-        <div class="mb-8 flex justify-between items-center">
+        <!-- Header -->
+        <div class="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
                     <i class="fas fa-clipboard-check mr-2"></i>
                     {% trans "Review Submission" %}
                 </h1>
-                <p class="mt-2 text-gray-600">
+                <p class="mt-2 text-sm sm:text-base text-gray-600">
                     {% trans "Review and approve or reject this sell item submission." %}
                 </p>
             </div>
             
             <a href="{% url 'sell_items:admin_submissions' %}" 
-               class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+               class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-center">
                 <i class="fas fa-arrow-left mr-2"></i>
                 {% trans "Back to Submissions" %}
             </a>
         </div>
         
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Left Column - Item Details -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-6">
+        <!-- Mobile-First Layout -->
+        <div class="space-y-6 lg:grid lg:grid-cols-2 lg:gap-8 lg:space-y-0">
+            <!-- Status & Actions - Priority on Mobile -->
+            <div class="lg:order-2 space-y-6">
+                <!-- Current Status -->
+                <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                    <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-flag mr-2"></i>
+                        {% trans "Current Status" %}
+                    </h2>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 block">{% trans "Status" %}</label>
+                            <span class="inline-flex mt-1 px-3 py-1 text-sm rounded-full 
+                                {% if submission.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                {% elif submission.status == 'accepted' %}bg-green-100 text-green-800
+                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ submission.get_status_display }}
+                            </span>
+                        </div>
+                        
+                        {% if submission.reviewed_by %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 block">{% trans "Reviewed By" %}</label>
+                                <p class="text-gray-900 mt-1">{{ submission.reviewed_by.get_full_name|default:submission.reviewed_by.email }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 block">{% trans "Reviewed At" %}</label>
+                                <p class="text-gray-900 mt-1">{{ submission.reviewed_at|date:"M j, Y H:i" }}</p>
+                            </div>
+                        {% endif %}
+                        
+                        {% if submission.admin_notes %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 block">{% trans "Admin Notes" %}</label>
+                                <div class="mt-1 p-3 bg-gray-50 rounded-lg">
+                                    <p class="text-gray-900 text-sm whitespace-pre-wrap">{{ submission.admin_notes }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Review Actions -->
+                <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                    <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-clipboard-check mr-2"></i>
+                        {% trans "Review Actions" %}
+                    </h2>
+                    
+                    <form id="review-form">
+                        {% csrf_token %}
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    {% trans "Status" %}
+                                </label>
+                                <select id="status" 
+                                        class="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+                                    <option value="pending" {% if submission.status == 'pending' %}selected{% endif %}>
+                                        {% trans "Pending Review" %}
+                                    </option>
+                                    <option value="accepted" {% if submission.status == 'accepted' %}selected{% endif %}>
+                                        {% trans "Accepted" %}
+                                    </option>
+                                    <option value="rejected" {% if submission.status == 'rejected' %}selected{% endif %}>
+                                        {% trans "Rejected" %}
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    {% trans "Admin Notes" %}
+                                </label>
+                                <textarea id="admin-notes" 
+                                          rows="4"
+                                          class="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm"
+                                          placeholder="Provide reason for acceptance/rejection...">{{ submission.admin_notes }}</textarea>
+                            </div>
+                            
+                            <button type="submit" 
+                                    class="w-full bg-amber-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-amber-700 transition-colors">
+                                <i class="fas fa-save mr-2"></i>
+                                {% trans "Update Status" %}
+                            </button>
+                        </div>
+                    </form>
+                    
+                    {% if submission.status == 'accepted' %}
+                        <div class="mt-6 pt-6 border-t">
+                            <button onclick="createProduct('{{ submission.id }}')"
+                                    class="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                                <i class="fas fa-plus-circle mr-2"></i>
+                                {% trans "Create Product on Site" %}
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Seller Information -->
+                <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                    <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-user mr-2"></i>
+                        {% trans "Seller Information" %}
+                    </h2>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 block">{% trans "Name" %}</label>
+                            <p class="text-gray-900 mt-1">{{ submission.user.get_full_name|default:submission.user.email }}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 block">{% trans "Email" %}</label>
+                            <p class="text-gray-900 mt-1 break-all">{{ submission.user.email }}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 block">{% trans "Submission Type" %}</label>
+                            <span class="inline-flex mt-1 px-2 py-1 text-xs rounded-full 
+                                {% if submission.source == 'own_item' %}bg-blue-100 text-blue-800
+                                {% else %}bg-purple-100 text-purple-800{% endif %}">
+                                {% if submission.source == 'own_item' %}
+                                    {% trans "Own Item" %}
+                                {% else %}
+                                    {% trans "Held Asset" %}
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 block">{% trans "Submitted" %}</label>
+                            <p class="text-gray-900 mt-1">{{ submission.created_at|date:"M j, Y H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Item Details -->
+            <div class="lg:order-1 bg-white rounded-lg shadow-md p-4 sm:p-6">
+                <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
                     <i class="fas fa-info-circle mr-2"></i>
                     {% trans "Item Details" %}
                 </h2>
                 
-                <!-- Images -->
+                <!-- Images - Mobile Optimized -->
                 {% if submission.images.exists %}
                     <div class="mb-6">
                         <h3 class="text-sm font-medium text-gray-700 mb-3">{% trans "Images" %}</h3>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-2 sm:grid-cols-2 gap-3 sm:gap-4">
                             {% for image in submission.images.all %}
                                 <div class="relative">
                                     <img src="{{ image.image.url }}" 
                                          alt="{{ submission.title }}" 
-                                         class="w-full h-32 object-cover rounded-lg border">
+                                         class="w-full h-24 sm:h-32 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition"
+                                         onclick="openImageModal('{{ image.image.url }}')">
                                     {% if image.is_primary %}
-                                        <span class="absolute top-2 left-2 bg-amber-500 text-white text-xs px-2 py-1 rounded">
+                                        <span class="absolute top-1 left-1 sm:top-2 sm:left-2 bg-amber-500 text-white text-xs px-2 py-1 rounded">
                                             {% trans "Primary" %}
                                         </span>
                                     {% endif %}
@@ -56,64 +194,70 @@
                 <!-- Item Information -->
                 <div class="space-y-4">
                     <div>
-                        <label class="text-sm font-medium text-gray-500">{% trans "Title" %}</label>
-                        <p class="text-lg font-semibold text-gray-900">{{ submission.title }}</p>
+                        <label class="text-sm font-medium text-gray-500 block">{% trans "Title" %}</label>
+                        <p class="text-base sm:text-lg font-semibold text-gray-900 mt-1">{{ submission.title }}</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 block">{% trans "Category" %}</label>
+                            <p class="text-gray-900 mt-1">
+                                {% if submission.category %}{{ submission.category.name }}{% else %}{% trans "Not specified" %}{% endif %}
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 block">{% trans "Seller's Price" %}</label>
+                            <p class="text-xl font-bold text-amber-600 mt-1">₦{{ submission.price|floatformat:2 }}</p>
+                        </div>
                     </div>
                     
                     <div>
-                        <label class="text-sm font-medium text-gray-500">{% trans "Category" %}</label>
-                        <p class="text-gray-900">
-                            {% if submission.category %}{{ submission.category.name }}{% else %}{% trans "Not specified" %}{% endif %}
-                        </p>
-                    </div>
-                    
-                    <div>
-                        <label class="text-sm font-medium text-gray-500">{% trans "Seller's Price" %}</label>
-                        <p class="text-xl font-bold text-amber-600">₦{{ submission.price|floatformat:2 }}</p>
-                    </div>
-                    
-                    <div>
-                        <label class="text-sm font-medium text-gray-500">{% trans "Stock Quantity" %}</label>
-                        <p class="text-gray-900">
-                            {{ submission.stock_quantity }} {% if submission.stock_quantity == 1 %}{% trans "item" %}{% else %}{% trans "items" %}{% endif %}
+                        <label class="text-sm font-medium text-gray-500 block">{% trans "Stock Quantity" %}</label>
+                        <div class="mt-1">
+                            <p class="text-gray-900">
+                                {{ submission.stock_quantity }} {% if submission.stock_quantity == 1 %}{% trans "item" %}{% else %}{% trans "items" %}{% endif %}
+                            </p>
                             {% if submission.source == 'held_asset' and submission.held_asset_order %}
                                 {% with order_item=submission.held_asset_order.items.first %}
                                     {% if order_item %}
-                                        <span class="text-sm text-gray-500">
+                                        <p class="text-sm text-gray-500 mt-1">
                                             ({% trans "out of" %} {{ order_item.quantity }} {% trans "originally purchased" %})
-                                        </span>
+                                        </p>
                                     {% endif %}
                                 {% endwith %}
                             {% endif %}
-                        </p>
+                        </div>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="text-sm font-medium text-gray-500">{% trans "Weight" %}</label>
-                            <p class="text-gray-900">
+                            <label class="text-sm font-medium text-gray-500 block">{% trans "Weight" %}</label>
+                            <p class="text-gray-900 mt-1">
                                 {% if submission.weight %}{{ submission.weight }} kg{% else %}{% trans "Not specified" %}{% endif %}
                             </p>
                         </div>
                         <div>
-                            <label class="text-sm font-medium text-gray-500">{% trans "Dimensions" %}</label>
-                            <p class="text-gray-900">
+                            <label class="text-sm font-medium text-gray-500 block">{% trans "Dimensions" %}</label>
+                            <p class="text-gray-900 mt-1">
                                 {% if submission.dimensions %}{{ submission.dimensions }}{% else %}{% trans "Not specified" %}{% endif %}
                             </p>
                         </div>
                     </div>
                     
                     <div>
-                        <label class="text-sm font-medium text-gray-500">{% trans "Description" %}</label>
-                        <p class="text-gray-900 mt-1 whitespace-pre-wrap">{{ submission.description }}</p>
+                        <label class="text-sm font-medium text-gray-500 block">{% trans "Description" %}</label>
+                        <div class="mt-2 p-3 bg-gray-50 rounded-lg">
+                            <p class="text-gray-900 text-sm whitespace-pre-wrap">{{ submission.description }}</p>
+                        </div>
                     </div>
                     
                     <!-- Bank Details -->
                     <div>
-                        <label class="text-sm font-medium text-gray-500">{% trans "Bank Account Details" %}</label>
+                        <label class="text-sm font-medium text-gray-500 block">{% trans "Bank Account Details" %}</label>
                         {% if submission.has_complete_bank_details %}
                             <div class="mt-2 p-3 bg-green-50 rounded-lg">
-                                <div class="grid grid-cols-1 gap-2 text-sm">
+                                <div class="space-y-2 text-sm">
                                     <div>
                                         <strong>{% trans "Bank:" %}</strong> {{ submission.bank_name }}
                                     </div>
@@ -136,151 +280,27 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- Right Column - Review & Actions -->
-            <div class="space-y-6">
-                <!-- Seller Information -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4">
-                        <i class="fas fa-user mr-2"></i>
-                        {% trans "Seller Information" %}
-                    </h2>
-                    
-                    <div class="space-y-3">
-                        <div>
-                            <label class="text-sm font-medium text-gray-500">{% trans "Name" %}</label>
-                            <p class="text-gray-900">{{ submission.user.get_full_name|default:submission.user.email }}</p>
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-500">{% trans "Email" %}</label>
-                            <p class="text-gray-900">{{ submission.user.email }}</p>
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-500">{% trans "Submission Type" %}</label>
-                            <span class="inline-flex px-2 py-1 text-xs rounded-full 
-                                {% if submission.source == 'own_item' %}bg-blue-100 text-blue-800
-                                {% else %}bg-purple-100 text-purple-800{% endif %}">
-                                {% if submission.source == 'own_item' %}
-                                    {% trans "Own Item" %}
-                                {% else %}
-                                    {% trans "Held Asset" %}
-                                {% endif %}
-                            </span>
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-500">{% trans "Submitted" %}</label>
-                            <p class="text-gray-900">{{ submission.created_at|date:"M j, Y H:i" }}</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Current Status -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4">
-                        <i class="fas fa-flag mr-2"></i>
-                        {% trans "Current Status" %}
-                    </h2>
-                    
-                    <div class="space-y-3">
-                        <div>
-                            <label class="text-sm font-medium text-gray-500">{% trans "Status" %}</label>
-                            <p>
-                                <span class="px-3 py-1 text-sm rounded-full 
-                                    {% if submission.status == 'pending' %}bg-yellow-100 text-yellow-800
-                                    {% elif submission.status == 'accepted' %}bg-green-100 text-green-800
-                                    {% else %}bg-red-100 text-red-800{% endif %}">
-                                    {{ submission.get_status_display }}
-                                </span>
-                            </p>
-                        </div>
-                        
-                        {% if submission.reviewed_by %}
-                            <div>
-                                <label class="text-sm font-medium text-gray-500">{% trans "Reviewed By" %}</label>
-                                <p class="text-gray-900">{{ submission.reviewed_by.get_full_name|default:submission.reviewed_by.email }}</p>
-                            </div>
-                            <div>
-                                <label class="text-sm font-medium text-gray-500">{% trans "Reviewed At" %}</label>
-                                <p class="text-gray-900">{{ submission.reviewed_at|date:"M j, Y H:i" }}</p>
-                            </div>
-                        {% endif %}
-                        
-                        {% if submission.admin_notes %}
-                            <div>
-                                <label class="text-sm font-medium text-gray-500">{% trans "Admin Notes" %}</label>
-                                <p class="text-gray-900 mt-1 whitespace-pre-wrap">{{ submission.admin_notes }}</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <!-- Review Actions -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4">
-                        <i class="fas fa-clipboard-check mr-2"></i>
-                        {% trans "Review Actions" %}
-                    </h2>
-                    
-                    <form id="review-form">
-                        {% csrf_token %}
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">
-                                    {% trans "Status" %}
-                                </label>
-                                <select id="status" 
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
-                                    <option value="pending" {% if submission.status == 'pending' %}selected{% endif %}>
-                                        {% trans "Pending Review" %}
-                                    </option>
-                                    <option value="accepted" {% if submission.status == 'accepted' %}selected{% endif %}>
-                                        {% trans "Accepted" %}
-                                    </option>
-                                    <option value="rejected" {% if submission.status == 'rejected' %}selected{% endif %}>
-                                        {% trans "Rejected" %}
-                                    </option>
-                                </select>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">
-                                    {% trans "Admin Notes" %}
-                                </label>
-                                <textarea id="admin-notes" 
-                                          rows="4"
-                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                                          placeholder="Provide reason for acceptance/rejection...">{{ submission.admin_notes }}</textarea>
-                            </div>
-                            
-                            <button type="submit" 
-                                    class="w-full bg-amber-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-amber-700 transition-colors">
-                                <i class="fas fa-save mr-2"></i>
-                                {% trans "Update Status" %}
-                            </button>
-                        </div>
-                    </form>
-                    
-                    {% if submission.status == 'accepted' %}
-                        <div class="mt-6 pt-6 border-t">
-                            <button onclick="createProduct('{{ submission.id }}')"
-                                    class="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 transition-colors">
-                                <i class="fas fa-plus-circle mr-2"></i>
-                                {% trans "Create Product on Site" %}
-                            </button>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
         </div>
     </div>
 </div>
 
-<!-- Create Product Modal -->
+<!-- Image Modal - Mobile Optimized -->
+<div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex items-center justify-center p-4">
+    <div class="relative max-w-full max-h-full">
+        <img id="modal-image" src="" alt="" class="max-w-full max-h-full object-contain">
+        <button onclick="closeImageModal()" 
+                class="absolute top-2 right-2 sm:top-4 sm:right-4 text-white text-xl sm:text-2xl hover:text-gray-300 bg-black bg-opacity-50 rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Create Product Modal - Mobile Optimized -->
 <div id="create-product-modal" class="fixed inset-0 flex items-center justify-center p-4 hidden z-50">
     <!-- Overlay -->
     <div class="absolute inset-0 bg-black opacity-50"></div>
 
-    <div class="relative bg-white rounded-lg max-w-md w-full p-6">
+    <div class="relative bg-white rounded-lg max-w-md w-full p-4 sm:p-6">
         <h3 class="text-lg font-medium text-gray-900 mb-4">
             {% trans "Create Product" %}
         </h3>
@@ -289,7 +309,7 @@
             {% csrf_token %}
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
                         {% trans "Admin Price (₦)" %}
                     </label>
                     <input type="number" 
@@ -297,20 +317,20 @@
                             min="1" 
                             step="1"
                             value="{{ submission.price }}"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
-                    <p class="text-sm text-gray-500 mt-1">
+                            class="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-base sm:text-sm">
+                    <p class="text-xs sm:text-sm text-gray-500 mt-2">
                         {% trans "Current seller price: ₦" %}{{ submission.price|floatformat:2 }}
                     </p>
                 </div>
             </div>
             
-            <div class="flex space-x-3 mt-6">
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 mt-6">
                 <button type="button" onclick="closeCreateProductModal()" 
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        class="flex-1 px-4 py-3 sm:py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium">
                     {% trans "Cancel" %}
                 </button>
                 <button type="submit" 
-                        class="flex-1 px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700">
+                        class="flex-1 px-4 py-3 sm:py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 font-medium">
                     {% trans "Create Product" %}
                 </button>
             </div>
@@ -321,12 +341,31 @@
 <script>
 let currentSubmissionId = null;
 
+// Image modal functions
+function openImageModal(imageUrl) {
+    document.getElementById('modal-image').src = imageUrl;
+    document.getElementById('image-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeImageModal() {
+    document.getElementById('image-modal').classList.add('hidden');
+    document.getElementById('modal-image').src = '';
+    document.body.style.overflow = 'auto';
+}
+
 // Review form submission
 document.getElementById('review-form').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const status = document.getElementById('status').value;
     const adminNotes = document.getElementById('admin-notes').value;
+    
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Updating...';
+    submitBtn.disabled = true;
     
     fetch('{% url "sell_items:update_submission_status" %}', {
         method: 'POST',
@@ -344,7 +383,7 @@ document.getElementById('review-form').addEventListener('submit', function(e) {
     .then(data => {
         if (data.success) {
             showNotification("Status updated successfully!", "success");
-            location.reload();
+            setTimeout(() => location.reload(), 1000);
         } else {
             showNotification(data.error || "Error updating status", "error");
         }
@@ -352,6 +391,10 @@ document.getElementById('review-form').addEventListener('submit', function(e) {
     .catch(error => {
         console.error('Error:', error);
         showNotification("Error updating status", "error")
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     });
 });
 
@@ -382,9 +425,9 @@ function showNotification(message, type = 'info') {
     };
     
     const notification = $(`
-        <div class="fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform max-w-md">
+        <div class="fixed top-4 left-4 right-4 sm:top-4 sm:right-4 sm:left-auto sm:w-auto ${colors[type]} text-white px-4 sm:px-6 py-3 rounded-lg shadow-lg z-50 transform translate-y-[-100%] sm:translate-y-0 sm:translate-x-full transition-transform max-w-md text-sm">
             <div class="flex items-center">
-                <i class="fas ${icons[type]} mr-2"></i>
+                <i class="fas ${icons[type]} mr-2 flex-shrink-0"></i>
                 <span>${message}</span>
             </div>
         </div>
@@ -393,11 +436,11 @@ function showNotification(message, type = 'info') {
     $('body').append(notification);
     
     setTimeout(() => {
-        notification.removeClass('translate-x-full');
+        notification.removeClass('translate-y-[-100%] translate-x-full');
     }, 100);
     
     setTimeout(() => {
-        notification.addClass('translate-x-full');
+        notification.addClass('translate-y-[-100%] sm:translate-y-0 sm:translate-x-full');
         setTimeout(() => {
             notification.remove();
         }, 300);
@@ -410,6 +453,12 @@ document.getElementById('create-product-form').addEventListener('submit', functi
     if (!currentSubmissionId) return;
     
     const adminPrice = document.getElementById('admin-price').value;
+    
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating...';
+    submitBtn.disabled = true;
     
     fetch('{% url "sell_items:create_product_from_submission" %}', {
         method: 'POST',
@@ -427,16 +476,44 @@ document.getElementById('create-product-form').addEventListener('submit', functi
         if (data.success) {
             showNotification("Product created successfully!" , "success")
             closeCreateProductModal();
-            window.open('/admin/store/product/', '_blank');
+            setTimeout(() => window.open('/admin/store/product/', '_blank'), 1000);
         } else {
             showNotification(data.error || "Error creating product", "error")
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showNotification(data.error || "Error creating product", "error")
+        showNotification("Error creating product", "error")
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     });
 });
 
+// Close modals when clicking outside
+document.getElementById('create-product-modal').addEventListener('click', function(e) {
+    if (e.target === this || e.target.classList.contains('opacity-50')) {
+        closeCreateProductModal();
+    }
+});
+
+document.getElementById('image-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageModal();
+    }
+});
+
+// Escape key to close modals
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        if (!document.getElementById('create-product-modal').classList.contains('hidden')) {
+            closeCreateProductModal();
+        }
+        if (!document.getElementById('image-modal').classList.contains('hidden')) {
+            closeImageModal();
+        }
+    }
+});
 </script>
 {% endblock %}

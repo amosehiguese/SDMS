@@ -1,0 +1,33 @@
+{% extends "emails/base/user_base.html" %}
+
+{% block email_title %}{{ subject }}{% endblock %}
+
+{% block main_content %}
+<div style="margin-bottom: 30px;">
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; text-align: center;">
+        <h2 style="margin: 0; font-size: 24px; font-weight: 600;">📢 Message from Administration</h2>
+    </div>
+    
+    <div style="background: #f8fafc; border-left: 4px solid #667eea; padding: 20px; border-radius: 0 8px 8px 0; margin-bottom: 25px;">
+        <h3 style="margin: 0 0 15px 0; color: #2d3748; font-size: 20px;">{{ subject }}</h3>
+        <div style="color: #4a5568; line-height: 1.6; font-size: 16px;">
+            {{ message|linebreaks }}
+        </div>
+    </div>
+    
+    <div style="background: #edf2f7; padding: 15px; border-radius: 8px; font-size: 14px; color: #718096;">
+        <p style="margin: 0;">
+            <strong>Note:</strong> This message was sent by the site administration. 
+            If you have any questions, please contact our support team.
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block action_button %}
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ site_url }}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+        Visit Our Website
+    </a>
+</div>
+{% endblock %}

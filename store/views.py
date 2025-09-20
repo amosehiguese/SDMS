@@ -188,8 +188,8 @@ def generate_product_cards_html(page_obj):
             <div class="relative">
                 {image_html}
                 {flash_sale_badge}
-                <button onclick="addToCart('{product.id}')" class="absolute bottom-2 right-2 bg-amber-700 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition">
-                    <i class="fas fa-shopping-cart"></i>
+                <button onclick="addToCart('{product.id}')" class="absolute bottom-2 right-2 bg-amber-700 hover:bg-amber-800 text-white p-2 sm:p-3 rounded-full shadow-lg transition-colors z-10 opacity-100 visible touch-manipulation">
+                    <i class="fas fa-shopping-cart text-sm sm:text-base"></i>
                 </button>
             </div>
             <div class="p-4">
@@ -207,7 +207,6 @@ def generate_product_cards_html(page_obj):
         '''
     
     return products_html
-
 
 def product_detail(request, slug):
     """Product detail page"""

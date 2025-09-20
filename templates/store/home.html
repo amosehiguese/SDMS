@@ -30,6 +30,21 @@
     justify-content: center;
     min-width: 9rem; /* fixed width per item to align single row */
 }
+
+.product-card button {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+@media (max-width: 640px) {
+    .product-card button {
+        position: absolute !important;
+        bottom: 8px !important;
+        right: 8px !important;
+        z-index: 10 !important;
+    }
+}
 </style>
 {% endblock %}
 

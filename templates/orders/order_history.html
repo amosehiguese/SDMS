@@ -4,63 +4,166 @@
 {% block title %}Order History - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
 
 {% block content %}
-<!-- Breadcrumb -->
-<div class="bg-gray-100 py-4">
+<!-- Breadcrumb - Mobile Optimized -->
+<div class="bg-gray-100 py-3 sm:py-4">
     <div class="container mx-auto px-4">
-        <nav class="text-sm">
+        <nav class="text-xs sm:text-sm">
             <a href="{% url 'store:home' %}" class="text-amber-700 hover:text-yellow-700">Home</a>
-            <span class="mx-2">/</span>
+            <span class="mx-1 sm:mx-2">/</span>
             <span class="text-gray-600">Order History</span>
         </nav>
     </div>
 </div>
 
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-4 sm:py-8">
     <!-- Header -->
-    <div class="flex flex-col md:flex-row justify-between  md:items-center mb-8">
+    <div class="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8">
         <div>
-            <h1 class="text-3xl font-bold mb-2">Order History</h1>
-            <p class="text-gray-600">Track and manage your orders</p>
+            <h1 class="text-2xl sm:text-3xl font-bold mb-2">Order History</h1>
+            <p class="text-sm sm:text-base text-gray-600">Track and manage your orders</p>
         </div>
-        
-        <div class="mb-6 bg-white p-4 rounded-lg shadow">
-            <form method="get" action="{% url 'orders:order_history' %}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select id="status-filter" name="status" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500">
-                        <option value="all" {% if not current_status or current_status == 'all' %}selected{% endif %}>All Statuses</option>
-                        {% for value, display in status_choices %}
-                        <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ display }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="period-filter" class="block text-sm font-medium text-gray-700 mb-1">Time Period</label>
-                    <select id="period-filter" name="period" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500">
-                        <option value="" {% if not current_period %}selected{% endif %}>All Time</option>
-                        <option value="last_week" {% if current_period == 'last_week' %}selected{% endif %}>Last week</option>
-                        <option value="last_month" {% if current_period == 'last_month' %}selected{% endif %}>Last month</option>
-                        <option value="last_3_months" {% if current_period == 'last_3_months' %}selected{% endif %}>Last 3 months</option>
-                        <option value="last_year" {% if current_period == 'last_year' %}selected{% endif %}>Last year</option>
-                    </select>
-                </div>
-                
-                <div class="md:col-span-1 flex items-end">
-                    <button type="submit" class="w-full bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-amber-700 transition">
-                        Apply Filters
-                    </button>
-                </div>
-            </form>
-        </div>
+    </div>
+
+    <!-- Filters - Mobile Optimized -->
+    <div class="mb-6 bg-white p-4 rounded-lg shadow">
+        <form method="get" action="{% url 'orders:order_history' %}" class="space-y-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0">
+            <div>
+                <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <select id="status-filter" name="status" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 py-3 sm:py-2">
+                    <option value="all" {% if not current_status or current_status == 'all' %}selected{% endif %}>All Statuses</option>
+                    {% for value, display in status_choices %}
+                    <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ display }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label for="period-filter" class="block text-sm font-medium text-gray-700 mb-2">Time Period</label>
+                <select id="period-filter" name="period" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 py-3 sm:py-2">
+                    <option value="" {% if not current_period %}selected{% endif %}>All Time</option>
+                    <option value="last_week" {% if current_period == 'last_week' %}selected{% endif %}>Last week</option>
+                    <option value="last_month" {% if current_period == 'last_month' %}selected{% endif %}>Last month</option>
+                    <option value="last_3_months" {% if current_period == 'last_3_months' %}selected{% endif %}>Last 3 months</option>
+                    <option value="last_year" {% if current_period == 'last_year' %}selected{% endif %}>Last year</option>
+                </select>
+            </div>
+            
+            <div class="sm:flex sm:items-end">
+                <button type="submit" class="w-full bg-amber-600 text-white py-3 sm:py-2 px-4 rounded-md hover:bg-amber-700 transition font-medium">
+                    Apply Filters
+                </button>
+            </div>
+        </form>
     </div>
     
     <!-- Orders List -->
     <div id="orders-container">
         {% if orders %}
-            <div class="space-y-6">
+            <div class="space-y-4 sm:space-y-6">
                 {% for order in orders %}
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                
+                <!-- Mobile Order Card (Hidden on larger screens) -->
+                <div class="sm:hidden bg-white rounded-lg shadow-md overflow-hidden">
+                    <!-- Order Header -->
+                    <div class="bg-gray-50 p-4 border-b">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <p class="text-xs text-gray-600">Order Number</p>
+                                <p class="font-semibold text-sm">#{{ order.order_number }}</p>
+                            </div>
+                            <div class="px-2 py-1 rounded-full text-xs font-semibold
+                                {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                {% elif order.status == 'paid' %}bg-blue-100 text-blue-800
+                                {% elif order.status == 'shipped' %}bg-purple-100 text-purple-800
+                                {% elif order.status == 'delivered' %}bg-green-100 text-green-800
+                                {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                {% endif %}">
+                                {{ order.get_status_display }}
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 text-xs">
+                            <div>
+                                <p class="text-gray-600">Date Placed</p>
+                                <p class="font-medium">{{ order.created_at|date:"M d, Y" }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-gray-600">Total</p>
+                                <p class="font-semibold text-amber-700">₦{{ order.total|floatformat:0 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Items Preview -->
+                    <div class="p-4">
+                        <div class="space-y-3">
+                            {% for item in order.items.all|slice:":2" %}
+                            <div class="flex items-center space-x-3">
+                                <!-- Product Image -->
+                                <div class="w-12 h-12 flex-shrink-0">
+                                    {% if item.product.images.exists %}
+                                        <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.title }}" class="w-full h-full object-cover rounded">
+                                    {% else %}
+                                        <div class="w-full h-full bg-gray-200 flex items-center justify-center rounded">
+                                            <i class="fas fa-image text-gray-400 text-xs"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Product Info -->
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-sm font-medium truncate">{{ item.product.title|truncatewords:4 }}</h4>
+                                    <div class="text-xs text-gray-600 space-y-1">
+                                        <div class="flex justify-between">
+                                            <span>Qty: {{ item.quantity }}</span>
+                                            <span>₦{{ item.get_total_price|floatformat:0 }}</span>
+                                        </div>
+                                        <span class="{% if order.fulfillment_type == 'hold_asset' %}text-blue-600{% else %}text-green-600{% endif %}">
+                                            {% if order.fulfillment_type == 'hold_asset' %}Hold as Asset{% else %}Deliver to Me{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            
+                            {% if order.items.count > 2 %}
+                            <div class="text-center pt-2">
+                                <p class="text-xs text-gray-500">+ {{ order.items.count|add:"-2" }} more item{{ order.items.count|add:"-2"|pluralize }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Mobile Actions -->
+                        <div class="mt-4 pt-4 border-t space-y-2">
+                            <a href="{% url 'orders:order_detail' order.id %}" class="w-full bg-amber-700 text-white py-2 px-4 rounded text-center block text-sm font-medium">
+                                View Details
+                            </a>
+                            
+                            <div class="grid grid-cols-2 gap-2">
+                                {% if order.status == 'pending' %}
+                                    <button onclick="cancelOrder('{{ order.id }}')" class="bg-red-600 text-white py-2 px-3 rounded text-xs font-medium">
+                                        Cancel
+                                    </button>
+                                {% endif %}
+                                
+                                {% if order.status == 'paid' %}
+                                    <a href="{% url 'orders:order_receipt' order.id %}" class="bg-blue-600 text-white py-2 px-3 rounded text-center text-xs font-medium">
+                                        Receipt
+                                    </a>
+                                {% endif %}
+                                
+                                {% if order.status == 'delivered' and order.fulfillment_type == 'hold_asset' %}
+                                    <button onclick="liquidateAsset('{{ order.id }}')" class="bg-yellow-600 text-white py-2 px-3 rounded text-xs font-medium">
+                                        Liquidate
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Desktop Order Card (Hidden on mobile) -->
+                <div class="hidden sm:block bg-white rounded-lg shadow-md overflow-hidden">
                     <!-- Order Header -->
                     <div class="bg-gray-50 px-6 py-4 border-b">
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
@@ -133,7 +236,7 @@
                                 
                                 <!-- Item Total -->
                                 <div class="text-right">
-                                    <p class="font-semibold">₦{{ item.price|floatformat:0|mul:item.quantity }}</p>
+                                    <p class="font-semibold">₦{{ item.get_total_price|floatformat:0 }}</p>
                                 </div>
                             </div>
                             {% endfor %}
@@ -170,26 +273,40 @@
                 {% endfor %}
             </div>
             
-            <!-- Pagination -->
+            <!-- Pagination - Mobile Optimized -->
             {% if is_paginated %}
-            <div class="mt-8 flex justify-center">
-                <nav class="flex items-center space-x-2">
+            <div class="mt-6 sm:mt-8 flex justify-center">
+                <nav class="flex items-center space-x-1 sm:space-x-2">
                     {% if page_obj.has_previous %}
-                        <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                        <a href="?page={{ page_obj.previous_page_number }}" class="px-2 py-2 sm:px-3 sm:py-2 bg-white border border-gray-300 rounded hover:bg-gray-50 text-sm">
                             <i class="fas fa-chevron-left"></i>
                         </a>
                     {% endif %}
                     
-                    {% for num in page_obj.paginator.page_range %}
-                        {% if page_obj.number == num %}
-                            <span class="px-3 py-2 bg-amber-700 text-white rounded">{{ num }}</span>
-                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                            <a href="?page={{ num }}" class="px-3 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ num }}</a>
+                    <!-- Mobile: Show only current page and adjacent -->
+                    <div class="flex items-center space-x-1 sm:hidden">
+                        {% if page_obj.number > 1 %}
+                            <a href="?page={{ page_obj.number|add:'-1' }}" class="px-3 py-2 bg-white border border-gray-300 rounded text-sm">{{ page_obj.number|add:'-1' }}</a>
                         {% endif %}
-                    {% endfor %}
+                        <span class="px-3 py-2 bg-amber-700 text-white rounded text-sm">{{ page_obj.number }}</span>
+                        {% if page_obj.number < page_obj.paginator.num_pages %}
+                            <a href="?page={{ page_obj.number|add:'1' }}" class="px-3 py-2 bg-white border border-gray-300 rounded text-sm">{{ page_obj.number|add:'1' }}</a>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Desktop: Show full pagination -->
+                    <div class="hidden sm:flex items-center space-x-2">
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <span class="px-3 py-2 bg-amber-700 text-white rounded">{{ num }}</span>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <a href="?page={{ num }}" class="px-3 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                     
                     {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                        <a href="?page={{ page_obj.next_page_number }}" class="px-2 py-2 sm:px-3 sm:py-2 bg-white border border-gray-300 rounded hover:bg-gray-50 text-sm">
                             <i class="fas fa-chevron-right"></i>
                         </a>
                     {% endif %}
@@ -198,12 +315,12 @@
             {% endif %}
             
         {% else %}
-            <!-- Empty State -->
-            <div class="bg-white rounded-lg shadow-md p-12 text-center">
-                <i class="fas fa-clipboard-list text-6xl text-gray-300 mb-6"></i>
-                <h3 class="text-xl font-semibold text-gray-600 mb-4">No Orders Yet</h3>
-                <p class="text-gray-500 mb-8">You haven't placed any orders yet. Start shopping to see your order history here.</p>
-                <a href="{% url 'store:product_list' %}" class="bg-amber-700 text-white px-8 py-3 rounded-lg hover:bg-amber-800 transition inline-block">
+            <!-- Empty State - Mobile Optimized -->
+            <div class="bg-white rounded-lg shadow-md p-8 sm:p-12 text-center">
+                <i class="fas fa-clipboard-list text-4xl sm:text-6xl text-gray-300 mb-4 sm:mb-6"></i>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-600 mb-4">No Orders Yet</h3>
+                <p class="text-sm sm:text-base text-gray-500 mb-6 sm:mb-8 px-4">You haven't placed any orders yet. Start shopping to see your order history here.</p>
+                <a href="{% url 'store:product_list' %}" class="bg-amber-700 text-white px-6 sm:px-8 py-3 rounded-lg hover:bg-amber-800 transition inline-block text-sm sm:text-base font-medium">
                     Start Shopping
                 </a>
             </div>
@@ -221,21 +338,10 @@ $(document).ready(function() {
 });
 
 function initializeFilters() {
-    $('#status-filter, #date-filter').change(function() {
-        applyFilters();
+    $('#status-filter, #period-filter').change(function() {
+        // Auto-submit form on change for better mobile UX
+        $(this).closest('form').submit();
     });
-}
-
-function applyFilters() {
-    const status = $('#status-filter').val();
-    const dateRange = $('#date-filter').val();
-    
-    const params = new URLSearchParams();
-    if (status) params.append('status', status);
-    if (dateRange) params.append('date_range', dateRange);
-    
-    // Reload page with filters
-    window.location.href = '?' + params.toString();
 }
 
 // Cancel Order
@@ -294,7 +400,7 @@ function liquidateAsset(orderId) {
     });
 }
 
-// Show notification
+// Show notification - Mobile Optimized
 function showNotification(message, type = 'info') {
     const colors = {
         success: 'bg-green-500',
@@ -304,7 +410,7 @@ function showNotification(message, type = 'info') {
     };
     
     const notification = $(`
-        <div class="fixed top-20 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform">
+        <div class="fixed top-4 left-4 right-4 sm:top-20 sm:right-4 sm:left-auto sm:w-auto ${colors[type]} text-white px-4 sm:px-6 py-3 rounded-lg shadow-lg z-50 transform translate-y-[-100%] sm:translate-y-0 sm:translate-x-full transition-transform text-sm">
             ${message}
         </div>
     `);
@@ -312,11 +418,11 @@ function showNotification(message, type = 'info') {
     $('body').append(notification);
     
     setTimeout(() => {
-        notification.removeClass('translate-x-full');
+        notification.removeClass('translate-y-[-100%] translate-x-full');
     }, 100);
     
     setTimeout(() => {
-        notification.addClass('translate-x-full');
+        notification.addClass('translate-y-[-100%] sm:translate-y-0 sm:translate-x-full');
         setTimeout(() => {
             notification.remove();
         }, 300);
@@ -324,8 +430,14 @@ function showNotification(message, type = 'info') {
 }
 
 function showLoading() {
-    // Add loading indicator
-    $('body').append('<div id="loading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"><div class="bg-white p-4 rounded"><i class="fas fa-spinner fa-spin mr-2"></i>Please wait...</div></div>');
+    $('body').append(`
+        <div id="loading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg mx-4 text-center">
+                <i class="fas fa-spinner fa-spin mr-2 text-amber-700"></i>
+                <span class="text-sm sm:text-base">Please wait...</span>
+            </div>
+        </div>
+    `);
 }
 
 function hideLoading() {

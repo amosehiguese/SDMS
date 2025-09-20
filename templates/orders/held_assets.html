@@ -4,92 +4,104 @@
 {% block title %}{% trans "My Assets" %} - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-6xl mx-auto">
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">
+        <!-- Header -->
+        <div class="mb-6 sm:mb-8">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
                 <i class="fas fa-box mr-2"></i>
                 {% trans "My Assets" %}
             </h1>
-            <p class="mt-2 text-gray-600">
+            <p class="mt-2 text-sm sm:text-base text-gray-600">
                 {% trans "Manage your held assets and liquidate them when ready for delivery." %}
             </p>
         </div>
         
         {% if held_assets %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Assets Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {% for asset in held_assets %}
                     <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                        <!-- Product Image -->
                         {% if asset.product.images.exists %}
                             <img src="{{ asset.product.images.first.image.url }}" 
                                  alt="{{ asset.product.title }}" 
-                                 class="w-full h-48 object-cover">
+                                 class="w-full h-40 sm:h-48 object-cover">
                         {% else %}
-                            <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
-                                <i class="fas fa-image text-gray-400 text-4xl"></i>
+                            <div class="w-full h-40 sm:h-48 bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-image text-gray-400 text-3xl sm:text-4xl"></i>
                             </div>
                         {% endif %}
                         
-                        <div class="p-4">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                        <div class="p-3 sm:p-4">
+                            <!-- Product Title -->
+                            <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
                                 {{ asset.product.title }}
                             </h3>
                             
+                            <!-- Asset Details -->
                             <div class="space-y-2 mb-4">
-                                <p class="text-sm text-gray-600">
-                                    <i class="fas fa-tag mr-1"></i>
-                                    <strong>{% trans "Price:" %}</strong> ₦{{ asset.product.get_display_price|floatformat:2 }}
-                                </p>
+                                <div class="flex items-center text-xs sm:text-sm text-gray-600">
+                                    <i class="fas fa-tag mr-2 text-gray-400 w-3"></i>
+                                    <span class="font-medium">{% trans "Price:" %}</span>
+                                    <span class="ml-1">₦{{ asset.product.get_display_price|floatformat:2 }}</span>
+                                </div>
                                 
-                                <p class="text-sm text-gray-600">
-                                    <i class="fas fa-calendar mr-1"></i>
-                                    <strong>{% trans "Purchased:" %}</strong> {{ asset.order.created_at|date:"M j, Y" }}
-                                </p>
+                                <div class="flex items-center text-xs sm:text-sm text-gray-600">
+                                    <i class="fas fa-calendar mr-2 text-gray-400 w-3"></i>
+                                    <span class="font-medium">{% trans "Purchased:" %}</span>
+                                    <span class="ml-1">{{ asset.order.created_at|date:"M j, Y" }}</span>
+                                </div>
                                 
-                                <p class="text-sm text-gray-600">
-                                    <i class="fas fa-info-circle mr-1"></i>
-                                    <strong>{% trans "Status:" %}</strong> 
-                                    <span class="px-2 py-1 text-xs rounded-full 
+                                <div class="flex items-center text-xs sm:text-sm text-gray-600">
+                                    <i class="fas fa-info-circle mr-2 text-gray-400 w-3"></i>
+                                    <span class="font-medium">{% trans "Status:" %}</span>
+                                    <span class="ml-1 px-2 py-1 text-xs rounded-full 
                                         {% if asset.order.status == 'paid' %}bg-green-100 text-green-800
                                         {% elif asset.order.status == 'shipped' %}bg-blue-100 text-blue-800
                                         {% elif asset.order.status == 'delivered' %}bg-purple-100 text-purple-800
                                         {% else %}bg-gray-100 text-gray-800{% endif %}">
                                         {{ asset.order.get_status_display }}
                                     </span>
-                                </p>
+                                </div>
 
-                                <p class="text-sm text-gray-600">
-                                    <i class="fas fa-box mr-1"></i>
-                                    <strong>{% trans "Remaining Quantity:" %}</strong> 
-                                    {{ asset.quantity }}  
-                                    {% if asset.order.items.first.quantity == 1 %}{% trans "item" %}{% else %}{% trans "items" %}{% endif %}
-                                </p>
+                                <div class="flex items-center text-xs sm:text-sm text-gray-600">
+                                    <i class="fas fa-box mr-2 text-gray-400 w-3"></i>
+                                    <span class="font-medium">{% trans "Remaining:" %}</span>
+                                    <span class="ml-1">
+                                        {{ asset.quantity }}  
+                                        {% if asset.order.items.first.quantity == 1 %}{% trans "item" %}{% else %}{% trans "items" %}{% endif %}
+                                    </span>
+                                </div>
                             </div>
                             
-                            <div class="flex space-x-2">
+                            <!-- Action Buttons -->
+                            <div class="flex flex-col sm:flex-row gap-2">
                                 {% if asset.order.status == 'paid' %}
                                     <button onclick="liquidateAsset('{{ asset.order.id }}', '{{ asset.product.id }}')" 
-                                            class="flex-1 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                                            class="flex-1 bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex items-center justify-center">
                                         <i class="fas fa-shipping-fast mr-1"></i>
-                                        {% trans "Liquidate" %}
+                                        <span class="hidden sm:inline">{% trans "Liquidate" %}</span>
+                                        <span class="sm:hidden">{% trans "Ship" %}</span>
                                     </button>
                                     <a href="{% url 'sell_items:submit_held_asset_sell' asset.order.id %}" 
-                                       class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium text-center transition-colors">
+                                       class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-center transition-colors flex items-center justify-center">
                                         <i class="fas fa-store mr-1"></i>
                                         {% trans "Resell" %}
                                     </a>
                                 {% else %}
                                     <button disabled 
-                                            class="flex-1 bg-gray-300 text-gray-500 px-4 py-2 rounded-md text-sm font-medium cursor-not-allowed">
+                                            class="flex-1 bg-gray-300 text-gray-500 px-3 py-2 rounded-md text-xs sm:text-sm font-medium cursor-not-allowed flex items-center justify-center">
                                         <i class="fas fa-lock mr-1"></i>
                                         {% trans "Processing" %}
                                     </button>
                                 {% endif %}
                                 
                                 <a href="{% url 'orders:order_detail' asset.order.id %}" 
-                                   class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium text-center transition-colors">
+                                   class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-center transition-colors flex items-center justify-center">
                                     <i class="fas fa-eye mr-1"></i>
-                                    {% trans "View" %}
+                                    <span class="hidden sm:inline">{% trans "View" %}</span>
+                                    <span class="sm:hidden">{% trans "Details" %}</span>
                                 </a>
                             </div>
                         </div>
@@ -97,14 +109,15 @@
                 {% endfor %}
             </div>
         {% else %}
-            <div class="text-center py-12">
+            <!-- Empty State -->
+            <div class="text-center py-8 sm:py-12">
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100 mb-4">
                     <i class="fas fa-box text-gray-400 text-xl"></i>
                 </div>
                 <h3 class="text-lg font-medium text-gray-900 mb-2">
                     {% trans "No Assets Yet" %}
                 </h3>
-                <p class="text-gray-600 mb-6">
+                <p class="text-gray-600 mb-6 text-sm sm:text-base px-4">
                     {% trans "You don't have any held assets. Start shopping and choose 'Hold as Asset' at checkout!" %}
                 </p>
                 <a href="{% url 'store:product_list' %}" 
@@ -120,13 +133,18 @@
 <!-- Liquidation Modal -->
 <div id="liquidation-modal" class="fixed inset-0 hidden z-50 flex items-center justify-center p-4">
     <!-- Overlay -->
-    <div class="absolute inset-0 bg-black opacity-50"></div>
+    <div class="absolute inset-0 bg-black opacity-50" onclick="closeLiquidationModal()"></div>
 
     <!-- Modal Content -->
-    <div class="relative bg-white rounded-lg max-w-md w-full p-6 shadow-lg">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">
-            {% trans "Liquidate Asset" %}
-        </h3>
+    <div class="relative bg-white rounded-lg max-w-md w-full mx-4 p-4 sm:p-6 shadow-lg max-h-screen overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium text-gray-900">
+                {% trans "Liquidate Asset" %}
+            </h3>
+            <button onclick="closeLiquidationModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
         
         <form id="liquidation-form">
             {% csrf_token %}
@@ -137,7 +155,7 @@
                         {% trans "Shipping Address" %}
                     </label>
                     <select id="shipping-address" required 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500 text-sm">
                         <option value="">{% trans "Select an address" %}</option>
                         <!-- Addresses will be loaded here -->
                     </select>
@@ -149,15 +167,15 @@
                         {% trans "Quantity to Liquidate" %}
                     </label>
                     <input type="number" id="liquidation-quantity" name="quantity" min="1" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500 text-sm"
                            placeholder="{% trans 'Enter quantity' %}">
                     <p id="max-quantity-hint" class="mt-1 text-xs text-gray-500"></p>
                 </div>
                 
                 <!-- Info -->
-                <div class="text-sm text-gray-600">
-                    <p>{% trans "By liquidating this asset, you agree to:" %}</p>
-                    <ul class="list-disc list-inside mt-2 space-y-1">
+                <div class="text-xs sm:text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+                    <p class="font-medium mb-2">{% trans "By liquidating this asset, you agree to:" %}</p>
+                    <ul class="list-disc list-inside space-y-1">
                         <li>{% trans "Provide a valid shipping address" %}</li>
                         <li>{% trans "Pay any additional shipping costs" %}</li>
                         <li>{% trans "Asset will be shipped to the provided address" %}</li>
@@ -166,21 +184,19 @@
             </div>
             
             <!-- Buttons -->
-            <div class="flex space-x-3 mt-6">
+            <div class="flex flex-col sm:flex-row gap-3 mt-6">
                 <button type="button" onclick="closeLiquidationModal()" 
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm font-medium">
                     {% trans "Cancel" %}
                 </button>
                 <button type="submit" 
-                        class="flex-1 px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700">
+                        class="flex-1 px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 text-sm font-medium">
                     {% trans "Confirm Liquidation" %}
                 </button>
             </div>
         </form>
     </div>
 </div>
-
-
 
 <script>
 let currentAssetId = null;
@@ -191,11 +207,15 @@ function liquidateAsset(orderId, productId) {
     currentAssetProductId = productId;
     loadShippingAddresses();
     document.getElementById('liquidation-modal').classList.remove('hidden');
+    // Prevent body scroll when modal is open
+    document.body.style.overflow = 'hidden';
 }
 
 function closeLiquidationModal() {
     document.getElementById('liquidation-modal').classList.add('hidden');
     currentAssetId = null;
+    // Restore body scroll
+    document.body.style.overflow = 'auto';
 }
 
 function loadShippingAddresses() {
@@ -214,7 +234,9 @@ function loadShippingAddresses() {
                 data.addresses.forEach(address => {
                     const option = document.createElement('option');
                     option.value = address.id;
-                    option.textContent = `${address.full_name} - ${address.address_line_1}, ${address.city}`;
+                    // Truncate address for mobile
+                    const addressText = `${address.full_name} - ${address.address_line_1}, ${address.city}`;
+                    option.textContent = addressText.length > 50 ? addressText.substring(0, 47) + '...' : addressText;
                     select.appendChild(option);
                 });
             } else {
@@ -247,28 +269,31 @@ function showNotification(message, type = 'info') {
         warning: 'fa-exclamation-triangle'
     };
     
-    const notification = $(`
-        <div class="fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform max-w-md">
-            <div class="flex items-center">
-                <i class="fas ${icons[type]} mr-2"></i>
-                <span>${message}</span>
-            </div>
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform max-w-xs sm:max-w-md text-sm`;
+    notification.innerHTML = `
+        <div class="flex items-start">
+            <i class="fas ${icons[type]} mr-2 mt-0.5 flex-shrink-0"></i>
+            <span class="break-words">${message}</span>
         </div>
-    `);
+    `;
     
-    $('body').append(notification);
+    document.body.appendChild(notification);
     
+    // Slide in
     setTimeout(() => {
-        notification.removeClass('translate-x-full');
+        notification.classList.remove('translate-x-full');
     }, 100);
     
+    // Slide out and remove
     setTimeout(() => {
-        notification.addClass('translate-x-full');
+        notification.classList.add('translate-x-full');
         setTimeout(() => {
             notification.remove();
         }, 300);
     }, 3000);
 }
+
 document.getElementById('liquidation-form').addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -286,6 +311,12 @@ document.getElementById('liquidation-form').addEventListener('submit', function(
         return;
     }
 
+    // Disable submit button to prevent double submission
+    const submitBtn = e.target.querySelector('[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Processing...';
+
     fetch(`/orders/ajax/liquidate/${currentAssetId}/`, {
         method: 'POST',
         headers: {
@@ -302,16 +333,57 @@ document.getElementById('liquidation-form').addEventListener('submit', function(
     .then(data => {
         if (data.success) {
             showNotification(data.message, "success");
-            location.reload();
+            closeLiquidationModal();
+            setTimeout(() => location.reload(), 1000);
         } else {
             showNotification(data.error || "Error liquidating asset", "error");
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showNotification("Error liquidating asset", "error");
+        showNotification("Network error occurred", "error");
+    })
+    .finally(() => {
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
     });
 });
 
+// Close modal when clicking outside
+document.getElementById('liquidation-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeLiquidationModal();
+    }
+});
+
+// Handle escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !document.getElementById('liquidation-modal').classList.contains('hidden')) {
+        closeLiquidationModal();
+    }
+});
 </script>
+
+<style>
+/* Line clamp utility for product titles */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Smooth transitions */
+.transition-colors {
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 640px) {
+    .max-h-screen {
+        max-height: calc(100vh - 2rem);
+    }
+}
+</style>
 {% endblock %}

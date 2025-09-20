@@ -4,57 +4,64 @@
 {% block title %}{% trans "Resell Held Asset" %} - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto">
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">
+        <!-- Header -->
+        <div class="mb-6 sm:mb-8">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
                 <i class="fas fa-store mr-2"></i>
                 {% trans "Resell Held Asset" %}
             </h1>
-            <p class="mt-2 text-gray-600">
+            <p class="mt-2 text-sm sm:text-base text-gray-600">
                 {% trans "Submit your held asset for resale back to the platform." %}
             </p>
         </div>
         
-        <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
             <!-- Current Asset Info -->
-            <div class="mb-8 p-4 bg-blue-50 rounded-lg">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">
+            <div class="mb-6 sm:mb-8 p-3 sm:p-4 bg-blue-50 rounded-lg">
+                <h2 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
                     <i class="fas fa-info-circle mr-2"></i>
                     {% trans "Current Asset Details" %}
                 </h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="flex items-center space-x-4">
-                        {% if order_item.product.images.exists %}
-                            <img src="{{ order_item.product.images.first.image.url }}" 
-                                 alt="{{ order_item.product.title }}" 
-                                 class="w-20 h-20 object-cover rounded">
-                        {% else %}
-                            <div class="w-20 h-20 bg-gray-200 flex items-center justify-center rounded">
-                                <i class="fas fa-image text-gray-400 text-2xl"></i>
+                <div class="grid grid-cols-1 gap-4 sm:gap-6">
+                    <!-- Product Info -->
+                    <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                        <div class="flex items-center space-x-3 sm:space-x-4">
+                            {% if order_item.product.images.exists %}
+                                <img src="{{ order_item.product.images.first.image.url }}" 
+                                     alt="{{ order_item.product.title }}" 
+                                     class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded flex-shrink-0">
+                            {% else %}
+                                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 flex items-center justify-center rounded flex-shrink-0">
+                                    <i class="fas fa-image text-gray-400 text-xl sm:text-2xl"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="min-w-0 flex-1">
+                                <h3 class="font-semibold text-gray-900 text-sm sm:text-base break-words">
+                                    {{ order_item.product.title }}
+                                </h3>
+                                <p class="text-xs sm:text-sm text-gray-600">
+                                    {% trans "Original Price:" %} ₦{{ order_item.price|floatformat:2 }}
+                                </p>
+                                <p class="text-xs sm:text-sm text-gray-600">
+                                    {% trans "Purchased:" %} {{ order.created_at|date:"M j, Y" }}
+                                </p>
                             </div>
-                        {% endif %}
-                        
-                        <div>
-                            <h3 class="font-semibold text-gray-900">{{ order_item.product.title }}</h3>
-                            <p class="text-sm text-gray-600">
-                                {% trans "Original Price:" %} ₦{{ order_item.price|floatformat:2 }}
-                            </p>
-                            <p class="text-sm text-gray-600">
-                                {% trans "Purchased:" %} {{ order.created_at|date:"M j, Y" }}
-                            </p>
                         </div>
-                    </div>
-                    
-                    <div class="text-sm text-gray-600">
-                        <p><strong>{% trans "Category:" %}</strong> {{ order_item.product.category.name|default:"Not specified" }}</p>
-                        {% if order_item.product.weight %}
-                            <p><strong>{% trans "Weight:" %}</strong> {{ order_item.product.weight }} kg</p>
-                        {% endif %}
-                        {% if order_item.product.dimensions %}
-                            <p><strong>{% trans "Dimensions:" %}</strong> {{ order_item.product.dimensions }}</p>
-                        {% endif %}
+                        
+                        <!-- Additional Details -->
+                        <div class="text-xs sm:text-sm text-gray-600 space-y-1 sm:ml-4">
+                            <p><strong>{% trans "Category:" %}</strong> {{ order_item.product.category.name|default:"Not specified" }}</p>
+                            {% if order_item.product.weight %}
+                                <p><strong>{% trans "Weight:" %}</strong> {{ order_item.product.weight }} kg</p>
+                            {% endif %}
+                            {% if order_item.product.dimensions %}
+                                <p><strong>{% trans "Dimensions:" %}</strong> {{ order_item.product.dimensions }}</p>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -63,9 +70,10 @@
             <form method="post">
                 {% csrf_token %}
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Left Column -->
-                    <div class="space-y-6">
+                    <div class="space-y-4 sm:space-y-6">
+                        <!-- Item Title -->
                         <div>
                             <label for="title" class="block text-sm font-medium text-gray-700 mb-1">
                                 {% trans "Item Title" %} <span class="text-red-500">*</span>
@@ -75,13 +83,13 @@
                                    name="title" 
                                    value="{{ order_item.product.title }}"
                                    required
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
-                                   <p class="mt-1 text-sm text-gray-500">
-                            <p class="mt-1 text-sm text-gray-500">
-                            {% trans "Use a different product title" %}
+                                   class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
+                            <p class="mt-1 text-xs sm:text-sm text-gray-500">
+                                {% trans "Use a different product title" %}
                             </p>
                         </div>
                         
+                        <!-- Price -->
                         <div>
                             <label for="price" class="block text-sm font-medium text-gray-700 mb-1">
                                 {% trans "Your Selling Price (₦)" %} <span class="text-red-500">*</span>
@@ -92,26 +100,27 @@
                                    required
                                    min="1"
                                    step="1"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                   class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
                                    placeholder="Enter your selling price">
-                            <p class="mt-1 text-sm text-gray-500">
+                            <p class="mt-1 text-xs sm:text-sm text-gray-500">
                                 {% trans "Original price was ₦" %}{{ order_item.price|floatformat:2 }}
                             </p>
                         </div>
 
+                        <!-- Quantity -->
                         <div>
                             <label for="stock_quantity" class="block text-sm font-medium text-gray-700 mb-1">
                                 {% trans "Quantity to Sell" %} <span class="text-red-500">*</span>
                             </label>
                             <input type="number" 
-                                id="stock_quantity" 
-                                name="stock_quantity" 
-                                required
-                                min="1"
-                                max="{{ order_item.get_available_quantity }}"
-                                value="{{ order_item.get_available_quantity }}"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
-                            <p class="mt-1 text-sm text-gray-500">
+                                   id="stock_quantity" 
+                                   name="stock_quantity" 
+                                   required
+                                   min="1"
+                                   max="{{ order_item.get_available_quantity }}"
+                                   value="{{ order_item.get_available_quantity }}"
+                                   class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
+                            <p class="mt-1 text-xs sm:text-sm text-gray-500">
                                 {% trans "Available to sell:" %} {{ order_item.get_available_quantity }} 
                                 {% trans "out of" %} {{ order_item.quantity }} {% trans "originally purchased" %}
                             </p>
@@ -119,7 +128,8 @@
                     </div>
                     
                     <!-- Right Column -->
-                    <div class="space-y-6">
+                    <div class="space-y-4 sm:space-y-6">
+                        <!-- Description -->
                         <div>
                             <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
                                 {% trans "Additional Description" %}
@@ -127,20 +137,20 @@
                             <textarea id="description" 
                                       name="description" 
                                       rows="4"
-                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                      class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
                                       placeholder="Add any additional details about the item's condition, usage, etc.">{{ order_item.product.description }}</textarea>
-                            <p class="mt-1 text-sm text-gray-500">
+                            <p class="mt-1 text-xs sm:text-sm text-gray-500">
                                 {% trans "Original description is pre-filled. You can modify it as needed." %}
                             </p>
                         </div>
                         
                         <!-- Bank Account Details -->
-                        <div class="bg-blue-50 p-4 rounded-md">
-                            <h3 class="text-md font-medium text-gray-900 mb-3">
+                        <div class="bg-blue-50 p-3 sm:p-4 rounded-md">
+                            <h3 class="text-sm sm:text-base font-medium text-gray-900 mb-3">
                                 <i class="fas fa-university mr-2"></i>
                                 {% trans "Bank Account Details" %}
                             </h3>
-                            <p class="text-sm text-gray-600 mb-3">
+                            <p class="text-xs sm:text-sm text-gray-600 mb-3">
                                 {% trans "Provide your bank details for payment when your asset is sold." %}
                             </p>
                             
@@ -152,7 +162,7 @@
                                     <input type="text" 
                                            id="bank_name" 
                                            name="bank_name"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                           class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
                                            placeholder="e.g., First Bank, GTBank, etc.">
                                 </div>
                                 
@@ -163,7 +173,7 @@
                                     <input type="text" 
                                            id="account_number" 
                                            name="account_number"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                           class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
                                            placeholder="Enter your account number">
                                 </div>
                                 
@@ -174,7 +184,7 @@
                                     <input type="text" 
                                            id="account_holder_name" 
                                            name="account_holder_name"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                           class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
                                            placeholder="Full name as on bank account">
                                 </div>
                             </div>
@@ -183,27 +193,29 @@
                 </div>
                 
                 <!-- Terms and Conditions -->
-                <div class="mt-8 p-4 bg-amber-50 rounded-md">
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">
+                <div class="mt-6 sm:mt-8 p-3 sm:p-4 bg-amber-50 rounded-md">
+                    <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-2">
                         <i class="fas fa-info-circle mr-2"></i>
                         {% trans "Resale Terms" %}
                     </h3>
-                    <ul class="text-sm text-gray-700 space-y-1 list-disc list-inside">
+                    <ul class="text-xs sm:text-sm text-gray-700 space-y-1 list-disc list-inside">
                         <li>{% trans "Your held asset will be submitted for admin review" %}</li>
                         <li>{% trans "You will be notified of the review decision" %}</li>
                         <li>{% trans "If accepted, your asset will be listed on the platform for sale" %}</li>
+                        <li class="sm:hidden">{% trans "Payment will be made to your provided bank account once sold" %}</li>
                     </ul>
                 </div>
                 
-                <div class="mt-8 flex justify-between">
+                <!-- Action Buttons -->
+                <div class="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
                     <a href="{% url 'orders:held_assets' %}" 
-                       class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                       class="w-full sm:w-auto px-4 sm:px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-center text-sm sm:text-base">
                         <i class="fas fa-arrow-left mr-2"></i>
                         {% trans "Back to Assets" %}
                     </a>
                     
                     <button type="submit" 
-                            class="px-6 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
+                            class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors text-sm sm:text-base">
                         <i class="fas fa-paper-plane mr-2"></i>
                         {% trans "Submit for Resale" %}
                     </button>
@@ -230,5 +242,59 @@
             this.classList.remove('border-red-500');
         }
     });
+
+    // Auto-resize textarea on mobile
+    const textarea = document.getElementById('description');
+    if (textarea) {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    }
+
+    // Form validation feedback
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const requiredFields = form.querySelectorAll('[required]');
+            let hasErrors = false;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('border-red-500');
+                    hasErrors = true;
+                } else {
+                    field.classList.remove('border-red-500');
+                }
+            });
+
+            if (hasErrors) {
+                e.preventDefault();
+                // Scroll to first error field
+                const firstError = form.querySelector('.border-red-500');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+            }
+        });
+    }
+
+    // Price input formatting (add commas for thousands)
+    const priceInput = document.getElementById('price');
+    if (priceInput) {
+        priceInput.addEventListener('input', function() {
+            // Remove any non-digit characters except decimal point
+            let value = this.value.replace(/[^\d.]/g, '');
+            
+            // Ensure only one decimal point
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            
+            this.value = value;
+        });
+    }
 </script>
 {% endblock %}

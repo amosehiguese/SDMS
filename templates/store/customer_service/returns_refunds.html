@@ -2,53 +2,63 @@
 {% block title %}Returns & Refunds - {{ site_config.site_name|default:'Store' }}{% endblock %}
 {% block content %}
 <!-- Hero Section -->
-<div class="bg-gradient-to-br from-green-50 to-emerald-50 py-16">
+<div class="bg-gradient-to-br from-green-50 to-emerald-50 py-8 sm:py-16">
     <div class="container mx-auto px-4">
         <div class="text-center max-w-3xl mx-auto">
-            <div class="mb-6">
-                <i class="fas fa-undo text-6xl text-green-700"></i>
+            <div class="mb-4 sm:mb-6">
+                <i class="fas fa-undo text-4xl sm:text-6xl text-green-700"></i>
             </div>
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Returns & Refunds</h1>
-            <p class="text-xl text-gray-600">Hassle-free returns and quick refunds for your peace of mind</p>
+            <h1 class="text-2xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-3 sm:mb-4">
+                Returns & Refunds
+            </h1>
+            <p class="text-base sm:text-xl text-gray-600 px-4">
+                Hassle-free returns and quick refunds for your peace of mind
+            </p>
         </div>
     </div>
 </div>
 
 <!-- Main Content -->
-<div class="py-16 bg-white">
+<div class="py-8 sm:py-16 bg-white">
     <div class="container mx-auto px-4">
         <div class="max-w-4xl mx-auto">
             <!-- Policy Overview -->
-            <div class="text-center mb-12">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-4">30-Day Return Policy</h2>
-                <p class="text-gray-600 text-lg">
+            <div class="text-center mb-8 sm:mb-12">
+                <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-3 sm:mb-4">
+                    30-Day Return Policy
+                </h2>
+                <p class="text-sm sm:text-lg text-gray-600 px-4">
                     We want you to be completely satisfied with your purchase. If you're not happy, 
                     we'll make it right with our simple return process.
                 </p>
             </div>
 
             <!-- Return Policy Cards -->
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 mb-8 sm:mb-16">
                 <!-- Return Window -->
-                <div class="bg-white border border-gray-200 rounded-lg p-8 text-center hover:shadow-lg transition-shadow duration-300">
-                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-calendar-alt text-2xl text-green-700"></i>
+                <div class="bg-white border border-gray-200 rounded-lg p-4 sm:p-8 text-center hover:shadow-lg transition-shadow duration-300">
+                    <div class="bg-green-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                        <i class="fas fa-calendar-alt text-lg sm:text-2xl text-green-700"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">Return Window</h3>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">
+                        Return Window
+                    </h3>
                     <div class="text-gray-600">
-                        <p class="text-3xl font-bold text-green-700 mb-2">30 Days</p>
-                        <p class="text-sm">From the date of delivery to initiate a return</p>
+                        <p class="text-2xl sm:text-3xl font-bold text-green-700 mb-2">30 Days</p>
+                        <p class="text-xs sm:text-sm">From the date of delivery to initiate a return</p>
                     </div>
                 </div>
 
                 <!-- Condition -->
-                <div class="bg-white border border-gray-200 rounded-lg p-8 text-center hover:shadow-lg transition-shadow duration-300">
-                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-box text-2xl text-blue-700"></i>
+                <div class="bg-white border border-gray-200 rounded-lg p-4 sm:p-8 text-center hover:shadow-lg transition-shadow duration-300">
+                    <div class="bg-blue-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                        <i class="fas fa-box text-lg sm:text-2xl text-blue-700"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">Item Condition</h3>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">
+                        Item Condition
+                    </h3>
                     <div class="text-gray-600">
-                        <ul class="text-sm space-y-2">
+                        <ul class="text-xs sm:text-sm space-y-1 sm:space-y-2">
                             <li>• Original condition</li>
                             <li>• Unworn/unused</li>
                             <li>• Original packaging</li>
@@ -58,81 +68,91 @@
                 </div>
 
                 <!-- Refund Time -->
-                <div class="bg-white border border-gray-200 rounded-lg p-8 text-center hover:shadow-lg transition-shadow duration-300">
-                    <div class="bg-amber-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-money-bill-wave text-2xl text-amber-700"></i>
+                <div class="bg-white border border-gray-200 rounded-lg p-4 sm:p-8 text-center hover:shadow-lg transition-shadow duration-300 sm:col-span-2 lg:col-span-1">
+                    <div class="bg-amber-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                        <i class="fas fa-money-bill-wave text-lg sm:text-2xl text-amber-700"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">Refund Processing</h3>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">
+                        Refund Processing
+                    </h3>
                     <div class="text-gray-600">
-                        <p class="text-2xl font-bold text-amber-700 mb-2">5-7 Days</p>
-                        <p class="text-sm">After we receive your return</p>
+                        <p class="text-xl sm:text-2xl font-bold text-amber-700 mb-2">5-7 Days</p>
+                        <p class="text-xs sm:text-sm">After we receive your return</p>
                     </div>
                 </div>
             </div>
 
             <!-- Return Process -->
-            <div class="mb-16">
-                <h3 class="text-2xl font-bold text-center text-gray-800 mb-8">
+            <div class="mb-8 sm:mb-16">
+                <h3 class="text-xl sm:text-2xl font-bold text-center text-gray-800 mb-6 sm:mb-8">
                     <i class="fas fa-list-ol mr-2 text-gray-600"></i>
                     How to Return an Item
                 </h3>
                 <div class="max-w-3xl mx-auto">
-                    <div class="space-y-6">
+                    <div class="space-y-4 sm:space-y-6">
                         <!-- Step 1 -->
-                        <div class="flex items-start space-x-4 p-6 bg-gray-50 rounded-lg">
-                            <div class="bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                        <div class="flex items-start space-x-3 sm:space-x-4 p-4 sm:p-6 bg-gray-50 rounded-lg">
+                            <div class="bg-green-500 text-white w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0 text-sm sm:text-base">
                                 1
                             </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-800 mb-2">Contact Our Support Team</h4>
-                                <p class="text-gray-600 mb-2">
+                            <div class="min-w-0 flex-1">
+                                <h4 class="font-semibold text-gray-800 mb-2 text-sm sm:text-base">
+                                    Contact Our Support Team
+                                </h4>
+                                <p class="text-gray-600 mb-2 text-xs sm:text-base">
                                     Email us at <a href="mailto:{{ site_config.contact_email|default:'support@example.com' }}" 
-                                    class="text-green-700 hover:text-green-800 font-semibold">{{ site_config.contact_email|default:'support@example.com' }}</a> 
+                                    class="text-green-700 hover:text-green-800 font-semibold break-words">{{ site_config.contact_email|default:'support@example.com' }}</a> 
                                     with your order number and reason for return.
                                 </p>
-                                <p class="text-sm text-gray-500">Include photos if the item is damaged or defective.</p>
+                                <p class="text-xs text-gray-500">Include photos if the item is damaged or defective.</p>
                             </div>
                         </div>
 
                         <!-- Step 2 -->
-                        <div class="flex items-start space-x-4 p-6 bg-gray-50 rounded-lg">
-                            <div class="bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                        <div class="flex items-start space-x-3 sm:space-x-4 p-4 sm:p-6 bg-gray-50 rounded-lg">
+                            <div class="bg-green-500 text-white w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0 text-sm sm:text-base">
                                 2
                             </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-800 mb-2">Receive Return Authorization</h4>
-                                <p class="text-gray-600 mb-2">
+                            <div class="min-w-0 flex-1">
+                                <h4 class="font-semibold text-gray-800 mb-2 text-sm sm:text-base">
+                                    Receive Return Authorization
+                                </h4>
+                                <p class="text-gray-600 mb-2 text-xs sm:text-base">
                                     We'll provide you with return instructions and a return authorization number within 24 hours.
                                 </p>
-                                <p class="text-sm text-gray-500">This includes the return address and any specific packaging instructions.</p>
+                                <p class="text-xs text-gray-500">This includes the return address and any specific packaging instructions.</p>
                             </div>
                         </div>
 
                         <!-- Step 3 -->
-                        <div class="flex items-start space-x-4 p-6 bg-gray-50 rounded-lg">
-                            <div class="bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                        <div class="flex items-start space-x-3 sm:space-x-4 p-4 sm:p-6 bg-gray-50 rounded-lg">
+                            <div class="bg-green-500 text-white w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0 text-sm sm:text-base">
                                 3
                             </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-800 mb-2">Pack and Ship the Item</h4>
-                                <p class="text-gray-600 mb-2">
+                            <div class="min-w-0 flex-1">
+                                <h4 class="font-semibold text-gray-800 mb-2 text-sm sm:text-base">
+                                    Pack and Ship the Item
+                                </h4>
+                                <p class="text-gray-600 mb-2 text-xs sm:text-base">
                                     Pack the item securely in its original packaging (if available) and ship it back to us.
                                 </p>
-                                <p class="text-sm text-gray-500">We recommend using a trackable shipping method for your protection.</p>
+                                <p class="text-xs text-gray-500">We recommend using a trackable shipping method for your protection.</p>
                             </div>
                         </div>
 
                         <!-- Step 4 -->
-                        <div class="flex items-start space-x-4 p-6 bg-gray-50 rounded-lg">
-                            <div class="bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                        <div class="flex items-start space-x-3 sm:space-x-4 p-4 sm:p-6 bg-gray-50 rounded-lg">
+                            <div class="bg-green-500 text-white w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0 text-sm sm:text-base">
                                 4
                             </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-800 mb-2">Receive Your Refund</h4>
-                                <p class="text-gray-600 mb-2">
+                            <div class="min-w-0 flex-1">
+                                <h4 class="font-semibold text-gray-800 mb-2 text-sm sm:text-base">
+                                    Receive Your Refund
+                                </h4>
+                                <p class="text-gray-600 mb-2 text-xs sm:text-base">
                                     Once we receive and inspect your return, we'll process your refund within 5-7 business days.
                                 </p>
-                                <p class="text-sm text-gray-500">Refunds are issued to the original payment method.</p>
+                                <p class="text-xs text-gray-500">Refunds are issued to the original payment method.</p>
                             </div>
                         </div>
                     </div>
@@ -140,61 +160,99 @@
             </div>
 
             <!-- Important Information -->
-            <div class="space-y-8">
+            <div class="space-y-6 sm:space-y-8">
                 <!-- What Can Be Returned -->
-                <div class="bg-green-50 border border-green-200 rounded-lg p-8">
-                    <h3 class="text-xl font-bold text-green-800 mb-4">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 sm:p-8">
+                    <h3 class="text-lg sm:text-xl font-bold text-green-800 mb-3 sm:mb-4">
                         <i class="fas fa-check-circle mr-2"></i>
                         What Can Be Returned
                     </h3>
-                    <div class="grid md:grid-cols-2 gap-6 text-green-700">
-                        <ul class="space-y-2">
-                            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Clothing in original condition</li>
-                            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Accessories with tags</li>
-                            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Shoes in original box</li>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 text-green-700">
+                        <ul class="space-y-1 sm:space-y-2">
+                            <li class="flex items-center text-xs sm:text-sm">
+                                <i class="fas fa-check mr-2 flex-shrink-0"></i>
+                                <span>Clothing in original condition</span>
+                            </li>
+                            <li class="flex items-center text-xs sm:text-sm">
+                                <i class="fas fa-check mr-2 flex-shrink-0"></i>
+                                <span>Accessories with tags</span>
+                            </li>
+                            <li class="flex items-center text-xs sm:text-sm">
+                                <i class="fas fa-check mr-2 flex-shrink-0"></i>
+                                <span>Shoes in original box</span>
+                            </li>
                         </ul>
-                        <ul class="space-y-2">
-                            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Electronics in working condition</li>
-                            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Home goods (unused)</li>
-                            <li class="flex items-center"><i class="fas fa-check mr-2"></i>Damaged or defective items</li>
+                        <ul class="space-y-1 sm:space-y-2">
+                            <li class="flex items-center text-xs sm:text-sm">
+                                <i class="fas fa-check mr-2 flex-shrink-0"></i>
+                                <span>Electronics in working condition</span>
+                            </li>
+                            <li class="flex items-center text-xs sm:text-sm">
+                                <i class="fas fa-check mr-2 flex-shrink-0"></i>
+                                <span>Home goods (unused)</span>
+                            </li>
+                            <li class="flex items-center text-xs sm:text-sm">
+                                <i class="fas fa-check mr-2 flex-shrink-0"></i>
+                                <span>Damaged or defective items</span>
+                            </li>
                         </ul>
                     </div>
                 </div>
 
                 <!-- What Cannot Be Returned -->
-                <div class="bg-red-50 border border-red-200 rounded-lg p-8">
-                    <h3 class="text-xl font-bold text-red-800 mb-4">
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 sm:p-8">
+                    <h3 class="text-lg sm:text-xl font-bold text-red-800 mb-3 sm:mb-4">
                         <i class="fas fa-times-circle mr-2"></i>
                         What Cannot Be Returned
                     </h3>
-                    <div class="grid md:grid-cols-2 gap-6 text-red-700">
-                        <ul class="space-y-2">
-                            <li class="flex items-center"><i class="fas fa-times mr-2"></i>Personal care items</li>
-                            <li class="flex items-center"><i class="fas fa-times mr-2"></i>Customized products</li>
-                            <li class="flex items-center"><i class="fas fa-times mr-2"></i>Intimate apparel</li>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 text-red-700">
+                        <ul class="space-y-1 sm:space-y-2">
+                            <li class="flex items-center text-xs sm:text-sm">
+                                <i class="fas fa-times mr-2 flex-shrink-0"></i>
+                                <span>Personal care items</span>
+                            </li>
+                            <li class="flex items-center text-xs sm:text-sm">
+                                <i class="fas fa-times mr-2 flex-shrink-0"></i>
+                                <span>Customized products</span>
+                            </li>
+                            <li class="flex items-center text-xs sm:text-sm">
+                                <i class="fas fa-times mr-2 flex-shrink-0"></i>
+                                <span>Intimate apparel</span>
+                            </li>
                         </ul>
-                        <ul class="space-y-2">
-                            <li class="flex items-center"><i class="fas fa-times mr-2"></i>Items without tags</li>
-                            <li class="flex items-center"><i class="fas fa-times mr-2"></i>Worn or used items</li>
-                            <li class="flex items-center"><i class="fas fa-times mr-2"></i>Perishable goods</li>
+                        <ul class="space-y-1 sm:space-y-2">
+                            <li class="flex items-center text-xs sm:text-sm">
+                                <i class="fas fa-times mr-2 flex-shrink-0"></i>
+                                <span>Items without tags</span>
+                            </li>
+                            <li class="flex items-center text-xs sm:text-sm">
+                                <i class="fas fa-times mr-2 flex-shrink-0"></i>
+                                <span>Worn or used items</span>
+                            </li>
+                            <li class="flex items-center text-xs sm:text-sm">
+                                <i class="fas fa-times mr-2 flex-shrink-0"></i>
+                                <span>Perishable goods</span>
+                            </li>
                         </ul>
                     </div>
                 </div>
 
                 <!-- Contact Support -->
-                <div class="bg-gray-50 rounded-lg p-8 text-center">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Need Help with a Return?</h3>
-                    <p class="text-gray-600 mb-6">
+                <div class="bg-gray-50 rounded-lg p-4 sm:p-8 text-center">
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">
+                        Need Help with a Return?
+                    </h3>
+                    <p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 px-4">
                         Our customer service team is here to make the return process as smooth as possible.
                     </p>
-                    <div class="flex flex-col md:flex-row gap-4 justify-center">
+                    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md mx-auto">
                         <a href="mailto:{{ site_config.contact_email|default:'support@example.com' }}" 
-                           class="bg-green-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-800 transition-colors inline-flex items-center justify-center">
+                           class="bg-green-700 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:bg-green-800 transition-colors inline-flex items-center justify-center text-sm sm:text-base">
                             <i class="fas fa-envelope mr-2"></i>
                             Start a Return
                         </a>
                         <a href="{% url 'store:help_center' %}" 
-                           class="bg-white border border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors inline-flex items-center justify-center">
+                           class="bg-white border border-gray-300 text-gray-700 px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors inline-flex items-center justify-center text-sm sm:text-base">
                             <i class="fas fa-question-circle mr-2"></i>
                             Get Help
                         </a>
@@ -204,4 +262,6 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+
+
+{% endblock %}

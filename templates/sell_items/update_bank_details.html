@@ -4,149 +4,240 @@
 {% block title %}{% trans "Update Bank Details" %} - {{ site_config.site_name|default:"SuccessDirectMarketStore" }}{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-2xl mx-auto">
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">
+        <!-- Header Section -->
+        <div class="mb-6 sm:mb-8">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
                 <i class="fas fa-university mr-2"></i>
                 {% trans "Update Bank Details" %}
             </h1>
-            <p class="mt-2 text-gray-600">
+            <p class="mt-2 text-sm sm:text-base text-gray-600">
                 {% trans "Update your bank account details for receiving payments." %}
             </p>
         </div>
         
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <!-- Item Info -->
+        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <!-- Item Info - Mobile Optimized -->
             <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-                <h2 class="text-lg font-semibold text-gray-900 mb-2">
+                <h2 class="text-base sm:text-lg font-semibold text-gray-900 mb-3">
                     <i class="fas fa-tag mr-2"></i>
                     {% trans "Submission Details" %}
                 </h2>
-                <div class="flex items-center space-x-4">
-                    {% if submission.images.exists %}
-                        <img src="{{ submission.images.first.image.url }}" 
-                             alt="{{ submission.title }}" 
-                             class="w-16 h-16 object-cover rounded">
-                    {% else %}
-                        <div class="w-16 h-16 bg-gray-200 flex items-center justify-center rounded">
-                            <i class="fas fa-image text-gray-400"></i>
-                        </div>
-                    {% endif %}
+                
+                <!-- Mobile: Stacked Layout, Desktop: Horizontal -->
+                <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                    <!-- Image -->
+                    <div class="flex-shrink-0 self-start sm:self-center">
+                        {% if submission.images.exists %}
+                            <img src="{{ submission.images.first.image.url }}" 
+                                 alt="{{ submission.title }}" 
+                                 class="w-16 h-16 sm:w-16 sm:h-16 object-cover rounded-lg">
+                        {% else %}
+                            <div class="w-16 h-16 sm:w-16 sm:h-16 bg-gray-200 flex items-center justify-center rounded-lg">
+                                <i class="fas fa-image text-gray-400"></i>
+                            </div>
+                        {% endif %}
+                    </div>
                     
-                    <div>
-                        <h3 class="font-semibold text-gray-900">{{ submission.title }}</h3>
-                        <p class="text-sm text-gray-600">
-                            {% trans "Price:" %} ₦{{ submission.price|floatformat:2 }}
-                        </p>
-                        <span class="px-2 py-1 text-xs rounded-full 
-                            {% if submission.status == 'pending' %}bg-yellow-100 text-yellow-800
-                            {% elif submission.status == 'accepted' %}bg-green-100 text-green-800
-                            {% else %}bg-red-100 text-red-800{% endif %}">
-                            {{ submission.get_status_display }}
-                        </span>
+                    <!-- Item Details -->
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-semibold text-gray-900 text-base sm:text-lg truncate">{{ submission.title }}</h3>
+                        <div class="mt-1 flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
+                            <p class="text-sm text-gray-600">
+                                <span class="font-medium">{% trans "Price:" %}</span> 
+                                <span class="text-amber-600 font-semibold">₦{{ submission.price|floatformat:2 }}</span>
+                            </p>
+                            <span class="inline-flex px-2 py-1 text-xs rounded-full self-start sm:self-center
+                                {% if submission.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                {% elif submission.status == 'accepted' %}bg-green-100 text-green-800
+                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ submission.get_status_display }}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Current Bank Details -->
+            <!-- Current Bank Details - Mobile Optimized -->
             {% if submission.has_complete_bank_details %}
                 <div class="mb-6 p-4 bg-blue-50 rounded-lg">
-                    <h3 class="text-md font-medium text-gray-900 mb-3">
+                    <h3 class="text-sm sm:text-md font-medium text-gray-900 mb-3">
                         <i class="fas fa-info-circle mr-2"></i>
                         {% trans "Current Bank Details" %}
                     </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div>
-                            <strong>{% trans "Bank Name:" %}</strong><br>
-                            {{ submission.bank_name }}
+                    
+                    <!-- Mobile: Stacked, Tablet+: Grid -->
+                    <div class="space-y-3 sm:grid sm:grid-cols-1 md:grid-cols-3 sm:gap-4 sm:space-y-0">
+                        <div class="text-sm">
+                            <span class="font-medium text-gray-700 block">{% trans "Bank Name:" %}</span>
+                            <span class="text-gray-900 mt-1 block">{{ submission.bank_name }}</span>
                         </div>
-                        <div>
-                            <strong>{% trans "Account Number:" %}</strong><br>
-                            {{ submission.account_number }}
+                        <div class="text-sm">
+                            <span class="font-medium text-gray-700 block">{% trans "Account Number:" %}</span>
+                            <span class="text-gray-900 mt-1 block font-mono">{{ submission.account_number }}</span>
                         </div>
-                        <div>
-                            <strong>{% trans "Account Holder:" %}</strong><br>
-                            {{ submission.account_holder_name }}
+                        <div class="text-sm">
+                            <span class="font-medium text-gray-700 block">{% trans "Account Holder:" %}</span>
+                            <span class="text-gray-900 mt-1 block">{{ submission.account_holder_name }}</span>
                         </div>
                     </div>
                 </div>
             {% endif %}
             
             <!-- Update Form -->
-            <form method="post">
+            <form method="post" class="space-y-6">
                 {% csrf_token %}
                 
-                <div class="space-y-6">
-                    <div>
-                        <label for="bank_name" class="block text-sm font-medium text-gray-700 mb-1">
-                            {% trans "Bank Name" %} <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" 
-                               id="bank_name" 
-                               name="bank_name"
-                               value="{{ submission.bank_name }}"
-                               required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                               placeholder="e.g., First Bank, GTBank, Access Bank">
-                    </div>
-                    
-                    <div>
-                        <label for="account_number" class="block text-sm font-medium text-gray-700 mb-1">
-                            {% trans "Account Number" %} <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" 
-                               id="account_number" 
-                               name="account_number"
-                               value="{{ submission.account_number }}"
-                               required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                               placeholder="Enter your 10-digit account number">
-                    </div>
-                    
-                    <div>
-                        <label for="account_holder_name" class="block text-sm font-medium text-gray-700 mb-1">
-                            {% trans "Account Holder Name" %} <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" 
-                               id="account_holder_name" 
-                               name="account_holder_name"
-                               value="{{ submission.account_holder_name }}"
-                               required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                               placeholder="Full name as appears on bank account">
-                    </div>
+                <!-- Bank Name -->
+                <div>
+                    <label for="bank_name" class="block text-sm font-medium text-gray-700 mb-2">
+                        {% trans "Bank Name" %} <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="bank_name" 
+                           name="bank_name"
+                           value="{{ submission.bank_name }}"
+                           required
+                           class="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-base sm:text-sm"
+                           placeholder="e.g., First Bank, GTBank, Access Bank">
                 </div>
                 
-                <!-- Important Notice -->
-                <div class="mt-6 p-4 bg-amber-50 rounded-md">
-                    <h3 class="text-md font-medium text-gray-900 mb-2">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                <!-- Account Number -->
+                <div>
+                    <label for="account_number" class="block text-sm font-medium text-gray-700 mb-2">
+                        {% trans "Account Number" %} <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="account_number" 
+                           name="account_number"
+                           value="{{ submission.account_number }}"
+                           required
+                           inputmode="numeric"
+                           pattern="[0-9]*"
+                           maxlength="10"
+                           class="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-base sm:text-sm font-mono"
+                           placeholder="Enter your 10-digit account number">
+                    <p class="mt-1 text-xs text-gray-500">{% trans "Enter exactly 10 digits" %}</p>
+                </div>
+                
+                <!-- Account Holder Name -->
+                <div>
+                    <label for="account_holder_name" class="block text-sm font-medium text-gray-700 mb-2">
+                        {% trans "Account Holder Name" %} <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="account_holder_name" 
+                           name="account_holder_name"
+                           value="{{ submission.account_holder_name }}"
+                           required
+                           class="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-base sm:text-sm"
+                           placeholder="Full name as appears on bank account">
+                    <p class="mt-1 text-xs text-gray-500">{% trans "Must match your ID documents exactly" %}</p>
+                </div>
+                
+                <!-- Important Notice - Mobile Optimized -->
+                <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <h3 class="text-sm sm:text-md font-medium text-gray-900 mb-3">
+                        <i class="fas fa-exclamation-triangle mr-2 text-amber-600"></i>
                         {% trans "Important Notice" %}
                     </h3>
-                    <ul class="text-sm text-gray-700 space-y-1 list-disc list-inside">
-                        <li>{% trans "Ensure all details are accurate to avoid payment delays" %}</li>
-                        <li>{% trans "Account holder name must match your identity documents" %}</li>
-                        <li>{% trans "Double-check your account number for accuracy" %}</li>
-                        <li>{% trans "You can update these details anytime before payment" %}</li>
-                    </ul>
+                    <div class="space-y-2 text-xs sm:text-sm text-gray-700">
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-amber-600 mr-2 mt-0.5 text-xs flex-shrink-0"></i>
+                            <span>{% trans "Ensure all details are accurate to avoid payment delays" %}</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-amber-600 mr-2 mt-0.5 text-xs flex-shrink-0"></i>
+                            <span>{% trans "Account holder name must match your identity documents" %}</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-amber-600 mr-2 mt-0.5 text-xs flex-shrink-0"></i>
+                            <span>{% trans "Double-check your account number for accuracy" %}</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-amber-600 mr-2 mt-0.5 text-xs flex-shrink-0"></i>
+                            <span>{% trans "You can update these details anytime before payment" %}</span>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="mt-8 flex justify-between">
+                <!-- Action Buttons - Mobile Optimized -->
+                <div class="pt-6 space-y-3 sm:space-y-0 sm:flex sm:justify-between sm:space-x-4">
                     <a href="{% url 'sell_items:sell_submission_detail' submission.id %}" 
-                       class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                       class="w-full sm:w-auto px-6 py-3 sm:py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-center block">
                         <i class="fas fa-arrow-left mr-2"></i>
-                        {% trans "Back" %}
+                        {% trans "Back to Details" %}
                     </a>
                     
                     <button type="submit" 
-                            class="px-6 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
+                            class="w-full sm:w-auto px-6 py-3 sm:py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-colors font-medium">
                         <i class="fas fa-save mr-2"></i>
                         {% trans "Update Bank Details" %}
                     </button>
                 </div>
             </form>
         </div>
+        
+        <!-- Security Notice - Mobile Addition -->
+        <div class="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div class="flex items-start">
+                <i class="fas fa-shield-alt text-green-600 mr-3 mt-1 flex-shrink-0"></i>
+                <div>
+                    <h4 class="text-sm font-medium text-green-900 mb-1">{% trans "Your Information is Safe" %}</h4>
+                    <p class="text-xs sm:text-sm text-green-700">
+                        {% trans "All bank details are encrypted and securely stored. We never share your financial information with third parties." %}
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+// Auto-format account number input
+document.getElementById('account_number').addEventListener('input', function(e) {
+    // Remove any non-digit characters
+    let value = e.target.value.replace(/\D/g, '');
+    
+    // Limit to 10 digits
+    if (value.length > 10) {
+        value = value.substring(0, 10);
+    }
+    
+    e.target.value = value;
+});
+
+// Auto-capitalize account holder name
+document.getElementById('account_holder_name').addEventListener('input', function(e) {
+    // Convert to title case
+    e.target.value = e.target.value.replace(/\w\S*/g, function(txt) {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    });
+});
+
+// Form validation feedback
+document.querySelector('form').addEventListener('submit', function(e) {
+    const accountNumber = document.getElementById('account_number').value;
+    
+    if (accountNumber.length !== 10) {
+        e.preventDefault();
+        alert('{% trans "Account number must be exactly 10 digits" %}');
+        document.getElementById('account_number').focus();
+        return false;
+    }
+    
+    // Show loading state
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>{% trans "Updating..." %}';
+    submitBtn.disabled = true;
+    
+    // Re-enable after 3 seconds if form doesn't submit (fallback)
+    setTimeout(function() {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }, 3000);
+});
+</script>
 {% endblock %}

@@ -8,6 +8,8 @@ import uuid
 from datetime import datetime
 from django.utils.timezone import is_naive, make_aware, get_current_timezone
 
+
+
 def serialize_for_task(value):
     """Ensure values are JSON-serializable for Celery tasks"""
     if isinstance(value, uuid.UUID):
@@ -128,3 +130,5 @@ def preview_email(email_type, context=None):
         }, None
     except Exception as e:
         return None, str(e)
+
+        

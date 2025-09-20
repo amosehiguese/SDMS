@@ -87,6 +87,12 @@ class EmailService:
             'template': 'emails/admin/payment_failed.html',
             'recipient_type': 'admin'
         },
+        'admin_message': {
+            'subject': '{{ subject }}',
+            'template': 'emails/user/admin_message.html',
+            'description': 'Admin message to users',
+            'recipient_type': 'user'
+        },
     }
     
     

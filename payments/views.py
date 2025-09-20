@@ -148,8 +148,6 @@ def initiate_payment(request):
             result = payment_service.initialize_payment(payment)
             
             if result['success']:
-                # Clear cart after successful order creation
-                cart.clear()
                 
                 return JsonResponse({
                     'success': True,
@@ -227,57 +225,112 @@ def paystack_webhook(request):
     """
     Paystack webhook handler to process payment events.
     """
-    # Verify the request is from Paystack
     paystack_sk = settings.PAYSTACK_SECRET_KEY
     signature = request.headers.get('x-paystack-signature')
-    
+
     if not signature:
         return HttpResponse(status=400)
 
     try:
-        body = request.body.decode('utf-8')
-        hash = hmac.new(paystack_sk.encode('utf-8'), body.encode('utf-8'), hashlib.sha512).hexdigest()
-        
+        # Use raw body for HMAC verification
+        hash = hmac.new(
+            paystack_sk.encode('utf-8'),
+            request.body,
+            hashlib.sha512
+        ).hexdigest()
+
         if hash != signature:
             return HttpResponse(status=400)
-            
-    except Exception as e:
-        # Log the error for debugging
-        print(f"Webhook signature verification failed: {e}")
-        return HttpResponse(status=400)
 
-    try:
-        payload = json.loads(body)
+        payload = json.loads(request.body.decode('utf-8'))
         event = payload.get('event')
 
         if event == 'charge.success':
             data = payload.get('data')
             reference = data.get('reference')
-            
-            # Find the corresponding payment and order
+
             try:
-                payment = get_object_or_404(Payment, reference=reference)
+                payment = Payment.objects.select_related('order').get(
+                    payment_reference=reference
+                )
                 order = payment.order
 
-                # Update order and payment status if payment was successful
-                if data.get('status') == 'success':
-                    order.status = 'paid'
-                    order.paid_at = timezone.now() # Make sure to import timezone
-                    order.save()
+                # Only update if not already successful (idempotency)
+                if payment.status != 'success' and data.get('status') == 'success':
+                    with transaction.atomic():
+                        order.status = 'paid'
+                        order.paid_at = timezone.now()
+                        order.save(update_fields=['status', 'paid_at'])
 
-                    payment.status = 'success'
-                    payment.raw_response = data # Store the full response
-                    payment.save()
-                    
-            except (Payment.DoesNotExist, Order.DoesNotExist) as e:
-                 return HttpResponse(status=404) # Not found
+                        payment.status = 'success'
+                        payment.raw_response = data
+                        payment.save(update_fields=['status', 'raw_response'])
+
+                        # Clear the user's cart now that payment is confirmed
+                        try:
+                            cart = Cart.objects.get(user=payment.user)
+                            cart.clear()
+                        except Cart.DoesNotExist:
+                            pass  # Cart already cleared or not found
+
+            except Payment.DoesNotExist:
+                return HttpResponse(status=404)
+        elif event == 'charge.failed':
+            data = payload.get('data')
+            reference = data.get('reference')
+
+            try:
+                payment = Payment.objects.select_related('order').get(
+                    payment_reference=reference
+                )
+                order = payment.order
+
+                # Only update if not already processed
+                if payment.status not in ['success', 'failed']:
+                    with transaction.atomic():
+                        order.status = 'payment_failed'
+                        order.save(update_fields=['status'])
+
+                        payment.status = 'failed'
+                        payment.raw_response = data
+                        payment.save(update_fields=['status', 'raw_response'])
+
+            except Payment.DoesNotExist:
+                return HttpResponse(status=404)
+
+        elif event == 'charge.pending':
+            data = payload.get('data')
+            reference = data.get('reference')
+
+            try:
+                payment = Payment.objects.select_related('order').get(
+                    payment_reference=reference
+                )
+                order = payment.order
+
+                # Update to pending status if currently initiated
+                if payment.status == 'initiated':
+                    with transaction.atomic():
+                        order.status = 'payment_pending'
+                        order.save(update_fields=['status'])
+
+                        payment.status = 'pending'
+                        payment.raw_response = data
+                        payment.save(update_fields=['status', 'raw_response'])
+
+            except Payment.DoesNotExist:
+                return HttpResponse(status=404)
 
         return HttpResponse(status=200)
 
     except json.JSONDecodeError:
         return HttpResponse(status=400)
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error("Webhook error: %s", e)
         return HttpResponse(status=500)
+
 
 @login_required
 def payment_history(request):
