@@ -425,26 +425,31 @@ function showNotification(message, type = 'info') {
     };
     
     const notification = $(`
-        <div class="fixed top-4 left-4 right-4 sm:top-4 sm:right-4 sm:left-auto sm:w-auto ${colors[type]} text-white px-4 sm:px-6 py-3 rounded-lg shadow-lg z-50 transform translate-y-[-100%] sm:translate-y-0 sm:translate-x-full transition-transform max-w-md text-sm">
+        <div class="fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-[9999] transform translate-x-full transition-transform max-w-sm">
             <div class="flex items-center">
                 <i class="fas ${icons[type]} mr-2 flex-shrink-0"></i>
-                <span>${message}</span>
+                <span class="text-sm">${message}</span>
+                <button onclick="$(this).closest('.fixed').addClass('translate-x-full')" class="ml-3 text-white hover:text-gray-200">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
             </div>
         </div>
     `);
     
     $('body').append(notification);
     
+    // Slide in from right
     setTimeout(() => {
-        notification.removeClass('translate-y-[-100%] translate-x-full');
+        notification.removeClass('translate-x-full');
     }, 100);
     
+    // Auto-hide after 4 seconds
     setTimeout(() => {
-        notification.addClass('translate-y-[-100%] sm:translate-y-0 sm:translate-x-full');
+        notification.addClass('translate-x-full');
         setTimeout(() => {
             notification.remove();
         }, 300);
-    }, 3000);
+    }, 4000);
 }
 
 document.getElementById('create-product-form').addEventListener('submit', function(e) {

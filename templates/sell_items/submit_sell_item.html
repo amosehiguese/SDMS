@@ -80,29 +80,33 @@
                             </p>
                         </div>
                         
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">
-                                    {% trans "Weight (kg)" %}
-                                </label>
-                                <input type="number" 
-                                       id="weight" 
-                                       name="weight"
-                                       step="0.01"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                                       placeholder="e.g., 1.5">
-                            </div>
-                            
-                            <div>
-                                <label for="dimensions" class="block text-sm font-medium text-gray-700 mb-1">
-                                    {% trans "Dimensions" %}
-                                </label>
-                                <input type="text" 
-                                       id="dimensions" 
-                                       name="dimensions"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                                       placeholder="L x W x H in cm">
-                            </div>
+                        <div>
+                            <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">
+                                {% trans "Weight (kg)" %}
+                            </label>
+                            <input type="number" 
+                                   id="weight" 
+                                   name="weight" 
+                                   step="0.01"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                   placeholder="Enter weight in kg">
+                            <p class="mt-1 text-sm text-gray-500">
+                                {% trans "Optional. Helps with shipping calculations." %}
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label for="dimensions" class="block text-sm font-medium text-gray-700 mb-1">
+                                {% trans "Dimensions" %}
+                            </label>
+                            <input type="text" 
+                                   id="dimensions" 
+                                   name="dimensions"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                   placeholder="e.g., 20cm x 15cm x 10cm">
+                            <p class="mt-1 text-sm text-gray-500">
+                                {% trans "Optional. Length x Width x Height format." %}
+                            </p>
                         </div>
                     </div>
                     
@@ -114,23 +118,84 @@
                             </label>
                             <textarea id="description" 
                                       name="description" 
+                                      rows="6"
                                       required
-                                      rows="4"
                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                                      placeholder="Describe your item in detail, including condition, features, etc."></textarea>
+                                      placeholder="Describe your item in detail..."></textarea>
+                            <p class="mt-1 text-sm text-gray-500">
+                                {% trans "Provide detailed information about condition, features, and any defects." %}
+                            </p>
                         </div>
                         
-                        <!-- Bank Account Details -->
-                        <div class="bg-blue-50 p-4 rounded-md">
-                            <h3 class="text-md font-medium text-gray-900 mb-3">
+                        <!-- Enhanced Multiple Image Upload Section -->
+                        <div>
+                            <label for="images" class="block text-sm font-medium text-gray-700 mb-2">
+                                {% trans "Images" %} <span class="text-red-500">*</span>
+                                <span class="text-gray-500 font-normal">({% trans "Upload 1-10 images" %})</span>
+                            </label>
+                            
+                            <!-- File Input with Drag & Drop Zone -->
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-amber-500 transition-colors cursor-pointer" id="upload-zone">
+                                <input type="file" 
+                                       id="images" 
+                                       name="images" 
+                                       multiple 
+                                       accept="image/*"
+                                       required
+                                       class="hidden">
+                                <div class="space-y-2">
+                                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
+                                    <div>
+                                        <p class="text-sm text-gray-600">
+                                            <span class="font-medium text-amber-600 hover:text-amber-500 cursor-pointer">
+                                                {% trans "Click to upload" %}
+                                            </span>
+                                            {% trans " or drag and drop" %}
+                                        </p>
+                                        <p class="text-xs text-gray-500">
+                                            {% trans "PNG, JPG, WebP up to 5MB each" %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Image Preview Container -->
+                            <div id="image-preview-container" class="mt-3 hidden">
+                                <div class="text-sm font-medium text-gray-700 mb-2">
+                                    {% trans "Selected Images:" %}
+                                    <span id="image-count" class="text-amber-600"></span>
+                                </div>
+                                <div id="image-previews" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+                            </div>
+                            
+                            <!-- Help Text -->
+                            <div class="mt-2 space-y-1">
+                                <p class="text-sm text-gray-500">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    {% trans "First image will be the main product image" %}
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    <i class="fas fa-images mr-1"></i>
+                                    {% trans "You can select multiple images at once (Hold Ctrl/Cmd while clicking)" %}
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    <i class="fas fa-file-image mr-1"></i>
+                                    {% trans "Supported formats: JPG, PNG. Max 2MB per image" %}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Bank Details Section -->
+                        <div class="border-t pt-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">
                                 <i class="fas fa-university mr-2"></i>
                                 {% trans "Bank Account Details" %}
                             </h3>
-                            <p class="text-sm text-gray-600 mb-3">
-                                {% trans "Provide your bank details for payment when your item is sold." %}
+                            <p class="text-sm text-gray-600 mb-4">
+                                {% trans "Provide your bank details for payment processing. You can update these later if needed." %}
                             </p>
                             
-                            <div class="space-y-3">
+                            <div class="space-y-4">
                                 <div>
                                     <label for="bank_name" class="block text-sm font-medium text-gray-700 mb-1">
                                         {% trans "Bank Name" %}
@@ -139,7 +204,7 @@
                                            id="bank_name" 
                                            name="bank_name"
                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                                           placeholder="e.g., First Bank, GTBank, etc.">
+                                           placeholder="Enter your bank name">
                                 </div>
                                 
                                 <div>
@@ -164,22 +229,6 @@
                                            placeholder="Full name as on bank account">
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div>
-                            <label for="images" class="block text-sm font-medium text-gray-700 mb-1">
-                                {% trans "Images" %} <span class="text-red-500">*</span>
-                            </label>
-                            <input type="file" 
-                                   id="images" 
-                                   name="images" 
-                                   multiple 
-                                   accept="image/*"
-                                   required
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500">
-                            <p class="mt-1 text-sm text-gray-500">
-                                {% trans "Upload multiple images. First image will be the main image." %}
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -216,4 +265,201 @@
         </div>
     </div>
 </div>
+
+<style>
+.aspect-square {
+    aspect-ratio: 1 / 1;
+}
+
+/* Loading animation for image previews */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+#image-previews > div {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Drag and drop styling */
+.drag-over {
+    border-color: #f59e0b !important;
+    background-color: #fffbeb !important;
+}
+
+/* Upload zone hover effect */
+#upload-zone:hover {
+    background-color: #fefdf8;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('images');
+    const uploadZone = document.getElementById('upload-zone');
+    const previewContainer = document.getElementById('image-preview-container');
+    const previewGrid = document.getElementById('image-previews');
+    const imageCount = document.getElementById('image-count');
+    
+    // Make upload zone clickable
+    uploadZone.addEventListener('click', function() {
+        imageInput.click();
+    });
+    
+    imageInput.addEventListener('change', function(event) {
+        const files = Array.from(event.target.files);
+        handleFiles(files);
+    });
+    
+    function handleFiles(files) {
+        // Clear previous previews
+        previewGrid.innerHTML = '';
+        
+        if (files.length === 0) {
+            previewContainer.classList.add('hidden');
+            return;
+        }
+        
+        // Validate file count
+        if (files.length > 10) {
+            alert('You can upload maximum 10 images. Please select fewer images.');
+            imageInput.value = '';
+            previewContainer.classList.add('hidden');
+            return;
+        }
+        
+        // Validate file sizes and types
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        
+        for (let file of files) {
+            if (file.size > maxSize) {
+                alert(`File "${file.name}" is too large. Maximum size is 5MB.`);
+                imageInput.value = '';
+                previewContainer.classList.add('hidden');
+                return;
+            }
+            
+            if (!allowedTypes.includes(file.type)) {
+                alert(`File "${file.name}" is not a supported image format. Please use JPG, PNG, or WebP.`);
+                imageInput.value = '';
+                previewContainer.classList.add('hidden');
+                return;
+            }
+        }
+        
+        // Update count
+        imageCount.textContent = `${files.length} image${files.length > 1 ? 's' : ''} selected`;
+        
+        // Show preview container
+        previewContainer.classList.remove('hidden');
+        
+        // Generate previews
+        files.forEach((file, index) => {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'relative group';
+                
+                previewDiv.innerHTML = `
+                    <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 hover:border-amber-500 transition-colors">
+                        <img src="${e.target.result}" 
+                             alt="Preview ${index + 1}" 
+                             class="w-full h-full object-cover">
+                    </div>
+                    <div class="absolute top-1 left-1 bg-amber-600 text-white text-xs px-2 py-1 rounded">
+                        ${index === 0 ? 'Main' : index + 1}
+                    </div>
+                    <div class="absolute top-1 right-1 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                        ${formatFileSize(file.size)}
+                    </div>
+                    <button type="button" 
+                            onclick="removeImage(${index})" 
+                            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-600 text-white rounded-full w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                `;
+                
+                previewGrid.appendChild(previewDiv);
+            };
+            
+            reader.readAsDataURL(file);
+        });
+    }
+    
+    // Format file size
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+    
+    // Remove image function
+    window.removeImage = function(index) {
+        const dt = new DataTransfer();
+        const files = Array.from(imageInput.files);
+        
+        // Add all files except the one to remove
+        files.forEach((file, i) => {
+            if (i !== index) {
+                dt.items.add(file);
+            }
+        });
+        
+        // Update input files
+        imageInput.files = dt.files;
+        
+        // Trigger change event to update previews
+        imageInput.dispatchEvent(new Event('change'));
+    };
+    
+    // Drag and drop functionality
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, unhighlight, false);
+    });
+    
+    uploadZone.addEventListener('drop', handleDrop, false);
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    function highlight(e) {
+        uploadZone.classList.add('drag-over');
+    }
+    
+    function unhighlight(e) {
+        uploadZone.classList.remove('drag-over');
+    }
+    
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = Array.from(dt.files);
+        
+        // Filter only image files
+        const imageFiles = files.filter(file => file.type.startsWith('image/'));
+        
+        if (imageFiles.length > 0) {
+            // Create a new DataTransfer object with only image files
+            const newDt = new DataTransfer();
+            imageFiles.forEach(file => newDt.items.add(file));
+            
+            imageInput.files = newDt.files;
+            imageInput.dispatchEvent(new Event('change'));
+        }
+    }
+});
+</script>
 {% endblock %}

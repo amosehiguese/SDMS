@@ -265,29 +265,6 @@
                         <span class="text-amber-700">₦{{ order.total|floatformat:0 }}</span>
                     </div>
                 </div>
-                
-                <!-- Payment Status -->
-                <div class="border-t pt-4">
-                    <h3 class="font-semibold mb-3 text-sm sm:text-base">Payment Information</h3>
-                    <div class="space-y-2 text-xs sm:text-sm">
-                        <div class="flex justify-between">
-                            <span>Payment Method</span>
-                            <span class="capitalize">{{ order.payment_method|default:"Card" }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Payment Status</span>
-                            <span class="{% if order.status == 'paid' %}text-green-600{% else %}text-red-600{% endif %} font-medium">
-                                {% if order.status == 'paid' %}Paid{% else %}Pending{% endif %}
-                            </span>
-                        </div>
-                        {% if order.status == 'paid' and order.payment_reference %}
-                        <div class="flex flex-col sm:flex-row sm:justify-between space-y-1 sm:space-y-0">
-                            <span>Reference</span>
-                            <span class="font-mono text-xs break-all">{{ order.payment_reference }}</span>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
             </div>
             
             <!-- Quick Actions - Mobile Priority -->
@@ -488,33 +465,48 @@ function contactSupport() {
     {% endif %}
 }
 
-// Show notification - Mobile Optimized
+// Show notification
 function showNotification(message, type = 'info') {
     const colors = {
         success: 'bg-green-500',
         error: 'bg-red-500',
         info: 'bg-blue-500',
-        warning: 'bg-amber-700'
+        warning: 'bg-amber-500'
+    };
+    
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        info: 'fa-info-circle',
+        warning: 'fa-exclamation-triangle'
     };
     
     const notification = $(`
-        <div class="fixed top-4 left-4 right-4 sm:top-20 sm:right-4 sm:left-auto sm:w-auto ${colors[type]} text-white px-4 sm:px-6 py-3 rounded-lg shadow-lg z-50 transform translate-y-[-100%] sm:translate-y-0 sm:translate-x-full transition-transform text-sm">
-            ${message}
+        <div class="fixed top-4 right-4 ${colors[type]} text-white px-4 py-2 rounded-lg shadow-lg z-[9999] transform translate-x-full transition-transform max-w-sm">
+            <div class="flex items-center">
+                <i class="fas ${icons[type]} mr-2 flex-shrink-0"></i>
+                <span class="text-sm">${message}</span>
+                <button onclick="$(this).closest('.fixed').addClass('translate-x-full')" class="ml-3 text-white hover:text-gray-200">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>
         </div>
     `);
     
     $('body').append(notification);
     
+    // Slide in from right
     setTimeout(() => {
-        notification.removeClass('translate-y-[-100%] translate-x-full');
+        notification.removeClass('translate-x-full');
     }, 100);
     
+    // Auto-hide after 4 seconds
     setTimeout(() => {
-        notification.addClass('translate-y-[-100%] sm:translate-y-0 sm:translate-x-full');
+        notification.addClass('translate-x-full');
         setTimeout(() => {
             notification.remove();
         }, 300);
-    }, 3000);
+    }, 4000);
 }
 
 function showLoading() {
