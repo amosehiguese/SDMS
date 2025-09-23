@@ -1,338 +1,233 @@
-from celery import shared_task
-from django.contrib.auth.models import User
-
-from django.utils import timezone
-from .services import EmailService
-import logging
-
-logger = logging.getLogger(__name__)
-
-def get_base_context():
-    """
-    Get base context variables for email templates (reusable across the project)
-    Returns only serializable data for Celery tasks
-    """
-    from django.conf import settings
-    from core.models import SiteConfiguration
-    from .utils import serialize_for_task
-    
-    try:
-        site_config = SiteConfiguration.get_config()
-    except:
-        site_config = None
-    
-    context = {
-        'site_name': getattr(site_config, 'site_name', 'Success Direct Marketstore') if site_config else 'Success Direct Marketstore',
-        'site_url': getattr(settings, 'SITE_URL', 'http://localhost:8000'),
-        'contact_email': getattr(site_config, 'contact_email', 'support@successdirectmarketstores.com'),
-        'site_logo': 'https://sdmsstore.s3.us-east-1.amazonaws.com/static/img/sdms-logo-w.png',
-        'year': timezone.now().year,
-        'phone_number': getattr(site_config, 'phone_number', None) if site_config else None,
-    }
-    
-    # Clean context to ensure all values are serializable
-    cleaned_context = {}
-    for key, value in context.items():
-        cleaned_context[key] = serialize_for_task(value)
-    
-    return cleaned_context
-
-def deserialize_datetime_fields(context):
-    """
-    Convert serialized datetime strings back to datetime objects for template rendering
-    """
-    from django.utils.dateparse import parse_datetime
-    from datetime import datetime
-    
-    datetime_fields = [
-        'order_date', 'shipped_at', 'delivered_at', 'created_at', 'updated_at',
-        'failed_at', 'paid_at', 'date_joined'
-    ]
-    
-    for field in datetime_fields:
-        if field in context and isinstance(context[field], str):
-            try:
-                # Try to parse ISO format datetime
-                parsed_dt = parse_datetime(context[field])
-                if parsed_dt:
-                    context[field] = parsed_dt
-            except (ValueError, TypeError):
-                # If parsing fails, keep as string
-                pass
-    
-    return context
-
-@shared_task(bind=True, max_retries=3)
-def send_email_task(self, email_type, recipient_email, context=None):
-    """
-    Async task to send emails
-    
-    Args:
-        email_type: Type of email to send
-        recipient_email: Recipient email address
-        context: Dictionary of context variables (all serializable)
-    """
-    try:
-        if context is None:
-            context = {}
-            
-        # Deserialize datetime fields for proper template rendering
-        context = deserialize_datetime_fields(context)
-            
-        success = EmailService.send_email(email_type, recipient_email, context)
-        if not success:
-            raise Exception(f"Failed to send email type: {email_type}")
-        return f"Email sent successfully: {email_type} to {recipient_email}"
-    except Exception as e:
-        logger.error(f"Email task failed: {email_type} to {recipient_email} - {str(e)}")
-        # Retry the task
-        if self.request.retries < 3:
-            raise self.retry(countdown=60 * (self.request.retries + 1))
-        raise e
-
-@shared_task(bind=True, max_retries=3)
-def send_admin_email_task(self, email_type, context=None):
-    """
-    Async task to send emails to admin
-    
-    Args:
-        email_type: Type of admin email to send
-        context: Dictionary of context variables (all serializable)
-    """
-    try:
-        if context is None:
-            context = {}
-        
-        # Deserialize datetime fields for proper template rendering
-        context = deserialize_datetime_fields(context)
-        
-        success = EmailService.send_admin_email(email_type, context)
-        if not success:
-            raise Exception(f"Failed to send admin email type: {email_type}")
-        return f"Admin email sent successfully: {email_type}"
-    except Exception as e:
-        logger.error(f"Admin email task failed: {email_type} - {str(e)}")
-        if self.request.retries < 3:
-            raise self.retry(countdown=60 * (self.request.retries + 1))
-        raise e
-
-@shared_task(bind=True, max_retries=3)
-def send_user_email_task(self, email_type, user_id, context=None):
-    """
-    Async task to send emails to specific user by ID
-    
-    Args:
-        email_type: Type of email to send
-        user_id: User ID (not user object)
-        context: Dictionary of context variables (all serializable)
-    """
-    try:
-        from .utils import serialize_for_task
-        
-        # Retrieve user object from ID
-        try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            logger.error(f"User not found for email task: user_id={user_id}")
-            raise Exception(f"User with ID {user_id} not found")
-        
-        if context is None:
-            context = {}
-        
-        # Deserialize datetime fields for proper template rendering
-        context = deserialize_datetime_fields(context)
-
-        # Add user info to context if not already present
-        if 'user_email' not in context:
-            context['user_email'] = user.email
-        if 'user_first_name' not in context:
-            context['user_first_name'] = user.first_name or ''
-        if 'user_last_name' not in context:
-            context['user_last_name'] = user.last_name or ''
-        
-        success = EmailService.send_user_email(email_type, user, context)
-        if not success:
-            raise Exception(f"Failed to send user email type: {email_type}")
-        return f"User email sent successfully: {email_type} to {user.email}"
-        
-    except Exception as e:
-        logger.error(f"User email task failed: {email_type} for user_id={user_id} - {str(e)}")
-        if self.request.retries < 3:
-            raise self.retry(countdown=60 * (self.request.retries + 1))
-        raise e
+# Add these new functions to emails/tasks.py
 
 @shared_task
-def send_bulk_email_task(email_type, recipient_emails, context=None):
-    """
-    Send bulk emails (useful for newsletters or announcements)
-    
-    Args:
-        email_type: Type of email to send
-        recipient_emails: List of email addresses
-        context: Dictionary of context variables (all serializable)
-    """
-    if context is None:
-        context = {}
-    
-    # Deserialize datetime fields for proper template rendering
-    context = deserialize_datetime_fields(context)
-        
-    successful = 0
-    failed = 0
-    
-    for email in recipient_emails:
-        try:
-            success = EmailService.send_email(email_type, email, context)
-            if success:
-                successful += 1
-            else:
-                failed += 1
-        except Exception as e:
-            logger.error(f"Bulk email failed for {email}: {str(e)}")
-            failed += 1
-    
-    return f"Bulk email completed: {successful} successful, {failed} failed"
-
-@shared_task(bind=True, max_retries=3)
-def send_receipt_email_task(self, order_id):
-    """
-    Special task for sending receipt emails with order data retrieval
-    
-    Args:
-        order_id: Order ID (not order object)
-    """
+def send_welcome_email_task(user_id):
+    """Send welcome email when user registers"""
     try:
-        from orders.models import Order
-        
-        # Retrieve order object from ID
-        try:
-            order = Order.objects.select_related('user').prefetch_related('items__product').get(id=order_id)
-        except Order.DoesNotExist:
-            logger.error(f"Order not found for receipt email: order_id={order_id}")
-            raise Exception(f"Order with ID {order_id} not found")
-        
-        # Build context with serializable data
+        user = User.objects.get(id=user_id)
         context = {
-            'order_id': order.id,
-            'order_number': getattr(order, 'order_number', str(order.id)),
-            'customer_email': order.user.email,
-            'customer_name': f"{order.user.first_name} {order.user.last_name}".strip(),
-            'customer_first_name': order.user.first_name or '',
-            'customer_last_name': order.user.last_name or '',
-            'order_date': order.created_at,  # Pass as datetime object
-            'paid_at': getattr(order, 'paid_at', order.created_at),  # Pass as datetime object
-            'payment_method': getattr(order, 'payment_method', 'Card'),
-            'subtotal': str(getattr(order, 'subtotal', 0)),
-            'shipping_cost': str(getattr(order, 'shipping_cost', 0)),
-            'tax_amount': str(getattr(order, 'tax_amount', 0)),
-            'total': str(order.calculate_totals()),
-            'total_amount': str(order.calculate_totals()),  # Alias for consistency
+            'user_email': user.email,
+            'user_first_name': user.first_name or '',
+            'user_last_name': user.last_name or '',
+            'user_id': serialize_for_task(user.id),
+            'username': user.username,
         }
         
-        # Add receipt-specific info if Receipt model exists
-        try:
-            from orders.models import Receipt
-            receipt = Receipt.objects.filter(order=order).first()
-            if receipt:
-                context['receipt_number'] = getattr(receipt, 'receipt_number', f"RCP-{order.id}")
-        except ImportError:
-            # Receipt model doesn't exist, generate receipt number
-            context['receipt_number'] = f"RCP-{order.id}"
+        # Send welcome email to user
+        send_user_email_task.delay('welcome', user.id, context)
         
-        # Add order items as serializable data
-        order_items = []
-        for item in order.items.all():
-            order_items.append({
-                'product_title': item.product.title,
-                'product_name': getattr(item.product, 'name', item.product.title),
-                'quantity': item.quantity,
-                'price': str(item.price),
-                'total_price': str(item.get_total_price()),
-            })
-        context['order_items'] = order_items
+        # Notify admin of new user
+        admin_context = {
+            'user_id': serialize_for_task(user.id),
+            'user_email': user.email,
+            'user_first_name': user.first_name or '',
+            'user_last_name': user.last_name or '',
+            'username': user.username,
+            'user_date_joined': serialize_for_task(user.date_joined), 
+            'is_active': user.is_active,
+        }
+        send_admin_email_task.delay('new_user_admin', admin_context)
         
-        success = EmailService.send_user_email('receipt', order.user, context)
-        if success:
-            return f"Receipt email sent for order {order_id}"
-        else:
-            raise Exception("Failed to send receipt email")
-            
-    except Exception as e:
-        logger.error(f"Receipt email task failed for order {order_id}: {str(e)}")
-        if self.request.retries < 3:
-            raise self.retry(countdown=60 * (self.request.retries + 1))
-        raise e
+        logger.info(f"Welcome email queued for user: {user.email}")
+        return True
+    except User.DoesNotExist:
+        logger.error(f"User with id {user_id} not found")
+        return False
 
-@shared_task(bind=True, max_retries=3) 
-def send_order_status_email_task(self, order_id, email_type, additional_context=None):
-    """
-    Task for sending order status emails (shipped, delivered, etc.)
-    
-    Args:
-        order_id: Order ID (not order object)
-        email_type: Type of status email (order_shipped, order_delivered, etc.)
-        additional_context: Additional context data (all serializable)
-    """
+@shared_task  
+def send_order_confirmation_task(order_id):
+    """Send order confirmation email"""
     try:
         from orders.models import Order
+        order = Order.objects.select_related('user').get(id=order_id)
         
-        # Retrieve order object from ID
-        try:
-            order = Order.objects.select_related('user', 'shipping_address').prefetch_related('items__product').get(id=order_id)
-        except Order.DoesNotExist:
-            logger.error(f"Order not found for status email: order_id={order_id}")
-            raise Exception(f"Order with ID {order_id} not found")
+        order_items = build_order_items_context(order)
+        shipping_context = build_shipping_context(order)
         
-        # Build base context
         context = {
-            'order_id': order.id,
+            'order_id': serialize_for_task(order.id),
             'order_number': getattr(order, 'order_number', str(order.id)),
             'user_email': order.user.email,
             'user_first_name': order.user.first_name or '',
             'user_last_name': order.user.last_name or '',
+            'user_id': serialize_for_task(order.user.id),
+            'total_amount': str(order.calculate_totals()),
+            'order_date': order.created_at,
+            'items_count': order.items.count(),
+            'fulfillment_type': getattr(order, 'fulfillment_type', 'deliver'),
             'status': order.status,
-            'total': str(order.calculate_totals()),
-            'total_amount': str(order.calculate_totals()),  # Alias for consistency
-            'tracking_number': getattr(order, 'tracking_number', ''),
-            'shipped_at': order.shipped_at if getattr(order, 'shipped_at', None) else None,  # Pass as datetime
-            'delivered_at': order.delivered_at if getattr(order, 'delivered_at', None) else None,  # Pass as datetime
+            'order_items': order_items,
+            **shipping_context
         }
         
-        # Add order items
-        order_items = []
-        for item in order.items.all():
-            order_items.append({
-                'product_title': item.product.title,
-                'product_name': getattr(item.product, 'name', item.product.title),
-                'quantity': item.quantity,
-                'price': str(item.price),
-                'total_price': str(item.get_total_price()),
-            })
-        context['order_items'] = order_items
+        # Send order confirmation to user
+        send_user_email_task.delay('order_confirmation', order.user.id, context)
         
-        # Add shipping address if available
-        if hasattr(order, 'shipping_address') and order.shipping_address:
-            context.update({
-                'shipping_full_name': getattr(order.shipping_address, 'full_name', ''),
-                'shipping_address': getattr(order.shipping_address, 'full_address', ''),
-                'shipping_phone': getattr(order.shipping_address, 'phone', ''),
-                'shipping_email': getattr(order.shipping_address, 'email', ''),
-            })
+        # Notify admin of new order
+        admin_context = {
+            'order_id': serialize_for_task(order.id),
+            'order_number': getattr(order, 'order_number', str(order.id)),
+            'customer_email': order.user.email,
+            'customer_name': f"{order.user.first_name} {order.user.last_name}",
+            'customer_id': serialize_for_task(order.user.id),
+            'total_amount': str(order.calculate_totals()),
+            'order_date': order.created_at,
+            'items_count': order.items.count(),
+            'fulfillment_type': getattr(order, 'fulfillment_type', 'deliver'),
+            'status': order.status,
+            'order_items': order_items,
+            **shipping_context
+        }
+        send_admin_email_task.delay('new_order_admin', admin_context)
         
-        # Merge additional context
-        if additional_context:
-            # Deserialize datetime fields in additional context too
-            additional_context = deserialize_datetime_fields(additional_context)
-            context.update(additional_context)
-        
-        success = EmailService.send_user_email(email_type, order.user, context)
-        if success:
-            return f"Order status email sent: {email_type} for order {order_id}"
-        else:
-            raise Exception(f"Failed to send order status email: {email_type}")
-            
+        logger.info(f"Order confirmation email queued for order: {order.id}")
+        return True
     except Exception as e:
-        logger.error(f"Order status email task failed: {email_type} for order {order_id}: {str(e)}")
-        if self.request.retries < 3:
-            raise self.retry(countdown=60 * (self.request.retries + 1))
-        raise e
+        logger.error(f"Error sending order confirmation for order {order_id}: {str(e)}")
+        return False
+
+@shared_task
+def send_order_status_update_task(order_id, old_status, new_status):
+    """Send email when order status changes"""
+    try:
+        from orders.models import Order
+        order = Order.objects.select_related('user').get(id=order_id)
+        
+        order_items = build_order_items_context(order)
+        shipping_context = build_shipping_context(order)
+        
+        context = {
+            'order_id': serialize_for_task(order.id),
+            'order_number': getattr(order, 'order_number', str(order.id)),
+            'user_email': order.user.email,
+            'user_first_name': order.user.first_name or '',
+            'user_last_name': order.user.last_name or '',
+            'user_id': serialize_for_task(order.user.id),
+            'old_status': old_status,
+            'new_status': new_status,
+            'total_amount': str(order.calculate_totals()),
+            'updated_at': serialize_for_task(order.updated_at),
+            'tracking_number': getattr(order, 'tracking_number', ''),
+            'shipped_at': serialize_for_task(order.shipped_at) if getattr(order, 'shipped_at', None) else None,
+            'delivered_at': serialize_for_task(order.delivered_at) if getattr(order, 'delivered_at', None) else None,
+            'order_items': order_items,
+            **shipping_context
+        }
+        
+        # Send appropriate email based on new status
+        if new_status == 'shipped':
+            context.update({
+                'tracking_number': getattr(order, 'tracking_number', ''),
+                'shipped_at': order.shipped_at, 
+            })
+            send_user_email_task.delay('order_shipped', order.user.id, context)
+        elif new_status == 'delivered':
+            context.update({
+                'delivered_at': order.delivered_at,
+            })
+            send_user_email_task.delay('order_delivered', order.user.id, context)
+            # Also send receipt
+            send_receipt_email_task.delay(order.id)
+        elif new_status == 'liquidated':
+            send_user_email_task.delay('asset_liquidation', order.user.id, context)
+        
+        logger.info(f"Order status change email queued: {old_status} -> {new_status}")
+        return True
+    except Exception as e:
+        logger.error(f"Error sending status update for order {order_id}: {str(e)}")
+        return False
+
+@shared_task
+def send_payment_success_task(payment_id):
+    """Send receipt when payment is successful"""
+    try:
+        from payments.models import Payment
+        payment = Payment.objects.select_related('order').get(id=payment_id)
+        
+        if hasattr(payment, 'order') and payment.order:
+            send_receipt_email_task.delay(payment.order.id)
+            logger.info(f"Receipt email queued for payment: {payment.id}")
+        return True
+    except Exception as e:
+        logger.error(f"Error sending payment success email for payment {payment_id}: {str(e)}")
+        return False
+
+@shared_task
+def send_payment_failed_task(payment_id):
+    """Send admin notification when payment fails"""
+    try:
+        from payments.models import Payment
+        payment = Payment.objects.select_related('order', 'user').get(id=payment_id)
+        
+        order_context = {}
+        if hasattr(payment, 'order') and payment.order:
+            order = payment.order
+            order_context = {
+                'order_id': serialize_for_task(order.id),
+                'order_number': getattr(order, 'order_number', str(order.id)),
+                'customer_email': order.user.email,
+                'customer_name': f"{order.user.first_name} {order.user.last_name}",
+                'customer_id': serialize_for_task(order.user.id),
+                'order_total': str(order.calculate_totals()),
+            }
+        
+        context = {
+            'payment_id': serialize_for_task(payment.id),
+            'payment_reference': getattr(payment, 'reference', ''),
+            'amount': str(payment.amount),
+            'customer_email': payment.user.email if payment.user else 'Unknown',
+            'customer_id': serialize_for_task(payment.user.id) if payment.user else None,
+            'failed_at': serialize_for_task(payment.updated_at),
+            'error_message': getattr(payment, 'error_message', 'Unknown error'),
+            'error_code': getattr(payment, 'error_code', ''),
+            'payment_method': getattr(payment, 'payment_method', ''),
+            **order_context
+        }
+        
+        send_admin_email_task.delay('payment_failed_admin', context)
+        logger.info(f"Payment failure notification queued: {payment.id}")
+        return True
+    except Exception as e:
+        logger.error(f"Error sending payment failed notification for payment {payment_id}: {str(e)}")
+        return False
+
+@shared_task
+def send_sell_item_notification_task(submission_id):
+    """Send email when sell item is submitted"""
+    try:
+        from sell_items.models import SellItemSubmission
+        submission = SellItemSubmission.objects.select_related('user').get(id=submission_id)
+        
+        # User confirmation
+        user_context = {
+            'submission_id': serialize_for_task(submission.id),
+            'item_name': getattr(submission, 'item_name', ''),
+            'title': getattr(submission, 'title', ''),
+            'user_email': submission.user.email,
+            'user_first_name': submission.user.first_name or '',
+            'user_last_name': submission.user.last_name or '',
+            'user_id': serialize_for_task(submission.user.id),
+            'submitted_at': serialize_for_task(submission.created_at),
+        }
+        send_user_email_task.delay('sell_item_confirmation', submission.user.id, user_context)
+        
+        # Admin notification
+        admin_context = {
+            'submission_id': serialize_for_task(submission.id),
+            'item_name': getattr(submission, 'item_name', ''),
+            'title': getattr(submission, 'title', ''),
+            'user_email': submission.user.email,
+            'user_first_name': submission.user.first_name or '',
+            'user_last_name': submission.user.last_name or '',
+            'user_id': serialize_for_task(submission.user.id),
+            'submitted_at': serialize_for_task(submission.created_at),
+            'description': getattr(submission, 'description', ''),
+            'price': str(getattr(submission, 'price', 0)),
+        }
+        send_admin_email_task.delay('sell_item_review_admin', admin_context)
+        
+        logger.info(f"Sell item emails queued for submission: {submission.id}")
+        return True
+    except Exception as e:
+        logger.error(f"Error sending sell item notification for submission {submission_id}: {str(e)}")
+        return False

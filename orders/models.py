@@ -225,28 +225,44 @@ class Order(BaseModel):
         super().save(*args, **kwargs)
     
     def calculate_totals(self):
-        """Calculate order totals based on items"""
-        self.subtotal = sum(item.get_total_price() for item in self.items.all())
+        """Calculate order totals based on items - WITHOUT saving"""
+        from core.models import SiteConfiguration
+        
+        # Calculate subtotal
+        subtotal = sum(item.get_total_price() for item in self.items.all())
         
         # Add shipping cost only for delivery orders
+        shipping_cost = Decimal('0.00')
         if self.fulfillment_type == 'deliver':
-            from core.models import SiteConfiguration
             config = SiteConfiguration.get_config()
-            if self.subtotal < config.free_shipping_threshold:
-                self.shipping_cost = config.default_shipping_cost
-            else:
-                self.shipping_cost = Decimal('0.00')
-        else:
-            self.shipping_cost = Decimal('0.00')
+            if subtotal < config.free_shipping_threshold:
+                shipping_cost = config.default_shipping_cost
         
         # Calculate tax from site configuration
-        from core.models import SiteConfiguration
         config = SiteConfiguration.get_config()
         tax_rate = getattr(config, 'tax_rate', Decimal('0.00'))
-        self.tax_amount = self.subtotal * tax_rate
+        tax_amount = subtotal * tax_rate
         
-        self.total = self.subtotal + self.shipping_cost + self.tax_amount
+        total = subtotal + shipping_cost + tax_amount
+        
+        # Update instance fields but DON'T save automatically
+        self.subtotal = subtotal
+        self.shipping_cost = shipping_cost
+        self.tax_amount = tax_amount
+        self.total = total
+        
+        return total
+    
+    def update_totals(self):
+        """Calculate and save totals - use this when you want to save"""
+        self.calculate_totals()
         self.save(update_fields=['subtotal', 'shipping_cost', 'tax_amount', 'total'])
+    
+    def get_total(self):
+        """Get total without triggering calculations if already calculated"""
+        if hasattr(self, 'total') and self.total:
+            return self.total
+        return self.calculate_totals()
     
     def can_be_cancelled(self):
         """Check if order can be cancelled"""
