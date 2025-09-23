@@ -7,7 +7,7 @@ from sell_items.models import SellItemSubmission
 from payments.models import Payment
 from store.models import Product
 from .tasks import send_email_task, send_admin_email_task, send_user_email_task, send_receipt_email_task
-from .utils import serialize_for_task
+from .utils import serialize_for_task, build_order_items_context, build_shipping_context
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +55,8 @@ def track_order_status_change(sender, instance, **kwargs):
 @receiver(post_save, sender=Order)
 def send_order_emails(sender, instance, created, **kwargs):
     """Send order-related emails based on order status"""
+    order_items = build_order_items_context(instance)
+    shipping_context = build_shipping_context(instance)
     
     if created:
         # New order created
@@ -66,10 +68,12 @@ def send_order_emails(sender, instance, created, **kwargs):
             'user_last_name': instance.user.last_name or '',
             'user_id': serialize_for_task(instance.user.id),
             'total_amount': str(instance.calculate_totals()),
-            'order_date': serialize_for_task(instance.created_at),
+            'order_date': instance.created_at,
             'items_count': instance.items.count(),
             'fulfillment_type': getattr(instance, 'fulfillment_type', 'deliver'),
             'status': instance.status,
+            'order_items': order_items,
+            **shipping_context
         }
         
         # Send order confirmation to user
@@ -83,10 +87,13 @@ def send_order_emails(sender, instance, created, **kwargs):
             'customer_name': f"{instance.user.first_name} {instance.user.last_name}",
             'customer_id': serialize_for_task(instance.user.id),
             'total_amount': str(instance.calculate_totals()),
-            'order_date': serialize_for_task(instance.created_at),
+            'order_date': instance.created_at,
             'items_count': instance.items.count(),
             'fulfillment_type': getattr(instance, 'fulfillment_type', 'deliver'),
             'status': instance.status,
+            'order_items': order_items,
+            **shipping_context
+
         }
         send_admin_email_task.delay('new_order_admin', admin_context)
         
@@ -111,12 +118,21 @@ def send_order_emails(sender, instance, created, **kwargs):
                 'tracking_number': getattr(instance, 'tracking_number', ''),
                 'shipped_at': serialize_for_task(instance.shipped_at) if getattr(instance, 'shipped_at', None) else None,
                 'delivered_at': serialize_for_task(instance.delivered_at) if getattr(instance, 'delivered_at', None) else None,
+                'order_items': order_items,
+                **shipping_context
             }
             
             # Send appropriate email based on new status
             if instance.status == 'shipped':
+                context.update({
+                    'tracking_number': getattr(instance, 'tracking_number', ''),
+                    'shipped_at': instance.shipped_at, 
+                })
                 send_user_email_task.delay('order_shipped', instance.user.id, context)
             elif instance.status == 'delivered':
+                context.update({
+                    'delivered_at': instance.delivered_at,  # Pass as datetime object
+                })
                 send_user_email_task.delay('order_delivered', instance.user.id, context)
                 # Also send receipt
                 send_receipt_email_task.delay(instance.id)
@@ -192,6 +208,7 @@ def send_sell_item_emails(sender, instance, created, **kwargs):
             'bank_name': getattr(instance, 'bank_name', ''),
             'account_number': getattr(instance, 'account_number', ''),
             'account_holder_name': getattr(instance, 'account_holder_name', ''),
+            'created_at': instance.created_at,
         }
         
         # Add held asset order info if available
@@ -225,6 +242,7 @@ def send_sell_item_emails(sender, instance, created, **kwargs):
             'bank_name': getattr(instance, 'bank_name', ''),
             'account_number': getattr(instance, 'account_number', ''),
             'account_holder_name': getattr(instance, 'account_holder_name', ''),
+            'created_at': instance.created_at,
         }
         
         # Add held asset order info for admin too
@@ -255,7 +273,7 @@ def send_sell_item_emails(sender, instance, created, **kwargs):
                 'user_id': serialize_for_task(instance.user.id),
                 'old_status': old_status,
                 'new_status': instance.status,
-                'updated_at': serialize_for_task(instance.updated_at),
+                'updated_at': instance.updated_at,
                 'price': str(getattr(instance, 'price', 0)),
                 'stock_quantity': getattr(instance, 'stock_quantity', 0),
                 'reviewed_at': instance.updated_at.isoformat(),

@@ -37,6 +37,31 @@ def get_base_context():
     
     return cleaned_context
 
+def deserialize_datetime_fields(context):
+    """
+    Convert serialized datetime strings back to datetime objects for template rendering
+    """
+    from django.utils.dateparse import parse_datetime
+    from datetime import datetime
+    
+    datetime_fields = [
+        'order_date', 'shipped_at', 'delivered_at', 'created_at', 'updated_at',
+        'failed_at', 'paid_at', 'date_joined'
+    ]
+    
+    for field in datetime_fields:
+        if field in context and isinstance(context[field], str):
+            try:
+                # Try to parse ISO format datetime
+                parsed_dt = parse_datetime(context[field])
+                if parsed_dt:
+                    context[field] = parsed_dt
+            except (ValueError, TypeError):
+                # If parsing fails, keep as string
+                pass
+    
+    return context
+
 @shared_task(bind=True, max_retries=3)
 def send_email_task(self, email_type, recipient_email, context=None):
     """
@@ -50,6 +75,9 @@ def send_email_task(self, email_type, recipient_email, context=None):
     try:
         if context is None:
             context = {}
+            
+        # Deserialize datetime fields for proper template rendering
+        context = deserialize_datetime_fields(context)
             
         success = EmailService.send_email(email_type, recipient_email, context)
         if not success:
@@ -72,20 +100,13 @@ def send_admin_email_task(self, email_type, context=None):
         context: Dictionary of context variables (all serializable)
     """
     try:
-        from .utils import serialize_for_task
-        
         if context is None:
             context = {}
         
-        # Clean the incoming context to ensure serialization
-        cleaned_context = {}
-        for key, value in context.items():
-            cleaned_context[key] = serialize_for_task(value)
+        # Deserialize datetime fields for proper template rendering
+        context = deserialize_datetime_fields(context)
         
-        base_context = get_base_context()
-        merged_context = {**base_context, **cleaned_context}
-
-        success = EmailService.send_admin_email(email_type, merged_context)
+        success = EmailService.send_admin_email(email_type, context)
         if not success:
             raise Exception(f"Failed to send admin email type: {email_type}")
         return f"Admin email sent successfully: {email_type}"
@@ -94,7 +115,6 @@ def send_admin_email_task(self, email_type, context=None):
         if self.request.retries < 3:
             raise self.retry(countdown=60 * (self.request.retries + 1))
         raise e
-
 
 @shared_task(bind=True, max_retries=3)
 def send_user_email_task(self, email_type, user_id, context=None):
@@ -118,9 +138,10 @@ def send_user_email_task(self, email_type, user_id, context=None):
         
         if context is None:
             context = {}
-
-        base_context = get_base_context()
         
+        # Deserialize datetime fields for proper template rendering
+        context = deserialize_datetime_fields(context)
+
         # Add user info to context if not already present
         if 'user_email' not in context:
             context['user_email'] = user.email
@@ -129,26 +150,7 @@ def send_user_email_task(self, email_type, user_id, context=None):
         if 'user_last_name' not in context:
             context['user_last_name'] = user.last_name or ''
         
-        # Create user_data dictionary with properly serialized values
-        user_data = {
-            'user_id': serialize_for_task(user.id),
-            'username': user.username,
-            'email': user.email,
-            'first_name': user.first_name or '',
-            'last_name': user.last_name or '',
-            'is_active': user.is_active,
-            'date_joined': serialize_for_task(user.date_joined) if user.date_joined else None,
-        }
-
-        # Clean the incoming context to ensure serialization
-        cleaned_context = {}
-        for key, value in context.items():
-            cleaned_context[key] = serialize_for_task(value)
-
-        # Merge contexts properly
-        merged_context = {**base_context, **user_data, **cleaned_context}
-        
-        success = EmailService.send_user_email(email_type, user, merged_context)
+        success = EmailService.send_user_email(email_type, user, context)
         if not success:
             raise Exception(f"Failed to send user email type: {email_type}")
         return f"User email sent successfully: {email_type} to {user.email}"
@@ -171,6 +173,9 @@ def send_bulk_email_task(email_type, recipient_emails, context=None):
     """
     if context is None:
         context = {}
+    
+    # Deserialize datetime fields for proper template rendering
+    context = deserialize_datetime_fields(context)
         
     successful = 0
     failed = 0
@@ -214,13 +219,14 @@ def send_receipt_email_task(self, order_id):
             'customer_name': f"{order.user.first_name} {order.user.last_name}".strip(),
             'customer_first_name': order.user.first_name or '',
             'customer_last_name': order.user.last_name or '',
-            'order_date': order.created_at.isoformat(),
-            'paid_at': getattr(order, 'paid_at', order.created_at).isoformat(),
+            'order_date': order.created_at,  # Pass as datetime object
+            'paid_at': getattr(order, 'paid_at', order.created_at),  # Pass as datetime object
             'payment_method': getattr(order, 'payment_method', 'Card'),
             'subtotal': str(getattr(order, 'subtotal', 0)),
             'shipping_cost': str(getattr(order, 'shipping_cost', 0)),
             'tax_amount': str(getattr(order, 'tax_amount', 0)),
             'total': str(order.calculate_totals()),
+            'total_amount': str(order.calculate_totals()),  # Alias for consistency
         }
         
         # Add receipt-specific info if Receipt model exists
@@ -286,10 +292,23 @@ def send_order_status_email_task(self, order_id, email_type, additional_context=
             'user_last_name': order.user.last_name or '',
             'status': order.status,
             'total': str(order.calculate_totals()),
+            'total_amount': str(order.calculate_totals()),  # Alias for consistency
             'tracking_number': getattr(order, 'tracking_number', ''),
-            'shipped_at': order.shipped_at.isoformat() if getattr(order, 'shipped_at', None) else None,
-            'delivered_at': order.delivered_at.isoformat() if getattr(order, 'delivered_at', None) else None,
+            'shipped_at': order.shipped_at if getattr(order, 'shipped_at', None) else None,  # Pass as datetime
+            'delivered_at': order.delivered_at if getattr(order, 'delivered_at', None) else None,  # Pass as datetime
         }
+        
+        # Add order items
+        order_items = []
+        for item in order.items.all():
+            order_items.append({
+                'product_title': item.product.title,
+                'product_name': getattr(item.product, 'name', item.product.title),
+                'quantity': item.quantity,
+                'price': str(item.price),
+                'total_price': str(item.get_total_price()),
+            })
+        context['order_items'] = order_items
         
         # Add shipping address if available
         if hasattr(order, 'shipping_address') and order.shipping_address:
@@ -302,6 +321,8 @@ def send_order_status_email_task(self, order_id, email_type, additional_context=
         
         # Merge additional context
         if additional_context:
+            # Deserialize datetime fields in additional context too
+            additional_context = deserialize_datetime_fields(additional_context)
             context.update(additional_context)
         
         success = EmailService.send_user_email(email_type, order.user, context)

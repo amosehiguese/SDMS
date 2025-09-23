@@ -1,48 +1,7 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
-from django.utils.html import format_html
 from django.utils import timezone
-from .models import EmailTemplate, EmailLog
-
-@admin.register(EmailTemplate)
-class EmailTemplateAdmin(ModelAdmin):
-    list_display = ('email_type', 'recipient_type', 'subject', 'is_active', 'updated_at')
-    list_filter = ('recipient_type', 'is_active', 'email_type')
-    search_fields = ('email_type', 'subject', 'template_path')
-    readonly_fields = ('id', 'created_at', 'updated_at')
-    
-    fieldsets = (
-        ('Basic Information', {
-            'fields': ('email_type', 'recipient_type', 'is_active')
-        }),
-        ('Email Content', {
-            'fields': ('subject', 'template_path'),
-            'description': 'Use {variable} syntax for dynamic content like {site_name}, {user.email}, {order.order_number}'
-        }),
-        ('Metadata', {
-            'fields': ('id', 'created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-    
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-        
-        # Add help text for common variables
-        if 'subject' in form.base_fields:
-            help_text = """
-            <br><strong>Available variables:</strong><br>
-            <code>{site_name}</code> - Site name<br>
-            <code>{user.email}</code> - User email<br>
-            <code>{user.first_name}</code> - User first name<br>
-            <code>{order.order_number}</code> - Order number<br>
-            <code>{order.total}</code> - Order total<br>
-            <code>{product.title}</code> - Product title<br>
-            <code>{submission.title}</code> - Submission title
-            """
-            form.base_fields['subject'].help_text = format_html(help_text)
-            
-        return form
+from .models import EmailLog
 
 @admin.register(EmailLog)
 class EmailLogAdmin(ModelAdmin):

@@ -9,6 +9,31 @@ from datetime import datetime
 from django.utils.timezone import is_naive, make_aware, get_current_timezone
 
 
+def build_order_items_context(order):
+    """Build order items context with proper product information"""
+    order_items = []
+    for item in order.items.select_related('product').all():
+        order_items.append({
+            'product_title': item.product.title,
+            'product_name': getattr(item.product, 'name', item.product.title),
+            'quantity': item.quantity,
+            'price': str(item.price),
+            'total_price': str(item.get_total_price()),
+        })
+    return order_items
+
+def build_shipping_context(order):
+    """Build shipping address context if available"""
+    shipping_context = {}
+    if hasattr(order, 'shipping_address') and order.shipping_address:
+        shipping_context.update({
+            'shipping_full_name': getattr(order.shipping_address, 'full_name', ''),
+            'shipping_address': getattr(order.shipping_address, 'full_address', ''),
+            'shipping_phone': getattr(order.shipping_address, 'phone', ''),
+            'shipping_email': getattr(order.shipping_address, 'email', ''),
+        })
+    return shipping_context
+
 def serialize_for_task(value):
     """Ensure values are JSON-serializable for Celery tasks"""
     import uuid
