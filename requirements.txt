@@ -12,3 +12,4 @@ markdown==3.5.1
 django-cleanup==8.0.0
 gunicorn==23.0.0
 psycopg2-binary==2.9.10
+django-tailwind==4.2.0
