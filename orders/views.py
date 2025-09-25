@@ -10,9 +10,13 @@ from django.contrib import messages
 from django.urls import reverse
 
 from core.models import SiteConfiguration
+from emails.tasks import send_asset_liquidation_task, send_low_stock_alert_task, send_order_confirmation_task, send_order_status_update_task
 from .models import Order, OrderItem, Cart, CartItem, ShippingAddress
 from store.models import Product
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_or_create_cart(request):
     """Get or create cart for user (authenticated or anonymous)"""
@@ -282,6 +286,15 @@ def create_order(request):
                     quantity=cart_item.quantity,
                     price=cart_item.product.get_display_price()
                 )
+
+                try:
+                    remaining_stock = cart_item.product.stock - cart_item.quantity
+                    low_stock_threshold = getattr(cart_item.product, 'low_stock_threshold', 10)
+                    if remaining_stock <= low_stock_threshold:
+                        send_low_stock_alert_task.delay(str(cart_item.product.id))
+                        logger.info(f"Low stock alert queued for product {cart_item.product.title}")
+                except Exception as e:
+                    logger.error(f"Failed to queue low stock alert: {str(e)}")
         except Exception as e:
             order.delete()
             return JsonResponse({'success': False, 'error': f'Error creating order items: {str(e)}'})
@@ -299,7 +312,14 @@ def create_order(request):
         except Exception as e:
             # Don't fail the order creation if cart clearing fails
             pass
-        
+        print("Here")
+        try:
+            send_order_confirmation_task.delay(str(order.id))
+            logger.info(f"Order confirmation email queued for order {order.id}")
+        except Exception as e:
+            logger.error(f"Failed to queue order confirmation email for order {order.id}: {str(e)}")
+
+
         return JsonResponse({
             'success': True,
             'order_id': str(order.id),
@@ -475,6 +495,12 @@ def liquidate_asset(request, order_id):
         # Recalculate totals for both orders
         order.calculate_totals()
         new_order.calculate_totals()
+
+        try:
+            send_asset_liquidation_task.delay(str(order.id))
+            logger.info(f"Asset liquidation email queued for order {order.id}")
+        except Exception as e:
+            logger.error(f"Failed to queue asset liquidation email for order {order.id}: {str(e)}")
 
         return JsonResponse({
             'success': True,

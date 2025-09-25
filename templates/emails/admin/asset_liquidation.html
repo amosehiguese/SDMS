@@ -1,0 +1,40 @@
+{% extends "emails/base/admin_base.html" %}
+
+{% block email_title %}Asset Liquidation Request - Order #{{ order_number }}{% endblock %}
+
+{% block main_content %}
+<h2 style="color: #333; margin-bottom: 20px;">🏦 Asset Liquidation Request</h2>
+
+<p>A customer has requested to liquidate their held assets.</p>
+
+<div class="info-box">
+    <h3>Order Details</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td><strong>Order Number:</strong></td>
+            <td>{{ order_number }}</td>
+        </tr>
+        <tr>
+            <td><strong>Customer:</strong></td>
+            <td>{{ customer_email }}</td>
+        </tr>
+        <tr>
+            <td><strong>Total Value:</strong></td>
+            <td><strong>₦{{ total_amount|floatformat:0 }}</strong></td>
+        </tr>
+    </table>
+</div>
+
+<h3>Items to Ship:</h3>
+{% for item in order_items %}
+    <p>• {{ item.product_title }} (Qty: {{ item.quantity }})</p>
+{% endfor %}
+
+<p><strong>Action Required:</strong> Please process this liquidation request and prepare the items for shipping.</p>
+{% endblock %}
+
+{% block action_button %}
+<div style="text-align: center;">
+    <a href="{{ site_url }}/admin/orders/order/{{ order_id }}/" class="button">View Order in Admin</a>
+</div>
+{% endblock %}

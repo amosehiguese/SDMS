@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.html import strip_tags
 from .models import EmailLog  
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +71,10 @@ class EmailService:
         'payment_failed_admin': {
             'subject': 'Payment Failed for Order #{order_number}',
             'template': 'emails/admin/payment_failed.html',
+        },
+        'asset_liquidation_admin': {
+            'subject': 'Asset Liquidation Request Submitted',
+            'template': 'emails/admin/asset_liquidation.html',
         },
     }
     
@@ -145,7 +150,7 @@ class EmailService:
                 )
                 
                 email_log.status = 'sent'
-                email_log.sent_at = datetime.now()
+                email_log.sent_at = timezone.now()
                 email_log.save()
                 
                 logger.info(f"Email sent successfully: {email_type} to {recipient_email}")

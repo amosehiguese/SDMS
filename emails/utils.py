@@ -1,13 +1,6 @@
 from django.core.mail import send_mail
 from django.db import models
 from django.template.loader import render_to_string
-from django.conf import settings
-from .tasks import send_email_task, send_user_email_task, send_admin_email_task
-
-import uuid
-from datetime import datetime
-from django.utils.timezone import is_naive, make_aware, get_current_timezone
-
 
 def build_order_items_context(order):
     """Build order items context with proper product information"""
@@ -28,6 +21,8 @@ def build_shipping_context(order):
     if hasattr(order, 'shipping_address') and order.shipping_address:
         shipping_context.update({
             'shipping_full_name': getattr(order.shipping_address, 'full_name', ''),
+            'shipping_first_name': getattr(order.shipping_address, 'first_name', ''),  # ✅ From shipping address
+            'shipping_last_name': getattr(order.shipping_address, 'last_name', ''),
             'shipping_address': getattr(order.shipping_address, 'full_address', ''),
             'shipping_phone': getattr(order.shipping_address, 'phone', ''),
             'shipping_email': getattr(order.shipping_address, 'email', ''),
@@ -102,74 +97,6 @@ def send_test_email(email_type, recipient_email, context=None):
     """
     from .services import EmailService
     return EmailService.send_email(email_type, recipient_email, context)
-
-def send_notification_email(email_type, user=None, context=None):
-    """
-    Convenient function to send notification emails
-    """
-    if user:
-        return send_user_email_task.delay(email_type, user.id, context)
-    else:
-        return send_admin_email_task.delay(email_type, context)
-
-def send_bulk_notification(email_type, users, context=None):
-    """
-    Send bulk notification to multiple users
-    """
-    from .tasks import send_bulk_email_task
-    
-    recipient_emails = [user.email for user in users]
-    return send_bulk_email_task.delay(email_type, recipient_emails, context)
-
-def get_email_stats():
-    """
-    Get email statistics for dashboard
-    """
-    from .models import EmailLog
-    from django.utils import timezone
-    from datetime import timedelta
-    
-    now = timezone.now()
-    today = now.date()
-    week_ago = now - timedelta(days=7)
-    month_ago = now - timedelta(days=30)
-    
-    stats = {
-        'today': {
-            'total': EmailLog.objects.filter(created_at__date=today).count(),
-            'sent': EmailLog.objects.filter(created_at__date=today, status='sent').count(),
-            'failed': EmailLog.objects.filter(created_at__date=today, status='failed').count(),
-        },
-        'week': {
-            'total': EmailLog.objects.filter(created_at__gte=week_ago).count(),
-            'sent': EmailLog.objects.filter(created_at__gte=week_ago, status='sent').count(),
-            'failed': EmailLog.objects.filter(created_at__gte=week_ago, status='failed').count(),
-        },
-        'month': {
-            'total': EmailLog.objects.filter(created_at__gte=month_ago).count(),
-            'sent': EmailLog.objects.filter(created_at__gte=month_ago, status='sent').count(),
-            'failed': EmailLog.objects.filter(created_at__gte=month_ago, status='failed').count(),
-        },
-        'by_type': EmailLog.objects.filter(created_at__gte=week_ago).values('email_type').annotate(
-            count=models.Count('id')
-        ).order_by('-count')[:10]
-    }
-    
-    return stats
-
-def cleanup_old_email_logs(days=90):
-    """
-    Clean up old email logs older than specified days
-    """
-    from .models import EmailLog
-    from django.utils import timezone
-    from datetime import timedelta
-    
-    cutoff_date = timezone.now() - timedelta(days=days)
-    deleted_count = EmailLog.objects.filter(created_at__lt=cutoff_date).count()
-    EmailLog.objects.filter(created_at__lt=cutoff_date).delete()
-    
-    return deleted_count
 
 def validate_email_template(template_path, context=None):
     """

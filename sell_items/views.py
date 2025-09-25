@@ -11,9 +11,15 @@ from django.core.files.base import ContentFile
 from django.db.models import Count
 import json
 
+from emails.tasks import send_sell_item_notification_task, send_user_email_task
+
 from .models import SellItemSubmission, SellItemImage
 from orders.models import Order
 from store.models import Product, ProductImage, Category
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def sell_item_list(request):
@@ -65,6 +71,12 @@ def submit_sell_item(request):
                         is_primary=(i == 0),
                         sort_order=i
                     )
+
+                try:
+                    send_sell_item_notification_task.delay(str(submission.id))
+                    logger.info(f"Sell item notification emails queued for submission {submission.id}")
+                except Exception as e:
+                    logger.error(f"Failed to queue sell item emails for submission {submission.id}: {str(e)}")
                 
                 messages.success(request, 'Your item has been submitted for review!')
                 return redirect('sell_items:sell_item_list')
@@ -72,7 +84,9 @@ def submit_sell_item(request):
         except Exception as e:
             messages.error(request, 'Error submitting item. Please try again.')
     
-    return render(request, 'sell_items/submit_sell_item.html')
+    return render(request, 'sell_items/submit_sell_item.html', {
+        'categories': Category.objects.filter(is_active=True),
+    })
 
 @login_required
 def submit_held_asset_sell(request, order_id):
@@ -157,6 +171,12 @@ def submit_held_asset_sell(request, order_id):
                         sort_order=product_image.sort_order
                     )
                 
+                try:
+                    send_sell_item_notification_task.delay(str(submission.id))
+                    logger.info(f"Sell item notification emails queued for submission {submission.id}")
+                except Exception as e:
+                    logger.error(f"Failed to queue sell item emails for submission {submission.id}: {str(e)}")
+
                 messages.success(request, 'Your held asset has been submitted for selling!')
                 return redirect('sell_items:sell_item_list')
                 
@@ -290,6 +310,12 @@ def edit_sell_submission(request, submission_id):
                 submission.reviewed_by = None
                 submission.reviewed_at = None
                 submission.save()
+
+                try:
+                    send_sell_item_notification_task.delay(str(submission.id))
+                    logger.info(f"Sell item resubmission notification emails queued for submission {submission.id}")
+                except Exception as e:
+                    logger.error(f"Failed to queue resubmission emails for submission {submission.id}: {str(e)}")
                 
                 messages.success(request, 'Your submission has been updated and resubmitted for review!')
                 return redirect('sell_items:sell_submission_detail', submission_id=submission_id)
@@ -320,7 +346,35 @@ def update_submission_status(request):
         submission.reviewed_by = request.user
         submission.reviewed_at = timezone.now()
         submission.save()
+
+        try:
+            context = {
+                'submission_id': str(submission.id),
+                'title': submission.title,
+                'item_name': getattr(submission, 'item_name', ''),
+                'status': submission.status,
+                'admin_notes': admin_notes,
+                'reviewed_at': submission.reviewed_at,
+                'user_email': submission.user.email,
+                'user_first_name': submission.user.first_name or '',
+                'user_last_name': submission.user.last_name or '',
+            }
+            
+            if status == 'accepted':
+                send_user_email_task.delay('sell_item_approved', submission.user.id, context)
+                logger.info(f"Sell item approval email queued for submission {submission.id}")
+            elif status == 'rejected':
+                context.update({
+                    'rejection_reason': admin_notes,
+                    'rejected_at': submission.reviewed_at,
+                })
+                send_user_email_task.delay('sell_item_rejected', submission.user.id, context)
+                logger.info(f"Sell item rejection email queued for submission {submission.id}")
+
+        except Exception as e:
+            logger.error(f"Failed to queue status update email for submission {submission.id}: {str(e)}")
         
+
         return JsonResponse({'success': True, 'message': 'Status updated successfully'})
         
     except Exception as e:

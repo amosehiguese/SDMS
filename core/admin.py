@@ -70,6 +70,10 @@ class SiteConfigurationAdmin(ModelAdmin):
         ('Tax Settings', {
             'fields': ('tax_rate',)
         }),
+        ('Inventory Settings', {
+            'fields': ('low_stock_threshold',),
+            'description': 'Configure inventory management settings'
+        }),
         ('SEO Settings', {
             'fields': ('meta_title', 'meta_description', 'meta_keywords'),
             'classes': ('collapse',)

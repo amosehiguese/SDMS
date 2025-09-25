@@ -71,6 +71,11 @@ class SiteConfiguration(models.Model):
     default_shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     free_shipping_threshold = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
+    low_stock_threshold = models.PositiveIntegerField(
+        default=10, 
+        help_text="Send low stock alert when product stock falls to or below this number"
+    )
+
     # Tax settings
     tax_rate = models.DecimalField(max_digits=5, decimal_places=4, default=0.0750, help_text="Tax rate as decimal (e.g., 0.0750 for 7.5%)")
     

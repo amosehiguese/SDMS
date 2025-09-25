@@ -48,9 +48,6 @@ class PaymentAdmin(ModelAdmin):
         # Payments should only be created through the payment flow
         return False
     
-    def has_delete_permission(self, request, obj=None):
-        # Don't allow deletion of payment records
-        return False
 
 @admin.register(PaymentWebhook)
 class PaymentWebhookAdmin(ModelAdmin):

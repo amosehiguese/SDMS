@@ -12,9 +12,14 @@ from django.utils import timezone
 from django.db import transaction
 from django.conf import settings
 
+from emails.tasks import send_low_stock_alert_task, send_order_confirmation_task, send_payment_failed_task, send_payment_success_task
 from orders.models import Order, OrderItem, Cart, ShippingAddress
 from .models import Payment
 from .services import PaymentService
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 @require_http_methods(["POST"])
@@ -128,7 +133,29 @@ def initiate_payment(request):
                     quantity=cart_item.quantity,
                     price=cart_item.product.get_display_price()
                 )
-            
+
+                try:
+                    product = cart_item.product
+                    
+                    # Only check stock if product tracks stock
+                    if product.track_stock and product.stock_quantity is not None:
+                        remaining_stock = product.stock_quantity - cart_item.quantity
+                        
+                        # Get threshold from site configuration
+                        from core.models import SiteConfiguration
+                        try:
+                            config = SiteConfiguration.get_config()
+                            low_stock_threshold = config.low_stock_threshold
+                        except Exception:
+                            low_stock_threshold = 10  # Fallback if config fails
+                        
+                        if remaining_stock <= low_stock_threshold:
+                            send_low_stock_alert_task.delay(str(product.id))
+                            logger.info(f"Low stock alert queued for '{product.title}' - Remaining: {remaining_stock}, Threshold: {low_stock_threshold}")
+                            
+                except Exception as e:
+                    logger.error(f"Failed to queue low stock alert for '{cart_item.product.title}': {str(e)}")
+        
             # Calculate order totals
             order.calculate_totals()
             
@@ -148,7 +175,12 @@ def initiate_payment(request):
             result = payment_service.initialize_payment(payment)
             
             if result['success']:
-                
+                try:
+                    send_order_confirmation_task.delay(str(order.id))
+                    logger.info(f"Order confirmation email queued for order {order.id}")
+                except Exception as e:
+                    logger.error(f"Failed to queue order confirmation email for order {order.id}: {str(e)}")
+                    
                 return JsonResponse({
                     'success': True,
                     'payment_reference': payment_reference,
@@ -266,6 +298,12 @@ def paystack_webhook(request):
                         payment.raw_response = data
                         payment.save(update_fields=['status', 'raw_response'])
 
+                        try:
+                            send_payment_success_task.delay(str(payment.id))
+                            logger.info(f"Payment success email queued for payment {payment.id}")
+                        except Exception as e:
+                            logger.error(f"Failed to queue payment success email for payment {payment.id}: {str(e)}")
+
                         # Clear the user's cart now that payment is confirmed
                         try:
                             cart = Cart.objects.get(user=payment.user)
@@ -294,6 +332,12 @@ def paystack_webhook(request):
                         payment.status = 'failed'
                         payment.raw_response = data
                         payment.save(update_fields=['status', 'raw_response'])
+
+                        try:
+                            send_payment_failed_task.delay(str(payment.id))
+                            logger.info(f"Payment failure email queued for payment {payment.id}")
+                        except Exception as e:
+                            logger.error(f"Failed to queue payment failure email for payment {payment.id}: {str(e)}")
 
             except Payment.DoesNotExist:
                 return HttpResponse(status=404)

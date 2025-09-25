@@ -6,9 +6,14 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from decimal import Decimal
 import csv
+from emails.tasks import send_order_status_update_task
 from orders.models import Order, OrderStatusLog
 from store.models import Product, Category
 from django.contrib.auth.models import User
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @staff_member_required
@@ -232,7 +237,13 @@ def update_order_status(request):
                 order.delivered_at = timezone.now()
             
             order.save()
-            
+
+            try:
+                send_order_status_update_task.delay(str(order.id), old_status, new_status)
+                logger.info(f"Order status update email queued for order {order.id}: {old_status} -> {new_status}")
+            except Exception as e:
+                logger.error(f"Failed to queue status update email for order {order.id}: {str(e)}")
+                        
             # Log status change
             OrderStatusLog.objects.create(
                 order=order,

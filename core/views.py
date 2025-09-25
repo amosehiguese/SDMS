@@ -4,7 +4,6 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from store.models import Product
 
-
 def search_products(request):
     """AJAX search for products"""
     query = request.GET.get('q', '').strip()
