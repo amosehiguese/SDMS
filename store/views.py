@@ -79,9 +79,6 @@ def home_products(request):
         'total_pages': paginator.num_pages,
     })
 
-
-
-
 def product_list(request, category_slug=None):
     """Product listing with filters"""
     # Get search query from URL parameters
@@ -94,6 +91,13 @@ def product_list(request, category_slug=None):
     if category_slug:
         current_category = get_object_or_404(Category, slug=category_slug, is_active=True)
         products = products.filter(category=current_category)
+
+    flash_sale_filter = request.GET.get('flash_sale')
+    if flash_sale_filter:
+        products = products.filter(
+            flash_sale_enabled=True,
+            flash_sale_end_time__gt=timezone.now()
+        )
 
     # Apply search filter
     if search_query:
@@ -160,6 +164,7 @@ def product_list(request, category_slug=None):
         'current_category': current_category,
         'search_query': search_query,
         'total_products': paginator.count,
+        'flash_sale_filter': flash_sale_filter,
     })
 
 

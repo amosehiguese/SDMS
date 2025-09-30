@@ -53,15 +53,11 @@ class SiteConfigurationAdmin(ModelAdmin):
             'fields': ('flash_sales_enabled', 'blog_enabled', 'user_reviews_enabled')
         }),
         ('Hero Banner Settings', {
-            'fields': ('hero_banner_enabled', 'hero_banner_image', 'hero_banner_title', 'hero_banner_subtitle', 'hero_banner_button_text', 'hero_banner_button_action'),
+            'fields': ('hero_banner_enabled', 'hero_button_enabled', 'hero_banner_image', 'hero_banner_title', 'hero_banner_subtitle', 'hero_banner_button_text', 'hero_banner_button_action'),
             'classes': ('collapse',)
         }),
         ('Countdown Settings', {
             'fields': ('countdown_enabled', 'countdown_duration_hours', 'countdown_reset_daily'),
-            'classes': ('collapse',)
-        }),
-        ('Email Templates', {
-            'fields': ('welcome_email_subject', 'order_confirmation_subject', 'receipt_email_subject'),
             'classes': ('collapse',)
         }),
         ('Shipping Settings', {

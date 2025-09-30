@@ -50,22 +50,18 @@ class SiteConfiguration(models.Model):
     user_reviews_enabled = models.BooleanField(default=True)
     
     # Hero Banner Settings
-    hero_banner_enabled = models.BooleanField(default=True, help_text="Enable/disable hero banner on homepage")
+    hero_banner_enabled = models.BooleanField(default=False, help_text="Enable/disable hero banner on homepage")
+    hero_button_enabled = models.BooleanField(default=False, help_text="Enable/disable hero banner button on homepage")
     hero_banner_image = models.ImageField(upload_to='hero_banner/', blank=True, null=True, help_text="Hero banner background image")
-    hero_banner_title = models.CharField(max_length=200, default="Flash Sale", help_text="Hero banner title")
-    hero_banner_subtitle = models.CharField(max_length=300, default="Up to 70% off on selected items!", help_text="Hero banner subtitle")
-    hero_banner_button_text = models.CharField(max_length=100, default="Shop Flash Sale", help_text="Hero banner button text")
+    hero_banner_title = models.CharField(max_length=200, default="Flash Sale", blank=True, null=True, help_text="Hero banner title")
+    hero_banner_subtitle = models.CharField(max_length=300, default="Up to 70% off on selected items!", blank=True, null=True, help_text="Hero banner subtitle")
+    hero_banner_button_text = models.CharField(max_length=100, default="Shop Flash Sale", blank=True, null=True, help_text="Hero banner button text")
     hero_banner_button_action = models.CharField(max_length=200, default="flash sale", help_text="Search term when button is clicked")
     
     # Countdown Settings
     countdown_enabled = models.BooleanField(default=True, help_text="Enable/disable countdown timer")
     countdown_duration_hours = models.PositiveIntegerField(default=24, help_text="Countdown duration in hours")
     countdown_reset_daily = models.BooleanField(default=True, help_text="Reset countdown daily at midnight")
-    
-    # Email templates
-    welcome_email_subject = models.CharField(max_length=200, default="Welcome to SuccessDirectMarketStore!")
-    order_confirmation_subject = models.CharField(max_length=200, default="Order Confirmation - #{order_number}")
-    receipt_email_subject = models.CharField(max_length=200, default="Payment Receipt - #{order_number}")
     
     # Shipping settings
     default_shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)

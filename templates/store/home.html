@@ -58,9 +58,9 @@
     {% else %}
     <div class="bg-gradient-to-r from-amber-800 to-amber-900"></div>
     {% endif %}
-    <div class="relative container mx-auto px-4 text-center text-white">
-        <h1 class="text-4xl md:text-6xl font-bold mb-4">{{ site_config.hero_banner_title|default:"Flash Sale" }}</h1>
-        <p class="text-xl md:text-2xl mb-6">{{ site_config.hero_banner_subtitle|default:"Up to 70% off on selected items!" }}</p>
+    <div class="relative h-64 mx-auto px-4 text-center text-white">
+        <h1 class="text-4xl md:text-6xl font-bold mb-4">{{ site_config.hero_banner_title|default:"" }}</h1>
+        <p class="text-xl md:text-2xl mb-6">{{ site_config.hero_banner_subtitle|default:"" }}</p>
         
         {% if site_config.countdown_enabled %}
         <div class="flex justify-center space-x-4 mb-6 text-black">
@@ -86,9 +86,11 @@
         </div>
         {% endif %}
         
+        {% if site_config.hero_button_enabled %}
         <button onclick="searchProducts('{{ site_config.hero_banner_button_action|default:"flash sale" }}')" class="bg-black text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-800 transition">
             {{ site_config.hero_banner_button_text|default:"Shop Now" }}
         </button>
+        {% endif %}
     </div>
 </section>
 {% else %}
@@ -265,13 +267,16 @@ function scrollCategories(direction) {
 }
 
 function searchProducts(categoryName) {
-    currentCategory = categoryName; 
-    currentPage = 1;
-    hasMoreProducts = true;
-
-    $('#loading-indicator').removeClass('hidden');
-
-    loadProducts(1, false, categoryName);
+    if (categoryName && categoryName.toLowerCase() === 'flash sale') {
+        // Redirect to products page with flash sale filter
+        window.location.href = '{% url "store:product_list" %}?flash_sale=true';
+    } else if (categoryName) {
+        // Redirect to products page with category filter
+        window.location.href = '{% url "store:product_list" %}?category=' + encodeURIComponent(categoryName);
+    } else {
+        // Redirect to all products
+        window.location.href = '{% url "store:product_list" %}';
+    }
 }
 
 function loadProducts(page = 1, append = false, category = null) {
